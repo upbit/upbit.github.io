@@ -4,7 +4,7 @@ meta_description: "生命不息，折腾不止"
 
 markdown: redcarpet
 highlighter: pygments
-logo: /assets/images/profile.png
+logo: false
 paginate: 15
 
 # Details for the RSS feed generator

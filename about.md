@@ -1,6 +1,7 @@
----
+﻿---
 layout: page
 title: About me
 ---
 
-This is where you could put your "About me" page.
+<p>这里什么也没有...</p>
+<img src="/assets/images/404.jpg"> 
