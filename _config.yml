@@ -1,0 +1,12 @@
+name: 夢沉抹大拉
+description: 一个追寻抹大拉之地的geeker
+meta_description: "生命不息，折腾不止"
+
+markdown: redcarpet
+highlighter: pygments
+logo: /assets/images/profile.png
+paginate: 15
+
+# Details for the RSS feed generator
+url:            'http://upbit.github.io'
+author:         '木桩'
