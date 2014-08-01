@@ -5,5 +5,7 @@ baseurl: 'http://upbit.github.io/'
 
 markdown: redcarpet
 highlighter: pygments
+
 logo: false
-paginate: 15
+
+paginate: 10
