@@ -1,6 +1,7 @@
 name: 夢沉抹大拉
 description: 一个追寻抹大拉之地的geeker
 meta_description: "生命不息，折腾不止"
+baseurl: 'http://upbit.github.io'
 
 markdown: redcarpet
 highlighter: pygments
