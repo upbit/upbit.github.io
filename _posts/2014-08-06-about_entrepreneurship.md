@@ -1,13 +1,13 @@
 ---
 layout: post
-title: 创业点滴1
+title: 创业点滴
 description: "记几点别人的创业成功心得"
 category: 创业那点事
 comments: false
 share: false
 ---
 
-昨晚问一个创业老板的创业经验，听后感触颇深。
+昨晚问一个深圳老板的创业经验，听后感触颇深。
 
 可以总结为以下四点：
 
