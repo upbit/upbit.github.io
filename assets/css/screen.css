@@ -427,6 +427,7 @@ margin on the iframe, cause it breaks stuff. */
 
 .post-title {
     margin:0;
+    color: #259;
 }
 
 .post-title a {
