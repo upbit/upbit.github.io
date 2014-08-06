@@ -144,7 +144,7 @@ a:hover {
 
 h1 a, h2 a, h3 a,
 h4 a, h5 a, h6 a {
-    color: #1738b2;
+    color: #259;
 }
 
 
@@ -379,7 +379,7 @@ margin on the iframe, cause it breaks stuff. */
 /* The details of your blog. Defined in ghost/settings/ */
 .blog-title {
     margin: 10px 0 10px 0;
-    font-size: 2em;
+    font-size: 3em;
     letter-spacing: -1px;
     font-weight: bold;
     font-family: 'Open Sans','Helvetica Neue',Arial,'Hiragino Sans GB','Microsoft YaHei','WenQuanYi Micro Hei',sans-serif;
@@ -390,7 +390,7 @@ margin on the iframe, cause it breaks stuff. */
     font-size: 1.2em;
     line-height: 1.5em;
     font-weight: 300;
-    font-family: "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, Verdana, sans-serif;
+    font-family: 'Open Sans','Helvetica Neue',Arial,'Hiragino Sans GB','Microsoft YaHei','WenQuanYi Micro Hei',sans-serif;
     letter-spacing: 0;
 }
 
@@ -443,11 +443,11 @@ margin on the iframe, cause it breaks stuff. */
     display: inline-block;
     margin: 0 0 5px 0;
     font-size: 0.8em;
-    color: #9EABB3;
+    color: #999;
 }
 
 .post-meta a {
-    color: #9EABB3;
+    color: #999;
     text-decoration: none;
 }
 
@@ -496,7 +496,6 @@ margin on the iframe, cause it breaks stuff. */
     display: block;
     font-size: 0.8em;
     line-height: 1.5em;
-    color: #FFCC33;
 }
 
 /* ==========================================================================
