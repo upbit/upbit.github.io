@@ -84,14 +84,13 @@
 html {
     height: 100%;
     max-height: 100%;
-    font-size: 62.5%;
 }
 
 body {
     height: 100%;
     max-height: 100%;
     font-family: 'Open Sans','Helvetica Neue',Arial,'Hiragino Sans GB','Microsoft YaHei','WenQuanYi Micro Hei',sans-serif;
-    font-size: 1em;
+    font-size: 14px;
     line-height: 1.5em;
     color: #3A4145;
 }
@@ -116,25 +115,25 @@ h4, h5, h6 {
 }
 
 h1 {
-    font-size: 2em;
+    font-size: 44px;
     line-height: 1.2em;
     letter-spacing: -2px;
     text-indent: -3px;
 }
 
 h2 {
-    font-size: 1.5em;
+    font-size: 32px;
     line-height: 1.2em;
     letter-spacing: -1px;
     text-indent: -2px;
 }
 
 h3 {
-    font-size: 1.2em;
+    font-size: 22px;
 }
 
 a {
-    color: #4a4a4a;
+    color: #259;
     transition: color ease 0.3s;
 }
 
@@ -199,7 +198,7 @@ blockquote p {
 blockquote small {
     display: inline-block;
     margin: 0.8em 0 0.8em 1.5em;
-    font-size:0.9em;
+    font-size: 14px;
     color: #ccc;
 }
 
@@ -218,7 +217,7 @@ mark {
 code, tt {
     padding: 1px 3px;
     font-family: Inconsolata, monospace, sans-serif;
-    font-size: 0.85em;
+    font-size: 14px;
     white-space: pre-wrap;
     border: 1px solid #E3EDF3;
     background: #F7FAFB;
@@ -233,7 +232,7 @@ pre {
     width: 100%;
     padding: 10px;
     font-family: Inconsolata, monospace, sans-serif;
-    font-size: 0.9em;
+    font-size: 16px;
     white-space: pre;
     overflow: auto;
     background: #F7FAFB;
@@ -256,7 +255,7 @@ kbd {
     border: #ccc 1px solid;
     color: #666;
     text-shadow: #fff 0 1px 0;
-    font-size: 0.9em;
+    font-size: 16px;
     font-weight: bold;
     background: #f4f4f4;
     border-radius: 4px;
@@ -379,7 +378,7 @@ margin on the iframe, cause it breaks stuff. */
 /* The details of your blog. Defined in ghost/settings/ */
 .blog-title {
     margin: 10px 0 10px 0;
-    font-size: 3em;
+    font-size: 48px;
     letter-spacing: -1px;
     font-weight: bold;
     font-family: 'Open Sans','Helvetica Neue',Arial,'Hiragino Sans GB','Microsoft YaHei','WenQuanYi Micro Hei',sans-serif;
@@ -387,7 +386,7 @@ margin on the iframe, cause it breaks stuff. */
 
 .blog-description {
     margin: 0;
-    font-size: 1.2em;
+    font-size: 24px;
     line-height: 1.5em;
     font-weight: 300;
     font-family: 'Open Sans','Helvetica Neue',Arial,'Hiragino Sans GB','Microsoft YaHei','WenQuanYi Micro Hei',sans-serif;
@@ -436,14 +435,14 @@ margin on the iframe, cause it breaks stuff. */
 
 .post-excerpt p {
     margin: 1.6rem 0 0 0;
-    font-size: 0.9em;
+    font-size: 16px;
     line-height: 1.6em;
 }
 
 .post-meta {
     display: inline-block;
     margin: 0 0 5px 0;
-    font-size: 0.8em;
+    font-size: 14px;
     color: #999;
 }
 
@@ -476,7 +475,7 @@ margin on the iframe, cause it breaks stuff. */
 .user-bio {
     display: block;
     max-width: 440px;
-    font-size: 0.7em;
+    font-size: 14px;
     line-height: 1.5em;
 }
 
@@ -495,8 +494,8 @@ margin on the iframe, cause it breaks stuff. */
 
 .publish-date {
     display: block;
-    font-size: 0.8em;
-    line-height: 1.5em;
+    font-size: 13px;
+    line-height: 1.2em;
 }
 
 /* ==========================================================================
@@ -543,13 +542,13 @@ margin on the iframe, cause it breaks stuff. */
 }
 
 .post-footer h4 {
-    font-size: 1.8rem;
+    font-size: 18px;
     margin: 0;
 }
 
 .post-footer p {
     margin: 1rem 0;
-    font-size: 1.4rem;
+    font-size: 16px;
     line-height: 1.6em;
 }
 
@@ -570,7 +569,7 @@ margin on the iframe, cause it breaks stuff. */
 }
 
 .post-footer .share a {
-    font-size: 1.8rem;
+    font-size: 18px;
     display: inline-block;
     margin: 1.4rem 1.6rem 1.6rem 0;
     color: #BBC7CC;
@@ -590,12 +589,12 @@ margin on the iframe, cause it breaks stuff. */
 
 .gist table {
     margin: 0;
-    font-size: 1.4rem;
+    font-size: 16px;
 }
 
 .gist .line-number {
     min-width: 25px;
-    font-size: 1.1rem;
+    font-size: 14px;
 }
 
 
@@ -609,7 +608,7 @@ margin on the iframe, cause it breaks stuff. */
     width: 80%;
     max-width: 700px;
     margin: 1rem auto;
-    font-size: 1.3rem;
+    font-size: 14px;
     color: #9EABB3;
     text-align: center;
 }
@@ -658,7 +657,7 @@ margin on the iframe, cause it breaks stuff. */
     margin: 4rem 0 0 0;
     padding: 4rem 0;
     border-top: #EBF2F6 1px solid;
-    font-size: 1.3rem;
+    font-size: 14px;
     line-height: 1.7em;
     color: #BBC7CC;
     text-align: center;
@@ -684,7 +683,7 @@ margin on the iframe, cause it breaks stuff. */
 }
 
 .poweredby .icon-ghost:before {
-    font-size: 1rem;
+    font-size: 13px;
     margin-right: 0.2em;
 }
 
@@ -734,7 +733,7 @@ margin on the iframe, cause it breaks stuff. */
     top: -23px;
     left: -21px;
     color: rgba(255,255,255,0.9);
-    font-size: 1.1rem;
+    font-size: 14px;
     line-height: 1em;
     text-align: center;
     background: #50585D;
@@ -785,17 +784,17 @@ margin on the iframe, cause it breaks stuff. */
     }
 
     .blog-title {
-        font-size: 4rem;
+        font-size: 48px;
         letter-spacing: -1px;
     }
 
     .blog-description {
-        font-size: 1.7rem;
+        font-size: 24px;
         line-height: 1.5em;
     }
 
     .post {
-        font-size: 0.9em;
+        font-size: 14px;
         line-height: 1.6em;
     }
 
@@ -808,20 +807,20 @@ margin on the iframe, cause it breaks stuff. */
     }
 
     h1 {
-        font-size: 4.8rem;
+        font-size: 44px;
         text-indent: -2px;
     }
 
     h2 {
-        font-size: 3.8rem;
+        font-size: 32px;
     }
 
     h3 {
-        font-size: 3.3rem;
+        font-size: 22px;
     }
 
     h4 {
-        font-size: 2.8rem;
+        font-size: 18px;
     }
 
 }
@@ -848,7 +847,7 @@ margin on the iframe, cause it breaks stuff. */
         width:auto;
         margin-left: 16px;
         margin-right: 16px;
-        font-size: 0.8em;
+        font-size: 14px;
         line-height: 1.6em;
     }
 
@@ -857,26 +856,26 @@ margin on the iframe, cause it breaks stuff. */
     }
 
     .blog-title {
-        font-size: 3rem;
+        font-size: 48px;
     }
 
     .blog-description {
-        font-size: 1.5rem;
+        font-size: 24px;
     }
 
 
     h1, h2 {
-        font-size: 3rem;
+        font-size: 28px;
         line-height: 1.1em;
         letter-spacing: -1px;
     }
 
     h3 {
-        font-size: 2.8rem;
+        font-size: 18px;
     }
 
     h4 {
-        font-size: 2.3rem;
+        font-size: 16px;
     }
 
     .post-template .post {
@@ -888,7 +887,7 @@ margin on the iframe, cause it breaks stuff. */
     }
 
     .post-meta {
-        font-size: 1.3rem;
+        font-size: 14px;
     }
 
     .post-footer {
@@ -923,7 +922,7 @@ margin on the iframe, cause it breaks stuff. */
 
     .site-footer {
         margin-top: 6rem;
-        font-size: 1.1rem;
+        font-size: 13px;
     }
 
 }
