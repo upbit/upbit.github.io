@@ -426,7 +426,7 @@ margin on the iframe, cause it breaks stuff. */
 }
 
 .post-title {
-    margin: 0px;
+    margin: 20px 0px;
     color: #259;
 }
 
@@ -528,11 +528,15 @@ margin on the iframe, cause it breaks stuff. */
 }
 
 .post-content {
-    font-size: 0.9rem;
+    font-size: 1.6rem;
 }
 
 .post-content a {
     color: #259;
+}
+
+.post-content p, ul, ol, dl {
+    margin: 1.2em 0 0 0;
 }
 
 /* Keep large images within the bounds of the post-width */
