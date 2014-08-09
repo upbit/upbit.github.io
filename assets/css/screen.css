@@ -90,7 +90,7 @@ html {
 body {
     height: 100%;
     max-height: 100%;
-    font-family: 'Open Sans','Helvetica Neue',Arial,'Hiragino Sans GB','Microsoft YaHei','WenQuanYi Micro Hei',sans-serif;
+    font-family: 'Open Sans','Helvetica Neue',Arial,'Microsoft YaHei',sans-serif;
     font-size: 1em;
     line-height: 1.5em;
     color: #3A4145;
@@ -382,7 +382,7 @@ margin on the iframe, cause it breaks stuff. */
     font-size: 3em;
     letter-spacing: -1px;
     font-weight: bold;
-    font-family: 'Open Sans','Helvetica Neue',Arial,'Hiragino Sans GB','Microsoft YaHei','WenQuanYi Micro Hei',sans-serif;
+    font-family: 'Open Sans','Helvetica Neue',Arial,'Microsoft YaHei',sans-serif;
 }
 
 .blog-description {
@@ -390,7 +390,7 @@ margin on the iframe, cause it breaks stuff. */
     font-size: 1.2em;
     line-height: 1.5em;
     font-weight: 300;
-    font-family: 'Open Sans','Helvetica Neue',Arial,'Hiragino Sans GB','Microsoft YaHei','WenQuanYi Micro Hei',sans-serif;
+    font-family: 'Open Sans','Helvetica Neue',Arial,'Microsoft YaHei',sans-serif;
     letter-spacing: 0;
 }
 
@@ -432,10 +432,6 @@ margin on the iframe, cause it breaks stuff. */
 
 .post-title a {
     text-decoration: none;
-}
-
-post-excerpt a {
-    color: #259;
 }
 
 .post-excerpt p {
