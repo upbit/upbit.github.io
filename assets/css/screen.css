@@ -434,6 +434,10 @@ margin on the iframe, cause it breaks stuff. */
     text-decoration: none;
 }
 
+post-excerpt a {
+    color: #259;
+}
+
 .post-excerpt p {
     margin: 1.2rem 0 0 0;
     font-size: 0.9em;
@@ -532,6 +536,11 @@ margin on the iframe, cause it breaks stuff. */
 
 .post-content a {
     color: #259;
+    text-decoration: none;
+}
+
+.post-content a:hover {
+    color: #57A3E8;
 }
 
 .post-content p, ul, ol, dl {
