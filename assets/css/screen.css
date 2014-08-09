@@ -825,20 +825,20 @@ margin on the iframe, cause it breaks stuff. */
     }
 
     h1 {
-        font-size: 4.8rem;
+        font-size: 3.8rem;
         text-indent: -2px;
     }
 
     h2 {
-        font-size: 3.8rem;
-    }
-
-    h3 {
         font-size: 3.3rem;
     }
 
-    h4 {
+    h3 {
         font-size: 2.8rem;
+    }
+
+    h4 {
+        font-size: 2.2rem;
     }
 
 }
@@ -883,17 +883,17 @@ margin on the iframe, cause it breaks stuff. */
 
 
     h1, h2 {
-        font-size: 3rem;
+        font-size: 2.8rem;
         line-height: 1.1em;
         letter-spacing: -1px;
     }
 
     h3 {
-        font-size: 2.8rem;
+        font-size: 2.3rem;
     }
 
     h4 {
-        font-size: 2.3rem;
+        font-size: 1.8rem;
     }
 
     .post-template .post {
