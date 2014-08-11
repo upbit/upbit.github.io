@@ -25,7 +25,7 @@ share: true
 3. 三张的花色相同，得8分；
 4. Joker可以代替任意一张牌，且按最大分值组合。
 
-主要的[match函数](https://github.com/upbit/CS193p_Homework/blob/joker/Matchismo/Matchismo/Model/PlayingCard.m)实现：
+主要的[match函数](https://github.com/upbit/CS193p_Homework/blob/joker/Matchismo/Matchismo/Model/PlayingCard.m)实现。貌似还可以简化，不过由他去了→_→
 
 ```objective-c
 - (NSInteger)match:(NSArray *)otherCards
@@ -52,16 +52,8 @@ share: true
         sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"rank" ascending:YES];
         NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
         NSArray *sortedCards = [@[self, [otherCards firstObject], [otherCards lastObject]] sortedArrayUsingDescriptors:sortDescriptors];
-    
-        /**
-         *  这里要检查3张牌是否组成顺子
-         *
-         *  1. 检查排序后数组中joker的数量0-2
-         *  2. 如果joker为0，检查high-low的差值，不是2则肯定不为顺子
-         *     为2时，检查牌的两两差值是否为1，是则继续检查是否同花
-         *  3. 如果joker为1，检查high-low差值是否为1或2，不是则不为顺子
-         *  4. 如果joker为2，此时一定组成顺子
-        **/
+
+
         BOOL isStraight = NO;
         
         // 1. 检查排序后数组中joker的数量0-2
