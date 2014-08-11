@@ -15,13 +15,12 @@ share: true
 
 ---
 
-### 带同花顺匹配的版本
+### 关于[Joker分支](https://github.com/upbit/CS193p_Homework/tree/joker)
 
-玩了会觉得游戏略显单调，于是加了顺子和王的匹配。代码见[Joker分支](https://github.com/upbit/CS193p_Homework/tree/joker)
+玩了会觉得游戏略显单调，于是加了顺子和王的匹配。调整后的规则如下：
 
-调整后的规则如下。随机排布8,9,10,J,Q,K,A以及2张Joker，一共30张牌：
-
-1. 三张为顺子（A,K,Q或8,9,10）且同花色，得64分；不同花色得24分；
+0. 随机分布 8,9,10,J,Q,K,A 以及2张Joker，一共30张牌
+1. 三张为顺子（如 A,K,Q 或 8,9,10）且同花色，得64分；不同花色得24分；
 2. 三张中rank相同，得32分；
 3. 三张的花色相同，得8分；
 4. Joker可以代替任意一张牌，且按最大分值组合。
@@ -112,6 +111,6 @@ share: true
 }
 ```
 
-*下载*：Github的[全部工程](https://github.com/upbit/CS193p_Homework/archive/joker.zip)
+**下载**：Github的[工程源码](https://github.com/upbit/CS193p_Homework/archive/joker.zip)
 
 ps: 如果在PlayingCardDeck.m里将牌扩展到全部54张，难度就会大幅增加。
