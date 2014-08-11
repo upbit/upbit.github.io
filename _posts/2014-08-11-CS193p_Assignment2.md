@@ -1,6 +1,6 @@
 ---
 layout: post
-title: CS193p作业2完成，另外自己打造了个[带同花顺匹配的版本](https://github.com/upbit/CS193p_Homework/tree/joker)
+title: CS193p作业2完成，另外自己打造了个带同花顺匹配的版本，代码见文末
 description: "CS193p: complete assignment 2"
 category: study
 comments: false
@@ -13,8 +13,11 @@ share: true
 
 大部分实现在[CardMatchingGame.m](https://github.com/upbit/CS193p_Homework/blob/fb53c021c455cf53d85341ce61f9fb20ae3c3b7f/Matchismo/Matchismo/Model/CardMatchingGame.m)里，直接[clone这个分支](https://github.com/upbit/CS193p_Homework/tree/fb53c021c455cf53d85341ce61f9fb20ae3c3b7f)查看吧
 
+---
 
-### 另外觉得这个匹配游戏不过瘾，加了顺子和王的匹配。代码见[Joker分支](https://github.com/upbit/CS193p_Homework/tree/joker)
+### 带同花顺匹配的版本
+
+玩了会觉得游戏略显单调，于是加了顺子和王的匹配。代码见[Joker分支](https://github.com/upbit/CS193p_Homework/tree/joker)
 
 调整后的规则如下。随机排布8,9,10,J,Q,K,A以及2张Joker，一共30张牌：
 
@@ -23,8 +26,7 @@ share: true
 3. 三张的花色相同，得8分；
 4. Joker可以代替任意一张牌，且按最大分值组合。
 
-
-### 主要的[match函数](https://github.com/upbit/CS193p_Homework/blob/joker/Matchismo/Matchismo/Model/PlayingCard.m)如下：
+主要的[match函数](https://github.com/upbit/CS193p_Homework/blob/joker/Matchismo/Matchismo/Model/PlayingCard.m)实现：
 
 ```objective-c
 - (NSInteger)match:(NSArray *)otherCards
@@ -109,5 +111,7 @@ share: true
     return score;
 }
 ```
+
+*下载*：Github的[全部工程](https://github.com/upbit/CS193p_Homework/archive/joker.zip)
 
 ps: 如果在PlayingCardDeck.m里将牌扩展到全部54张，难度就会大幅增加。
