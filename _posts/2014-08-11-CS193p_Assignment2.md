@@ -25,6 +25,9 @@ share: true
 3. 三张的花色相同，得8分；
 4. Joker可以代替任意一张牌，且按最大分值组合。
 
+![Screenshot](https://raw.github.com/upbit/CS193p_Homework/joker/screenshot/joker.png)
+
+
 主要的[match函数](https://github.com/upbit/CS193p_Homework/blob/joker/Matchismo/Matchismo/Model/PlayingCard.m)实现。貌似还可以简化，不过由他去了→_→
 
 ```objective-c
