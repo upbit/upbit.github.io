@@ -149,7 +149,7 @@ h4 a, h5 a, h6 a {
 
 
 p, ul, ol, dl {
-    margin: 1.6em 0;
+    margin: 1.2rem 0;
 }
 
 ol ol, ul ul,
@@ -432,12 +432,6 @@ margin on the iframe, cause it breaks stuff. */
 
 .post-title a {
     text-decoration: none;
-}
-
-.post-excerpt p {
-    margin: 1.2rem 0 0 0;
-    font-size: 0.9em;
-    line-height: 1.6em;
 }
 
 .post-meta {
@@ -883,17 +877,17 @@ margin on the iframe, cause it breaks stuff. */
 
 
     h1, h2 {
-        font-size: 2.8rem;
+        font-size: 2rem;
         line-height: 1.1em;
         letter-spacing: -1px;
     }
 
     h3 {
-        font-size: 2.2rem;
+        font-size: 1.8rem;
     }
 
     h4 {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
     }
 
     .post-template .post {
