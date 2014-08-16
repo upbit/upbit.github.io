@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 痛苦不堪的做完了CS193p作业3，结果还是把UI元素引入了Model...
+title: 痛苦不堪的实现了CS193p作业3的基本要求，但是各种坑
 description: "CS193p: upload assignment 3"
 category: study
 comments: false
