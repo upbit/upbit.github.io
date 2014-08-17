@@ -3,7 +3,7 @@ layout: post
 title: 新游戏的想法，目前还在构思中
 description: "这闲着无聊大脑中，乱七八糟的游戏Idea"
 category: game
-comments: false
+comments: true
 share: true
 ---
 

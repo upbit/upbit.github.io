@@ -3,7 +3,7 @@ layout: post
 title: 公开课"Developing iOS 7 Apps"的第一个作业完成
 description: "CS193p: Developing iOS 7 Apps for iPhone and iPad"
 category: study
-comments: false
+comments: true
 share: true
 ---
 

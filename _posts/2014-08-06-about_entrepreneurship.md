@@ -2,8 +2,8 @@
 layout: post
 title: 创业点滴
 description: "记几点别人的创业成功心得"
-category: 创业那点事
-comments: entrepreneurship
+category: entrepreneurship
+comments: false
 share: false
 ---
 

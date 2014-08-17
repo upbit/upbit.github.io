@@ -3,7 +3,7 @@ layout: post
 title: CS193p作业2完成，另外自己打造了个带同花顺匹配的版本，代码见文末
 description: "CS193p: complete assignment 2"
 category: study
-comments: false
+comments: true
 share: true
 ---
 
