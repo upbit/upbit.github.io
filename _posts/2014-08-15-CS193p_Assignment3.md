@@ -83,11 +83,11 @@ share: true
 
 主要是实现matchSetCardsWithKey()这个函数，比较某条规则是否匹配。完成的作业截图如下：
 
-![Assignment 3 screenshut](https://raw.github.com/upbit/CS193p_Homework/master/screenshot/screenshot3a.png)
+![Assignment 3 screenshut](https://raw.github.com/upbit/CS193p_Homework/975beb12f587d5e9a93ead443fe61f633150fc43/screenshot/screenshot3a.png)
 
 History功能比较简单，因为已经显示了每次匹配的结果，不断将NSAttributedString附加到一个matchHistory变量即可：
 
-![Assignment 3 history page](https://raw.github.com/upbit/CS193p_Homework/master/screenshot/screenshot3b.png)
+![Assignment 3 history page](https://raw.github.com/upbit/CS193p_Homework/975beb12f587d5e9a93ead443fe61f633150fc43/screenshot/screenshot3b.png)
 
 [代码见GitHub](https://github.com/upbit/CS193p_Homework/tree/975beb12f587d5e9a93ead443fe61f633150fc43/Matchismo/Matchismo)
 
