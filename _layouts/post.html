@@ -37,7 +37,7 @@
 			<span class="post-meta">
 				<time datetime="{{ page.date | date:"%Y-%m-%d" }}">{{ page.date | date_to_string }}</time>
 				{% if page.category %}
-					on <a class="blog-title" href="{{ site.baseurl }}{{ page.category }}/">{{ page.category }}</a>
+					on {{ page.category }}
 				{% endif %}
 			</span>
 		</header>

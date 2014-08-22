@@ -12,7 +12,6 @@ highlighter: pygments
 
 paginate: 10
 
-sitemap:
-    exclude:
-        - "/404.html"
-        - "/feed.xml"
+gems:
+- jekyll-redirect-from
+- jekyll-sitemap
