@@ -11,3 +11,8 @@ markdown: redcarpet
 highlighter: pygments
 
 paginate: 10
+
+sitemap:
+    exclude:
+        - "/404.html"
+        - "/feed.xml"

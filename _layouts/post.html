@@ -36,11 +36,8 @@
 			&nbsp;&nbsp;
 			<span class="post-meta">
 				<time datetime="{{ page.date | date:"%Y-%m-%d" }}">{{ page.date | date_to_string }}</time>
-				{% if page.categories %}
-					on
-					{% for category in page.categories %}
-						{{category}}
-					{% endfor %}
+				{% if page.category %}
+					on <a class="blog-title" href="{{ site.baseurl }}{{ page.category }}/">{{ page.category }}</a>
 				{% endif %}
 			</span>
 		</header>
@@ -50,17 +47,6 @@
 		<section class="post-content">
 			{{content}}
 		</section>
-
-		{% if page.archive %}
-		<section class="archive">
-			<h5>Archive</h5>
-			<ul>
-				{% for post in site.posts %}
-					<li><span>{{ post.date | date_to_string }}</span>  <a href="{{ post.url }}">{{ post.title }}</a></li>
-				{% endfor %}	
-			</ul>
-		</section>
-		{% endif %}
 
 		<footer class="post-footer">
 			<!-- If we want to display author's name and bio -->
