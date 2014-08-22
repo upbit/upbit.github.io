@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+  xmlns:trackback="http://madskills.com/public/xml/rss/module/trackback/">
+  <channel>
+    <title>夢沉抹大拉</title>
+    <link>http://blog.imaou.com</link>
+    <description>一个追寻抹大拉之地的geeker</description>
+    <pubDate>Tue, 19 Aug 2014 00:00:00 +0800</pubDate>
+    <item>
+      <title>继续完善CS193p作业3的Extra Credit，发现多排序的Ranking处理起来还真不容易</title>
+      <link>http://blog.imaou.com/study/2014/08/19/CS193p_Assignment3_extra2.html</link>
+      <description>&lt;p&gt;今天接着做作业3的Extra Credit部分，要求是实现一个Ranking页和Setting页。&lt;/p&gt;
+</description>
+      <pubDate>Tue, 19 Aug 2014 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/study/2014/08/19/CS193p_Assignment3_extra2.html</guid>
+      <dc:date>2014-08-19T00:00:00+08:00</dc:date>
+    </item>
+    <item>
+      <title>终于填完了CS193p作业3的坑，不过话说还有Extra Credit没写...</title>
+      <link>http://blog.imaou.com/study/2014/08/18/CS193p_Assignment3_extra.html</link>
+      <description>&lt;p&gt;网上找了个&lt;a href=&quot;http://cs193p.m2m.at/tag/matchismo+2013-14/&quot;&gt;作业3的例子&lt;/a&gt;，看完代码才对UIViewController的继承有所体会&lt;/p&gt;
+</description>
+      <pubDate>Mon, 18 Aug 2014 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/study/2014/08/18/CS193p_Assignment3_extra.html</guid>
+      <dc:date>2014-08-18T00:00:00+08:00</dc:date>
+    </item>
+    <item>
+      <title>终于把博客首页显示慢的问题解决了，PageSpeed Insights立了大功！</title>
+      <link>http://blog.imaou.com/misc/2014/08/17/pagespeed_insights.html</link>
+      <description>&lt;p&gt;按&lt;a href=&quot;https://developers.google.com/speed/pagespeed/insights/&quot;&gt;PageSpeed Insights&lt;/a&gt;的建议优化了博客的性能，果然神器啊。&lt;/p&gt;
+</description>
+      <pubDate>Sun, 17 Aug 2014 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/misc/2014/08/17/pagespeed_insights.html</guid>
+      <dc:date>2014-08-17T00:00:00+08:00</dc:date>
+    </item>
+    <item>
+      <title>创业路还有点长</title>
+      <link>http://blog.imaou.com/entrepreneurship/2014/08/16/about_entrepreneurship.html</link>
+      <description>&lt;p&gt;意外结识一个手握有畅游500万注资的手游公司的CEO。因为他算是过来人，打算向他取点经验。他本人不像我这种半路出家的和尚，算是科班出身--已经在游戏行业有10年的经验。简单聊了下目前的现状，他给出了现在的我们评价是: &amp;quot;要钱没钱，要人没人&amp;quot;-_-&lt;/p&gt;
+</description>
+      <pubDate>Sat, 16 Aug 2014 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/entrepreneurship/2014/08/16/about_entrepreneurship.html</guid>
+      <dc:date>2014-08-16T00:00:00+08:00</dc:date>
+    </item>
+    <item>
+      <title>痛苦不堪的实现了CS193p作业3的基本要求，但是各种坑</title>
+      <link>http://blog.imaou.com/study/2014/08/15/CS193p_Assignment3.html</link>
+      <description>&lt;p&gt;陆陆续续花了2天，才功能上完成了作业3的要求。。。&lt;/p&gt;
+</description>
+      <pubDate>Fri, 15 Aug 2014 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/study/2014/08/15/CS193p_Assignment3.html</guid>
+      <dc:date>2014-08-15T00:00:00+08:00</dc:date>
+    </item>
+    <item>
+      <title>新游戏的想法，目前还在构思中</title>
+      <link>http://blog.imaou.com/game/2014/08/12/a_new_game_idea.html</link>
+      <description>&lt;p&gt;翻图库无意中发现去年舰娘活动的图片，海雾的船怎么看怎么漂亮：&lt;/p&gt;
+</description>
+      <pubDate>Tue, 12 Aug 2014 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/game/2014/08/12/a_new_game_idea.html</guid>
+      <dc:date>2014-08-12T00:00:00+08:00</dc:date>
+    </item>
+    <item>
+      <title>CS193p作业2完成，另外自己打造了个带同花顺匹配的版本，代码见文末</title>
+      <link>http://blog.imaou.com/study/2014/08/11/CS193p_Assignment2.html</link>
+      <description>&lt;p&gt;第二个作业难度确实陡增，整整花了一下午才搞定3张牌的匹配问题：&lt;/p&gt;
+</description>
+      <pubDate>Mon, 11 Aug 2014 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/study/2014/08/11/CS193p_Assignment2.html</guid>
+      <dc:date>2014-08-11T00:00:00+08:00</dc:date>
+    </item>
+    <item>
+      <title>公开课&quot;Developing iOS 7 Apps&quot;的第一个作业完成</title>
+      <link>http://blog.imaou.com/study/2014/08/07/CS193p_iPhone_appliction_developing.html</link>
+      <description>&lt;p&gt;以前iOS6的课程没学完，网易这&lt;a href=&quot;http://v.163.com/special/opencourse/ios7.html&quot;&gt;iOS7的课程&lt;/a&gt;都上线了 (远目&lt;/p&gt;
+</description>
+      <pubDate>Thu, 07 Aug 2014 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/study/2014/08/07/CS193p_iPhone_appliction_developing.html</guid>
+      <dc:date>2014-08-07T00:00:00+08:00</dc:date>
+    </item>
+    <item>
+      <title>创业点滴</title>
+      <link>http://blog.imaou.com/entrepreneurship/2014/08/06/about_entrepreneurship.html</link>
+      <description>&lt;p&gt;昨晚问一个深圳老板的创业经验，听后感触颇深。&lt;/p&gt;
+</description>
+      <pubDate>Wed, 06 Aug 2014 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/entrepreneurship/2014/08/06/about_entrepreneurship.html</guid>
+      <dc:date>2014-08-06T00:00:00+08:00</dc:date>
+    </item>
+    <item>
+      <title>新博客开张纪念</title>
+      <link>http://blog.imaou.com/misc/2014/08/01/new_blog.html</link>
+      <description>&lt;p&gt;庆祝新博客开张，附送张冈崎律子《For フルーツバスケット》的手稿：&lt;/p&gt;
+</description>
+      <pubDate>Fri, 01 Aug 2014 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/misc/2014/08/01/new_blog.html</guid>
+      <dc:date>2014-08-01T00:00:00+08:00</dc:date>
+    </item>
+    <dc:date>2014-08-19T00:00:00+08:00</dc:date>
+  </channel>
+</rss>
