@@ -127,10 +127,12 @@ h2 {
     line-height: 1.2em;
     letter-spacing: -1px;
     text-indent: -2px;
+    margin-top: 1.2em;
 }
 
 h3 {
     font-size: 1.2em;
+    margin-top: 1em;
 }
 
 a {

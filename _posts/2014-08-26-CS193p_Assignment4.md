@@ -143,6 +143,7 @@ NSDictionary *place = [self.sectionPlaces[self.sortedSectionTitles[indexPath.sec
 
 **完整代码见 [TopPlaces/FlickrPlacesTVC.m](https://github.com/upbit/CS193p_Homework/blob/e5652a0d5ef5458055ba67d5e567513de97a23ce/TopPlaces/TopPlaces/FlickrPlacesTVC.m)**
 
+----------------------
 
 ## RecentPhotos的存储
 
@@ -195,7 +196,5 @@ static const int MAX_RECENT_PHOTO_NUM = 20;
 ```
 
 因为 RecentsViewController 里点击图片，也会调用 addPhotoToRecentPhotosArray()，只好用比较搓的办法 self.tableView.tag = TVC_TAG_IGNORE_VIEW_HISTORY，然后判断自己tableView.tag是否为TVC_TAG_IGNORE_VIEW_HISTORY来跳过。
-
----------------------
 
 至此算是把作业4大致搞定了。另外吐槽下GFW，在国内访问Flickr真心不容易。因为cn.edit.yahoo.com无法访问，还要挂VPN注册yahoo帐号...
