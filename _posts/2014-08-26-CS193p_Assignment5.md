@@ -196,7 +196,7 @@ static const int MAX_RECENT_PHOTO_NUM = 20;
 }
 ```
 
-因为 RecentsViewController 里点击图片，也会调用 addPhotoToRecentPhotosArray()，只好用比较搓的办法 self.tableView.tag = TVC_TAG_IGNORE_VIEW_HISTORY，然后判断自己tableView.tag是否为TVC_TAG_IGNORE_VIEW_HISTORY来跳过。
+因为 RecentsViewController 里点击图片，也会调用 addPhotoToRecentPhotosArray()，只好用比较搓的办法 self.tableView.tag = TVC\_TAG\_IGNORE\_VIEW\_HISTORY，然后判断自己tableView.tag是否为TVC\_TAG\_IGNORE\_VIEW\_HISTORY来跳过。
 
 
 ## [Update SourceCode](https://github.com/upbit/CS193p_Homework/tree/bff7c92109567e811a331b954282d4f907001941/TopPlaces/TopPlaces)

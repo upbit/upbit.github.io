@@ -444,12 +444,12 @@ margin on the iframe, cause it breaks stuff. */
 }
 
 .post-meta a {
-    color: #259;
-    text-decoration: none;
+    color: #DAA520;
+    text-decoration: underline;
 }
 
 .post-meta a:hover {
-    text-decoration: underline;
+    color: #259;
 }
 
 .user-meta {
@@ -660,7 +660,6 @@ margin on the iframe, cause it breaks stuff. */
 .newer-posts:hover {
     border-color: #9EABB3;
 }
-
 
 /* ==========================================================================
    8. Footer - The bottom of every page

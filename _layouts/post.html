@@ -26,19 +26,19 @@
 
 	<article class="post">
 		<header class="post-header">
-			<a id="blog-logo" href="{{site.baseurl}}">
-				{% if site.logo %}
-					<img src="{{site.logo}}" alt="{{ site.name }}" />
-				{% else %}
-					<span class="blog-title">{{ site.name }}</span>
-				{%endif%} 
-			</a>
+			{% if site.logo %}
+				<a id="blog-logo" href="{{site.baseurl}}"><img src="{{site.logo}}" alt="{{ site.name }}" /></a>
+			{% else %}
+				<span class="blog-title"><a id="blog-logo" href="{{site.baseurl}}">{{ site.name }}</a></span>
+			{%endif%} 
 			&nbsp;&nbsp;
 			<span class="post-meta">
-				<time datetime="{{ page.date | date:"%Y-%m-%d" }}">{{ page.date | date_to_string }}</time>
 				{% if page.category %}
-					on {{ page.category }}
+					{{ page.category }} on
 				{% endif %}
+				<time datetime="{{ page.date | date:"%Y-%m-%d" }}">
+					<a href="{{ site.baseurl }}archive/{{ page.date | date: "%Y" }}/">{{ page.date | date_to_string }}</a>
+				</time>
 			</span>
 		</header>
 
@@ -109,7 +109,7 @@
 </main>
 
 	<footer class="site-footer">
-		<a class="subscribe icon-feed" href="{{ site.baseurl }}rss.xml"><span class="tooltip">Subscribe!</span></a>
+		<a class="subscribe icon-feed" href="{{ site.baseurl }}archive/{{ site.time | date: "%Y" }}/"><span class="tooltip">Archive</span></a>
 		<div class="inner">
 			 <section class="copyright">All content copyright <a href="{{ site.baseurl }}">{{ site.name }}</a> &copy; {{date format="YYYY"}} &bull; All rights reserved.</section>
 			 <section class="poweredby">Made with Jekyll using <a href="http://github.com/rosario/kasper">Kasper theme</a></section>
