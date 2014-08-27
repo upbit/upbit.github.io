@@ -1,22 +1,23 @@
 ---
 layout: post
-title: CS193p作业4完成基本功能，备忘下UITableView的Section的用法
-description: "CS193p: assignment 4"
+title: CS193p作业5完成基本功能，备忘下UITableView的Section的用法
+description: "CS193p: assignment 5"
 category: study
 comments: true
 share: true
+redirect_from: /study/2014/08/26/CS193p_Assignment4.html
 ---
 
-作业4和第11讲演示的Shutterbug很类似，做起来较为简单。主要遇到下面两个难点：
+作业5和第11讲演示的Shutterbug很类似，做起来较为简单。主要遇到下面两个难点：
 
 1. UITableView增加索引: [flickr.places.getTopPlacesList](https://www.flickr.com/services/api/flickr.places.getTopPlacesList.html)返回的分组问题
 2. RecentPhotos的存储: 要求是存储到NSUserDefaults，不过学着在AppDelegate里定义了全局变量，用来保存访问过的数据
 
 先放图，再依次记录解决办法。
 
-![Assignment 4 iPhone](https://raw.github.com/upbit/CS193p_Homework/master/screenshot/screenshot4a.png)
+![Assignment 5 iPhone](https://raw.github.com/upbit/CS193p_Homework/master/screenshot/screenshot5a.png)
 
-![Assignment 4 iPad](https://raw.github.com/upbit/CS193p_Homework/master/screenshot/screenshot4d.png)
+![Assignment 5 iPad](https://raw.github.com/upbit/CS193p_Homework/master/screenshot/screenshot5d.png)
 
 ----------------------
 
@@ -228,4 +229,4 @@ static const int MAX_RECENT_PHOTO_NUM = 20;
 }
 ```
 
-至此算是把作业4搞定了，另外吐槽下GFW，在国内访问Flickr真心不容易。而且因为cn.edit.yahoo.com无法访问，还要挂VPN注册Flickr帐号...
+至此算是把作业5搞定了，另外吐槽下GFW，在国内访问Flickr真心不容易。而且因为cn.edit.yahoo.com无法访问，还要挂VPN注册Flickr帐号...
