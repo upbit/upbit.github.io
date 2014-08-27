@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # run _plugin/*.rb
+rm -Rf archive
 rm -Rf _site
 jekyll build
 
 # gen archive/ and rss.xml
-rm -Rf archive
 cp -Rvf _site/archive ./
 
 # compress CSS
