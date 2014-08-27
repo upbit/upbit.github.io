@@ -1,6 +1,6 @@
 ---
 layout: post
-title: CS193p作业4完成基本功能，明天再来慢慢微调吧
+title: CS193p作业4完成基本功能，备忘下UITableView的Section的用法
 description: "CS193p: assignment 4"
 category: study
 comments: true
@@ -197,4 +197,35 @@ static const int MAX_RECENT_PHOTO_NUM = 20;
 
 因为 RecentsViewController 里点击图片，也会调用 addPhotoToRecentPhotosArray()，只好用比较搓的办法 self.tableView.tag = TVC_TAG_IGNORE_VIEW_HISTORY，然后判断自己tableView.tag是否为TVC_TAG_IGNORE_VIEW_HISTORY来跳过。
 
-至此算是把作业4大致搞定了。另外吐槽下GFW，在国内访问Flickr真心不容易。因为cn.edit.yahoo.com无法访问，还要挂VPN注册yahoo帐号...
+
+## [Update SourceCode](https://github.com/upbit/CS193p_Homework/tree/bff7c92109567e811a331b954282d4f907001941/TopPlaces/TopPlaces)
+
+修复Recents保存到NSUserDefaults的问题。UIImageView的自动缩小倒是很容易，暂时没做双击放大。
+
+```objective-c
+// Zoom to show as much image as possible
+// http://stackoverflow.com/questions/14471298/zooming-uiimageview-inside-uiscrollview-with-autolayout
+- (void)initZoom
+{
+    float minZoom = MIN(self.view.bounds.size.width / self.imageView.image.size.width,
+                        self.view.bounds.size.height / self.imageView.image.size.height);
+    if (minZoom > 1) return;
+    
+    self.scrollView.minimumZoomScale = minZoom;
+    self.scrollView.zoomScale = minZoom;
+}
+
+- (void)setImage:(UIImage *)image
+{
+    ...
+
+    [self initZoom];
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
+    [self initZoom];
+}
+```
+
+至此算是把作业4搞定了，另外吐槽下GFW，在国内访问Flickr真心不容易。而且因为cn.edit.yahoo.com无法访问，还要挂VPN注册Flickr帐号...
