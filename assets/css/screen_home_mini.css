@@ -464,7 +464,8 @@ hr {
     padding: 4px 8px 5px 8px;
     position:absolute;
     top: -23px;
-    left: -21px;
+    left: -33px;
+    width: 78px;
     color: rgba(255,255,255,0.9);
     font-size: 1.1rem;
     line-height: 1em;
