@@ -17,7 +17,7 @@ share: true
 
 ### 1. 安装dnsmasq和pdnsd
 
-```Shell
+```
 # opkg update
 # opkg install dnsmasq pdnsd
 ```
@@ -25,14 +25,14 @@ share: true
 配置方面文章 [openwrt 上通过 pdnsd 和 dnsmasq 解决 dns 污染](https://wido.me/sunteya/use-openwrt-resolve-gfw-dns-spoofing) 解释的比较清楚，这里就只列出我的参数配置：
 
 首先为dnsmasq.conf增加conf-dir，并生成个gfw.conf：
-```Shell
+```
 mkdir /etc/dnsmasq.d/
 touch /etc/dnsmasq.d/gfw.conf
 echo "conf-dir=/etc/dnsmasq.d" >> /etc/dnsmasq.conf
 ```
 
 配置pdnsd(/etc/pdnsd.conf)：
-```JSON
+```
 global {
     server_ip = 192.168.1.1;
     server_port = 5353;             # 因为dnsmasq用了53，这里要换一个
@@ -54,13 +54,13 @@ server=/.gmail.com/192.168.1.1#5353
 ```
 
 重启dnsmasq和pdnsd：
-```Shell
+```
 /etc/init.d/dnsmasq restart
 /etc/init.d/pdnsd restart
 ```
 
 试着dig下gmail：
-```Shell
+```
 # dig @192.168.1.1 www.gmail.com
 
 ; <<>> DiG 9.9.1-P3 <<>> @192.168.1.1 www.gmail.com
@@ -88,7 +88,7 @@ googlemail.l.google.com. 628    IN  A   173.194.33.86
 ```
 
 返回是对了，但是怎么ping不通？拿 http://ping.chinaz.com/ 测试了下，发现虽然这个是Google的IP，但国内很多地方都无法访问。换了著名的404域名facebook.com试了下，直接对5353端口dig果然返回了正确地址(假的一般是37.61.54.158)，并且拿https可以访问：
-```Shell
+```
 # dig @192.168.1.1 -p5353 www.facebook.com
 
 ; <<>> DiG 9.9.1-P3 <<>> @192.168.1.1 -p5353 www.facebook.com
@@ -117,7 +117,7 @@ star.c10r.facebook.com. 900 IN  A   31.13.79.96
 
 先查询Google的IP地址段：
 
-```Shell
+```
 # dig @8.8.8.8 _netblocks.google.com txt
 
 ; <<>> DiG 9.9.1-P3 <<>> @8.8.8.8 _netblocks.google.com txt
@@ -145,7 +145,7 @@ _netblocks.google.com.  3599    IN  TXT "v=spf1 ip4:216.239.32.0/19 ip4:64.233.1
 这个就是Google的IP分段，参考imouto.host里google.com/google.com.hk的IP，前后连续ping了几个服务器，然后用https访问确认下是不是Google的搜索服务器。
 
 得到IP后直接在/etc/hosts里增加本地host，重启dnsmasq：
-```Shell
+```
 # Google
 64.233.168.103  www.google.com
 64.233.168.104  www.google.com
