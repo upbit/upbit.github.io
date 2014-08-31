@@ -1,15 +1,15 @@
 ---
 layout: post
-title: PixivAPI_iOS初版完成，附带一个简单的日榜图片查看例子
+title: PixivAPI_iOS初版完成，附带一个日榜图片查看例子
 description: "Uploaded Pixiv API for iOS, with a demo project PixivDaily"
 category: opensource
 comments: true
 share: true
 ---
 
-折腾了几天，终于磕磕碰碰的把 PixivAPI_iOS(Pixiv API for iOS) 发布到[GitHub](https://github.com/upbit/PixivAPI_iOS)了。主要是以前没用过SDWebImage，写PixivDaily这个Demo花了很多时间，不过SDWebImage的Cache和异步下载确实很赞！
+折腾了几天，终于磕磕碰碰的把 PixivAPI_iOS(Pixiv API for iOS) 发布到[GitHub](https://github.com/upbit/PixivAPI_iOS)了。主要是以前没用过SDWebImage，写PixivDaily这个Demo花了很多时间。不过SDWebImage的Cache和异步下载确实很赞！
 
-### API的用法介绍
+### 1. API的用法介绍
 
 API为了尽可能简单，决定用block语法将异步获取和Illust解析封装在里面，于是最后调用方式变成了这样：
 
@@ -32,7 +32,7 @@ onSuccess:^(NSArray *illusts, BOOL isIllust) 会在解析成功后调用，NSArr
 
 如果responseCode不是200或连接出错时，会调用 onFailure:^(NSURLResponse *response, NSInteger responseCode, NSData *data, NSError *connectionError)，此时可以进行重试或者错误处理
 
-### API的请求流程
+### 2. API的请求流程
 
 对于 API_getRanking: 具体做了些什么，可以概括为以下几个：
 
@@ -42,7 +42,7 @@ onSuccess:^(NSArray *illusts, BOOL isIllust) 会在解析成功后调用，NSArr
 4. asyncURLFetch: 里先设置 NSMutableURLRequest 的 Referer 和 User-Agent，因为这里调用的是私有的iOS SAPI，必须要稍微伪装下...
 5. 接下来就是常规的 [NSURLConnection sendAsynchronousRequest:...] 了，然后淡定的等待返回
 
-### IllustModel说明
+### 3. IllustModel说明
 
 大部分提供的属性都在[IllustModel.h](https://github.com/upbit/PixivAPI_iOS/blob/master/PixivFetcher/IllustModel.h)里，对应字段也标注出来了。
 
@@ -52,7 +52,7 @@ onSuccess:^(NSArray *illusts, BOOL isIllust) 会在解析成功后调用，NSArr
 + (IllustModel *)parseDataArrayToModel:(NSArray *)data;
 ```
 
-### PixivDaily 的截图
+## PixivDaily 的截图
 
 目前完成日榜首页拉取，点击查看图片并记录最近访问：
 
@@ -62,4 +62,4 @@ onSuccess:^(NSArray *illusts, BOOL isIllust) 会在解析成功后调用，NSArr
 
 ![PixivDaily Screenshot3](https://raw.github.com/upbit/PixivAPI_iOS/master/examples/screenshots/PixivDaily_03.png)
 
-不过还有单击双击图片操作，以及日榜翻页等坑要填，今天太累就先到这里吧 (远目
+不过PixivDaily这个demo还有单击、双击图片操作，日榜翻页等坑要填，今天太累就先到这里吧 (远目
