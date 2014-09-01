@@ -60,6 +60,4 @@ onSuccess:^(NSArray *illusts, BOOL isIllust) 会在解析成功后调用，NSArr
 
 ![PixivDaily Screenshot2](https://raw.github.com/upbit/PixivAPI_iOS/master/examples/screenshots/PixivDaily_02.png)
 
-![PixivDaily Screenshot3](https://raw.github.com/upbit/PixivAPI_iOS/master/examples/screenshots/PixivDaily_03.png)
-
 不过PixivDaily这个demo还有单击、双击图片操作，日榜翻页等坑要填，今天太累就先到这里吧 (远目
