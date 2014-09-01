@@ -7,6 +7,8 @@ comments: true
 share: true
 ---
 
+### 为图片浏览增加手势: 双击切换缩放状态；单击隐藏标题
+
 作为一个图片浏览应用，PixivDaily的功能实在太简单了，连最基本的双击改变缩放模式都没有。先尝试在StoryBoard里拖放UITapGestureRecognizer，操作很简单不过当复制ImageView时，绑定的Tap手势失效了。第二个View莫名其妙只能触发双击操作，百思不得其解。
 
 于是手工在代码里添加单击、双击的手势：
@@ -56,6 +58,8 @@ share: true
 	2   CoreFoundation                      0x01c23243 -[NSObject(NSObject) doesNotRecognizeSelector:] + 275
 ```
 
+### 图片宽度/高度自适应
+
 在StoryBoard里拖iPad布局不难，之前因为都有处理 tableView:didSelectRowAtIndexPath:，直接复制就搞定了：
 
 ![PixivDaily iPad Screenshot](https://raw.github.com/upbit/PixivAPI_iOS/master/examples/screenshots/PixivDaily_03.png)
@@ -81,4 +85,84 @@ share: true
 
 widthZoomScale / heightZoomScale 分别是宽度适应和高度适应的比例，计算时bounds.size要乘以maximumZoomScale。这个逻辑太奇怪，不过能跑就先这样把 (远目
 
-剩下UITableView的向下翻页功能，一直没找到一个简单的实现方法(网上大多是增加一个Load More的Cell，伴随一堆零碎的插入代码)。如果有知道的达人求推荐！
+### UITableView向下翻页
+
+UITableView的向下翻页功能，一直没找到一个简单的实现方法(网上大多是增加一个Load More的Cell，伴随一堆零碎的插入代码)，只好退而求次不显示"Loading..."和小菊花了：
+
+```objective-c
+- (void)addPageRankingIllusts:(NSUInteger)page
+{
+    __weak DailyRankingViewController *weakSelf = self;
+    [PixivFetcher API_getRanking:page mode:PIXIV_RANKING_MODE_DAY content:PIXIV_RANKING_CONTENT_ALL
+                       onSuccess:^(NSArray *illusts, BOOL isIllust) {
+                           [weakSelf.refreshControl endRefreshing];
+                           weakSelf.illusts = [weakSelf.illusts arrayByAddingObjectsFromArray:illusts];
+                       }
+                       onFailure:^(NSURLResponse *response, NSInteger responseCode, NSData *data, NSError *connectionError) {
+                           NSLog(@"[HTTP %d] %@", responseCode, connectionError);
+                       }];
+}
+
+- (BOOL)loadMoreIllusts
+{
+    if (self.currentPage < MAX_FETCH_RANKING_PAGE_NUM) {
+        self.currentPage++;
+        NSLog(@"Load More - page %u", self.currentPage);
+        [self addPageRankingIllusts:self.currentPage];
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.row == [self.illusts count]-1) {
+        [self loadMoreIllusts];
+    }
+}
+```
+
+首先增加 addPageRankingIllusts:，将获取到的指定页码数据，插入到self.illusts中。接着判断 tableView:willDisplayCell:forRowAtIndexPath: 中indexPath.row == [self.illusts count]-1，如果相等说明已经滑到最后一个cell。此时就可以获取翻页数据了。
+
+### 导出图片到文件
+
+这个比较简单，主要是注意iPad默认detail会显示导出按钮，需要判断illust是否有效。另外在主线程里导出2M的图片担心卡住，于是 dispatch_async() 再写到Documents/；最后 UIAlertView 则要回到main_queue再弹出，不然窗口就冻结了：
+
+```objective-c
+- (NSString *)documentsPathForFileName:(NSString *)name
+{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES);
+    NSString *documentsPath = [paths objectAtIndex:0];
+    return [documentsPath stringByAppendingPathComponent:name];
+}
+
+- (IBAction)exportIllustToDocuments:(UIBarButtonItem *)sender
+{
+    if ((!self.illust) || (self.illust.illustId == PIXIV_ID_INVALID))
+        return;
+    
+    NSString *illustName = [NSString stringWithFormat:@"illistid_%u.%@", self.illust.illustId, self.illust.ext];
+    NSString *illustPath = [self documentsPathForFileName:illustName];
+    NSLog(@"export: %@", illustPath);
+
+    __weak SDWebImageViewController *weakSelf = self;
+    dispatch_queue_t exportQueue = dispatch_queue_create("export illust", NULL);
+    dispatch_async(exportQueue, ^{
+        if ([weakSelf.illust.ext isEqualToString:@"png"]) {
+            [UIImagePNGRepresentation(weakSelf.image) writeToFile:illustPath atomically:YES];
+        } else {
+            [UIImageJPEGRepresentation(weakSelf.image, 0.92) writeToFile:illustPath atomically:YES];
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Export Success!"
+                                                                message:illustName
+                                                               delegate:self
+                                                      cancelButtonTitle:nil
+                                                      otherButtonTitles:@"OK", nil];
+            [alertView show];
+        });
+    });
+}
+```
