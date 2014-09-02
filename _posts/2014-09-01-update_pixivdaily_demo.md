@@ -64,26 +64,48 @@ share: true
 
 ![PixivDaily iPad Screenshot](https://raw.github.com/upbit/PixivAPI_iOS/master/examples/screenshots/PixivDaily_03.png)
 
-唯一没料到的是Zoom，怎么弄都不太对劲。本来想实现尽可能用图片填满屏幕，试了半天发现 maximumZoomScale 会影响缩放比例，不设置的话iPad上又不能填充满ScrollView。最后找到个比较搓的方法：
+唯一没料到的是Zoom，怎么弄都不太对劲。本来想实现尽可能用图片填满屏幕，试了半天发现 maximumZoomScale 会影响缩放比例，不设置的话iPad上又不能填充满ScrollView。
+
+最后看到[这篇文章](http://www.cnblogs.com/wyqfighting/p/3194364.html)一语点醒梦中人，imageView.frame里，高宽没有设置放大倍率，这也就是为什么zoomScale怎么设置，图片也只能放大到原始大小的原因。弄清楚这个，整个缩放就很简单了：
 
 ```objective-c
+#define MAX_ILLUST_ZOOM_SCALE (2.0)
+
+- (void)setScrollView:(UIScrollView *)scrollView
+{
+    _scrollView.maximumZoomScale = MAX_ILLUST_ZOOM_SCALE;
+    self.scrollView.contentSize = self.image ? self.image.size : CGSizeZero;
+}
+
+- (void)setImage:(UIImage *)image
+{
+    // 这里最重要，frame一定要乘以放大的最大倍率
+    self.imageView.frame = CGRectMake(0,0,image.size.width*MAX_ILLUST_ZOOM_SCALE,image.size.height*MAX_ILLUST_ZOOM_SCALE);
+    self.scrollView.contentSize = self.image ? self.image.size : CGSizeZero;
+    [self initZoom];
+}
+
+// Zoom to show as much image as possible
+// http://stackoverflow.com/questions/14471298/zooming-uiimageview-inside-uiscrollview-with-autolayout
 - (void) initZoom {
     float minZoom = MIN(self.view.bounds.size.width / self.imageView.image.size.width,
                         self.view.bounds.size.height / self.imageView.image.size.height);
     if (minZoom > 1) minZoom = 1.0;
     self.scrollView.minimumZoomScale = minZoom;
     
-    self.widthZoomScale = self.view.bounds.size.width*_scrollView.maximumZoomScale / self.imageView.image.size.width;
-    self.heightZoomScale = self.view.bounds.size.height*_scrollView.maximumZoomScale / self.imageView.image.size.height;
+    self.widthZoomScale = self.view.bounds.size.width / self.imageView.image.size.width;
+    self.heightZoomScale = self.view.bounds.size.height / self.imageView.image.size.height;
     
-    NSLog(@"bound=%.2f scale=%.1f, image=%.2f", self.view.bounds.size.width, [UIScreen mainScreen].scale, self.imageView.image.size.width);
-    NSLog(@"widthZoom=%.2f heightZoom=%.2f, minZoom=%.2f", self.widthZoomScale, self.heightZoomScale, minZoom);
-
     self.scrollView.zoomScale = self.widthZoomScale;
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
+    [self initZoom];
 }
 ```
 
-widthZoomScale / heightZoomScale 分别是宽度适应和高度适应的比例，计算时bounds.size要乘以maximumZoomScale。这个逻辑太奇怪，不过能跑就先这样把 (远目
+每次载入图片，调用initZoom()就会自动设置缩放比例了。widthZoomScale / heightZoomScale 分别是宽度适应和高度适应的比例，在双击图片时进行切换，默认宽度适应。
 
 ### UITableView向下翻页
 
