@@ -7,9 +7,11 @@ comments: true
 share: true
 ---
 
+作为一个图片浏览应用，PixivDaily的功能实在太简单了，连最基本的双击改变缩放模式都没有。于是给这个作为Pixiv API for iOS的example的程序，增加了一些列如单击隐藏标题栏、双击切换缩放比例；图片宽度自适应；UITableView到底部后自动加载下一页；图片导出到Documents/等功能，算是学完CS193p的知识补充。这里记录下实现的过程，方便以后查阅。s
+
 ### 为图片浏览增加手势: 双击切换缩放状态；单击隐藏标题
 
-作为一个图片浏览应用，PixivDaily的功能实在太简单了，连最基本的双击改变缩放模式都没有。先尝试在StoryBoard里拖放UITapGestureRecognizer，操作很简单不过当复制ImageView时，绑定的Tap手势失效了。第二个View莫名其妙只能触发双击操作，百思不得其解。
+先尝试在StoryBoard里拖放UITapGestureRecognizer，操作很简单不过当复制ImageView时，绑定的Tap手势失效了。第二个View莫名其妙只能触发双击操作，百思不得其解。
 
 于是手工在代码里添加单击、双击的手势：
 
