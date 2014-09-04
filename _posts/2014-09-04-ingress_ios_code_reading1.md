@@ -7,7 +7,7 @@ comments: true
 share: true
 ---
 
-昨晚装上VPN兴冲冲出去把Ingress升到了Lv2，觉得这种实境"世界"实在是让宅男出门的最佳办法，何况它还打着拯救/奴役世界的幌子。想想不用实现的这么复杂，只要有个简单的户外游戏，能够根据行走的距离累计游戏内的点数(或金钱)，完成一些特殊地点才能取得的成就，乃至通过自己的努力改变虚拟世界的状态(例如经商模拟类游戏，通过物品的交易提升某个地域的贸易等级，从而慢慢从小镇发展为城邦甚至王国)，就能够持续给予我出门的动力...
+昨晚装上VPN兴冲冲出去把Ingress升到了Lv2，觉得这种实境"世界"实在是让宅男出门的最佳办法，何况它还打着拯救/奴役世界的幌子。想想不用实现的这么复杂，只要有个简单的户外游戏，就能够持续给予我外出的动力：能够根据行走的距离累计游戏内的点数(或金钱)，完成一些特殊地点才能取得的成就，乃至通过自己的努力改变虚拟世界的状态(例如经商模拟类游戏，通过物品的交易提升某个地域的贸易等级，从而慢慢从小镇发展为城邦甚至王国)
 
 于是在GitHub上找到了曾经有人ports的 [Ingress for iOS](https://github.com/marstone/ingress-ios)，打算下载下代码自己研究下，于是有了这篇文章。
 
@@ -151,6 +151,15 @@ LocationManager是一个自定义对CLLocationManager的单例封装，里面包
 }
 ```
 
-未完待续...
+XMOverlay是一个MKOverlay协议的对象，貌似是用于绘制什么内容到Map上的。暂时看不懂，不过也有[How do I create an image overlay and add to MKMapView?](http://stackoverflow.com/questions/5283741/how-do-i-create-an-image-overlay-and-add-to-mkmapview)这样的例子可以参考，暂时也不用管它：
 
+```objective-c
+- (void)viewDidLoad {
 
+    _xmOverlay = [XMOverlay new];
+    [_mapView addOverlay:_xmOverlay];
+
+}
+```
+
+后面的quickActionsMenu初始化和NSNotificationCenter部分，无关地图绘制的部分就先pass了。
