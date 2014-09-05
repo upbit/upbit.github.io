@@ -11,7 +11,7 @@ share: true
 
 说到只能硬件，不得不提最近最火爆的Google Nest被黑一事。早在5月底就有人放出了视频[Hacking into the Nest Thermostat (SSL@UCF)](https://www.youtube.com/watch?v=7AnvTgAKa-g)(要翻墙)。随后，Grant Hernandez, Orlando Arias, Daniel Buentello, and Yier Jin在黑帽大会US-14上发布了 [Smart Nest Thermostat: A Smart Spy in Your Home](https://www.blackhat.com/docs/us-14/materials/us-14-Jin-Smart-Nest-Thermostat-A-Smart-Spy-In-Your-Home-WP.pdf) 这篇论文。
 
-论文里提到，在重置Nest时会导致 sys_boot5 高电平，而这个引脚会直接触发USB启动。从而可以通过USB口，将自定义的x-loader刷入到Nest中，从而获取Shell并进一步获取Nest的控制权。文末还提到，**这个漏洞可以在其他使用类似CPU的设备上应用！**
+论文里提到，在重置Nest时会导致 sys_boot5 高电平(貌似和TI AM3703这个CPU有关)，而这个引脚会直接触发USB启动。从而可以通过USB口，将自定义的x-loader刷入到Nest中，从而获取Shell并进一步获取Nest的控制权。文末还提到，**这个漏洞可以在其他使用类似CPU的设备上应用！**
 
 然而论文都是简洁的，无一例外的需要你大量的Google相关资料。万幸找到GTVHacker的[一篇博文](http://blog.gtvhacker.com/2014/google-nest-exploiting-dfu-for-root/)，里面从获取root的角度提到了这个漏洞的另一些细节：
 
@@ -30,4 +30,4 @@ The Nest uses a CPU similar to the OMAP3630 series. This CPU features a Device F
 3. 修改U-Boot，在里面放入ssh server: Dropbear；
 4. 启动一个脚本，定时检查Nest虚拟磁盘中的host.txt，从中读取配置建立反向的SSH连接；
 
-作者甚至还开源了整个root过程用到的源码：[NestDFUAttack](https://github.com/gtvhacker/NestDFUAttack) 对照[Nest开源的代码](https://nest.com/legal/compliance/)，应该有可能看出是怎么实现获取shell然后获取root权限的。这回有东西可以研究了:)
+作者甚至还开源了整个root过程用到的源码：[NestDFUAttack](https://github.com/gtvhacker/NestDFUAttack) 对照[Nest开源的代码](https://nest.com/legal/compliance/)，应该有可能看出是怎么修改U-Boot到获取root的。这回有东西可以研究了:)
