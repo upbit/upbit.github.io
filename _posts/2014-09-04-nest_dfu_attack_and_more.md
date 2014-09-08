@@ -9,7 +9,7 @@ share: true
 
 今天有幸在QQ上和看雪坛主聊了几句，感触颇深。学生时代就是在图书馆看他的书启蒙的，也是那年代头一次知道有个论坛叫“看雪”。说来惭愧，个人在安全方面建树不深，之前凭一篇[《GSM Sniffing入门》](http://bbs.pediy.com/showthread.php?t=182574)去论坛混精华的帖子，居然让坛主产生我在硬件方面有所研究的错觉... 不过聊到智能设备，确实也勾起我那爱折腾的心。之前买树莓派折腾各种电路板、到现在折腾路由器，其实这些智能设备离我们并不远。
 
-说到只能硬件，不得不提最近最火爆的Google Nest被黑一事。早在5月底就有人放出了视频[Hacking into the Nest Thermostat (SSL@UCF)](https://www.youtube.com/watch?v=7AnvTgAKa-g)(要翻墙)。随后，Grant Hernandez, Orlando Arias, Daniel Buentello, and Yier Jin在黑帽大会US-14上发布了 [Smart Nest Thermostat: A Smart Spy in Your Home](https://www.blackhat.com/docs/us-14/materials/us-14-Jin-Smart-Nest-Thermostat-A-Smart-Spy-In-Your-Home-WP.pdf) 这篇论文。
+说到智能硬件，不得不提最近最火爆的Google Nest被黑一事。早在5月底就有人放出了视频[Hacking into the Nest Thermostat (SSL@UCF)](https://www.youtube.com/watch?v=7AnvTgAKa-g)(要翻墙)。随后，Grant Hernandez, Orlando Arias, Daniel Buentello, and Yier Jin在黑帽大会US-14上发布了 [Smart Nest Thermostat: A Smart Spy in Your Home](https://www.blackhat.com/docs/us-14/materials/us-14-Jin-Smart-Nest-Thermostat-A-Smart-Spy-In-Your-Home-WP.pdf) 这篇论文。
 
 论文里提到，在重置Nest时会导致 sys_boot5 高电平(貌似和TI AM3703这个CPU有关)，而这个引脚会直接触发USB启动。从而可以通过USB口，将自定义的x-loader刷入到Nest中，从而获取Shell并进一步获取Nest的控制权。文末还提到，**这个漏洞可以在其他使用类似CPU的设备上应用！**
 
