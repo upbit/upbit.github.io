@@ -87,7 +87,7 @@ share: true
 
 如果此时运行，会发现 UICollectionViewCell 只有默认的 50x50 像素，而且两两之间存在很粗的黑边。此时只需要在StoryBoard里配置 UICollectionView 的 Collection View Size，即可完成UICollectionView布局的定制：
 
-![For フルーツバスケット]({{ site.url }}/images/collection_view_size_for_PixivDaily.png)
+![PixivDaily View Size]({{ site.url }}/images/collection_view_size_for_PixivDaily.png)
 
 完成后的iPad布局如下：
 

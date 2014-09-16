@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Ingress-iOS ports代码阅读1
+title: Ingress-iOS ports代码阅读1 - ScannerViewController
 description: "Ingress-iOS code reading 01"
 category: opensource
 comments: true
@@ -163,3 +163,5 @@ XMOverlay是一个MKOverlay协议的对象，貌似是用于绘制什么内容�
 ```
 
 后面的quickActionsMenu初始化和NSNotificationCenter部分，无关地图绘制的部分就先pass了。
+
+未完待续：[Ingress-iOS ports代码阅读2 - Portal的绘制](http://blog.imaou.com/opensource/2014/09/04/ingress_ios_code_reading2.html)
