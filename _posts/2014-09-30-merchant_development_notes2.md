@@ -15,7 +15,7 @@ share: true
 
 所以物品的价格，会趋于一个稳定点，即[供给与需求曲线](http://zh.wikipedia.org/wiki/%E4%BE%9B%E7%BB%99%E5%92%8C%E9%9C%80%E6%B1%82)的交点，并且在这一点对应的价格P，使得供给与需求刚好都等于Q：
 
-<center>![供需平衡价格](http://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Supply-demand-equilibrium.svg/217px-Supply-demand-equilibrium.svg.png)</center>
+<center>![供需平衡价格]({{ site.url }}/images/Supply-demand-equilibrium.svg.png)</center>
 
 图中需求曲线(红色)和供给曲线(蓝色)，存在不同的曲率以及与坐标轴的交点。交点可以理解为最大需求量(价格为0时)以及最小供给价格(供给为0时)，而曲率则比较复杂，还需要从影响供需的因素说起。
 
@@ -38,7 +38,7 @@ share: true
 
 说了这么多理论，再回头看下 规则3 [**供需与价格**：区域中的物品进货价格，由区域的供需关系决定] 这条，物品的均衡价格正好用供需曲线来刻画：
 
-<center>![供给和需求](http://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Supply-demand-right-shift-demand_zh-tw.svg/217px-Supply-demand-right-shift-demand_zh-tw.svg.png)</center>
+<center>![供给和需求]{{ site.url }}/images/Supply-demand-right-shift-demand_zh-tw.svg.png)</center>
 
 当区域中代替品价格上涨时，小麦的需求曲线从D1变化到D2，及相同价格P1下需求量上升。而由于供给曲线S未变，均衡价格从P1慢慢变化到P2(因为持续供不应求)，直到达到新的均衡点(Q2,P2)为止。这个过程就是当某种谷物(比如大麦)价格上涨时，小麦价格与供需的变化过程。
 
