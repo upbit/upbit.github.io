@@ -29,4 +29,4 @@ share: true
 
 当然，上面说的特征仅仅是最基本的规则，而且实际模拟中还存在不少问题等待解决。不过Ingress用700w的用户证明了虚拟实境游戏的乐趣与可行性，而随着 Google Glass / Apple Watch 这样的可穿戴带GPS设备的普及，虚拟实境将真正进入玩家的生活。也许有一天，旅游而回的你给朋友携带的是虚拟国度的香辛料，而非现实社会的伴手礼也说不定。
 
-规则1/2有Ingress可以参考，[TravelingMerchant开发手记02](#)将重点说明**规则3:供需与价格**的模拟。
+规则1/2有Ingress可以参考，[TravelingMerchant开发手记02](http://blog.imaou.com/game/2014/09/30/merchant_development_notes2.html)将重点说明**规则3:供需与价格**的模拟。
