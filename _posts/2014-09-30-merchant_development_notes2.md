@@ -38,7 +38,7 @@ share: true
 
 说了这么多理论，再回头看下 规则3 [**供需与价格**：区域中的物品进货价格，由区域的供需关系决定] 这条，物品的均衡价格正好用供需曲线来刻画：
 
-<center>![供给和需求]{{ site.url }}/images/Supply-demand-right-shift-demand_zh-tw.svg.png)</center>
+<center>![供给和需求]({{ site.url }}/images/Supply-demand-right-shift-demand_zh-tw.svg.png)</center>
 
 当区域中代替品价格上涨时，小麦的需求曲线从D1变化到D2，及相同价格P1下需求量上升。而由于供给曲线S未变，均衡价格从P1慢慢变化到P2(因为持续供不应求)，直到达到新的均衡点(Q2,P2)为止。这个过程就是当某种谷物(比如大麦)价格上涨时，小麦价格与供需的变化过程。
 
