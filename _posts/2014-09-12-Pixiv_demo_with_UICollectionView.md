@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 为PivivAPI的example，增加三列显示的UICollectionView及自动翻页
+title: 为PixivAPI的example，增加三列显示的UICollectionView及自动翻页
 description: "PixivDaily demo with UICollectionView"
 category: opensource
 comments: true
@@ -31,19 +31,19 @@ share: true
 {
     static NSString *CellIdentifier = @"Image ColCell";
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:CellIdentifier forIndexPath:indexPath];
-    
+
     if ([self.illusts count] > 0)
     {
         IllustModel *illust = [self.illusts objectAtIndex:indexPath.row];
-        
+
         UIImageView *imageView = [[UIImageView alloc] init];
         cell.backgroundView = imageView;
-        
+
         // download illusts.thumbURL for cell image
         [imageView sd_setImageWithURL:[NSURL URLWithString:illust.thumbURL]
                      placeholderImage:[UIImage imageNamed:@"placeholder"] options:indexPath.row == 0 ? SDWebImageRefreshCached : 0];
     }
-    
+
     return cell;
 }
 ```
@@ -80,7 +80,7 @@ share: true
     if (indexPath.row == [self.illusts count]-1) {
         [self loadMoreIllusts];
     }
-    
+
     return [super collectionView:collectionView cellForItemAtIndexPath:indexPath];
 }
 ```
@@ -94,4 +94,3 @@ share: true
 ![PixivDaily iPad Screenshot2](https://raw.github.com/upbit/PixivAPI_iOS/master/examples/screenshots/PixivDaily_04.png)
 
 当然，如果是需要UICollectionView全屏显示或者让Cell自适应屏幕宽度，就需要用到 [UICollectionViewDelegateFlowLayout](https://developer.apple.com/library/ios/documentation/uikit/reference/UICollectionViewDelegateFlowLayout_protocol/Reference/Reference.html) 里的 collectionView:layout:sizeForItemAtIndexPath: 方法了，返回一个经过计算的 CGSize 来调整 UICollectionViewCell 的显示大小。
-
