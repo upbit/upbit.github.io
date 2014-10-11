@@ -113,7 +113,39 @@ https://public-api.secure.pixiv.net/v1/users/{author_id}.json
 }
 ```
 
-json.response[0].image_urls.large 的结果就是原始图片地址，并且其中还包含不少SAPI拿不到的信息。
+json.response[0].image_urls.large 的结果就是原始图片地址，并且其中还包含不少SAPI拿不到的信息。下面是 users/1184799.json 的返回:
+
+```json
+{
+    'status': u'success',
+     'count': 1,
+     'response': [
+        {
+            'profile': {
+                'tags': None,
+                 'introduction': u'白髪娘を愛しています(*\'▽\'*)\r\n好きなものを好きなように描いてます！\r\nｵﾘｼﾞﾅﾙ多め｡\r\n\r\n※ﾏｲﾋﾟｸ＆ご依頼はお受けしていません｡\r\n■I don\'t accept "maipiku" application other than a friend with having met.　I am really sorry＞＜\r\n\r\n絵はたまに気まぐれで消したりします｡\r\n画像加工＆配布は一切お断りしております｡\r\n\r\n※pixivのメールには反応していませんので、何かありましたらTwitterかHPの方へお願い致します。',
+                 'gender': None,
+                 'contacts': None,
+                 'job': None,
+                 'location': None,
+                 'workspace': None,
+                 'birth_date': None,
+                 'homepage': None,
+                 'blood_type': None
+            },
+             'account': u'luciahreat',
+             'name': u'三嶋くろね',
+             'email': None,
+             'is_premium': None,
+             'profile_image_urls': {
+                'px_170x170': u'http://i2.pixiv.net/img38/profile/luciahreat/7271308.png',
+                 'px_50x50': u'http://i2.pixiv.net/img38/profile/luciahreat/7271308_s.png'
+            },
+             'id': 1184799
+        }
+    ]
+}
+```
 
 不过这个 Public-API 并非真的那么公开，需要提供OAuth鉴权(Authorization 中携带 Bearer Token)。分析了下发现iOS的BearerToken每次登录或者换用户名都会变化，而Android是固定的(8mMXXWT9iuwdJvsVIvQsFYDwuZpRCMePeyagSh30ZdU)，于是拿来主义直接用到Public-API的访问模拟上了。另外一个麻烦则是需要提供 Cookie: PHPSESSID=****，完整的请求头部类似下面这样：
 
