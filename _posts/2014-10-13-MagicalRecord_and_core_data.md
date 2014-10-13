@@ -1,13 +1,13 @@
 ---
 layout: post
-title: MagicalRecord与CoreData - MagicalRecord使用比例
+title: MagicalRecord与CoreData - MagicalRecord使用笔记
 description: "MagicalRecord and CoreData"
 category: opensource
 comments: true
 share: true
 ---
 
-因为需要本地存储Pixiv的返回内容，于是搜了下CoreData的写法，自然而然也就接触到了[MagicalRecord](https://github.com/magicalpanda/MagicalRecord)。MagicalRecord确实极大简化了CoreData的各种操作，但也许正因为基于CoreData，到最后还是没搞定按插入顺序返回查询结果的功能...
+因为需要本地存储Pixiv的返回内容，于是搜了下CoreData的写法，自然而然也就接触到了[MagicalRecord](https://github.com/magicalpanda/MagicalRecord)。MagicalRecord确实极大简化了CoreData的各种操作，但正因为基于CoreData，到最后还是没搞定按插入顺序返回查询结果的功能...
 
 已经打算切换到 [SQLite + FMDB](https://github.com/ccgus/fmdb)，不过还是先记录下MagicalRecord的用法吧。
 
