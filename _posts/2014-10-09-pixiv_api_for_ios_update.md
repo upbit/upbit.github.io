@@ -42,78 +42,119 @@ https://public-api.secure.pixiv.net/v1/works/{illust_id}.json
 https://public-api.secure.pixiv.net/v1/users/{author_id}.json
 ```
 
-其中 works/{id}.json 返回的json数据中，就有想要的图片原始地址。works/46407559.json 返回如下：
+其中 works/{id}.json 返回的json数据中，就有想要的图片原始地址。works/46605041.json 返回如下：
 
 ```json
 {
-     'status': u'success',
-     'count': 1,
-     'response': [
-        {
-            'publicity': 0,
-             'is_manga': False,
-             'stats': {
-                'favorited_count': {
-                    'public': 7447,
-                     'private': 666
-                },
-                 'score': 58091,
-                 'views_count': 79067,
-                 'scored_count': 5851,
-                 'commented_count': 194
-            },
-             'favorite_id': 0,
-             'tags': [
-                u'アルクェイド',
-                 u'セイバー',
-                 u'月姫',
-                 u'型月',
-                 u'胸囲の格差社会',
-                 u'うつくしい',
-                 u'Fate/staynight',
-                 u'TYPE-MOON5000users入り',
-                 u'なにこれ可愛すぎる'
-            ],
-             'type': u'illustration',
-             'is_liked': False,
-             'page_count': 1,
-             'image_urls': {
-                'small': u'http://i2.pixiv.net/c/150x150/img-master/img/2014/10/07/12/36/51/46407559_p0_master1200.jpg',
-                 'large': u'http://i2.pixiv.net/img-original/img/2014/10/07/12/36/51/46407559_p0.jpg',
-                 'px_128x128': u'http://i2.pixiv.net/c/128x128/img-master/img/2014/10/07/12/36/51/46407559_128x128.jpg',
-                 'medium': u'http://i2.pixiv.net/c/600x600/img-master/img/2014/10/07/12/36/51/46407559_p0_master1200.jpg',
-                 'px_480mw': u'http://i2.pixiv.net/c/480x960/img-master/img/2014/10/07/12/36/51/46407559_480mw.jpg'
-            },
-             'height': 1273,
-             'caption': u'サイズの差は歴然。',
-             'tools': [
-                u'CLIP STUDIO PAINT'
-            ],
-             'user': {
-                'account': u'yangsfan',
-                 'name': u'曽我誠',
-                 'is_friend': False,
-                 'is_following': False,
-                 'is_follower': False,
-                 'profile_image_urls': {
-                    'px_50x50': u'http://i1.pixiv.net/img03/profile/yangsfan/5539709_s.jpg'
-                },
-                 'id': 20787
-            },
-             'reuploaded_time': u'2014-10-07 12:36:51',
-             'created_time': u'2014-10-07 12:36:51',
-             'title': u'金髪ヒロインズ',
-             'id': 46407559,
-             'book_style': u'none',
-             'age_limit': u'all-age',
-             'width': 900,
-             'metadata': None
+    count = 1;
+    response =     (
+                {
+            "age_limit" = "all-age";
+            "book_style" = none;
+            caption = "\U307b\U306e\U304b\U3061\U3083\U3093\U3000\U58c1\U7d19\U30b5\U30a4\U30ba\Uff081024\U00d7768\Uff09\U3067\U3059\Uff01
+\n\U30a2\U30a4\U30b3\U30f3\U3082\U3069\Uff5e\U305e\Uff5e";
+            "created_time" = "2014-10-18 02:31:58";
+            "favorite_id" = 0;
+            height = 768;
+            id = 46605041;
+            "image_urls" =             {
+                large = "http://i2.pixiv.net/img-original/img/2014/10/18/02/31/58/46605041_p0.jpg";
+                medium = "http://i2.pixiv.net/c/600x600/img-master/img/2014/10/18/02/31/58/46605041_p0_master1200.jpg";
+                "px_128x128" = "http://i2.pixiv.net/c/128x128/img-master/img/2014/10/18/02/31/58/46605041_128x128.jpg";
+                "px_480mw" = "http://i2.pixiv.net/c/480x960/img-master/img/2014/10/18/02/31/58/46605041_480mw.jpg";
+                small = "http://i2.pixiv.net/c/150x150/img-master/img/2014/10/18/02/31/58/46605041_p0_master1200.jpg";
+            };
+            "is_liked" = 0;
+            "is_manga" = 1;
+            metadata =             {
+                pages =                 (
+                                        {
+                        "image_urls" =                         {
+                            large = "http://i2.pixiv.net/img-original/img/2014/10/18/02/31/58/46605041_p0.jpg";
+                            medium = "http://i2.pixiv.net/c/1200x1200/img-master/img/2014/10/18/02/31/58/46605041_p0_master1200.jpg";
+                            "px_128x128" = "http://i2.pixiv.net/c/128x128/img-master/img/2014/10/18/02/31/58/46605041_p0_square1200.jpg";
+                            "px_480mw" = "http://i2.pixiv.net/c/480x960/img-master/img/2014/10/18/02/31/58/46605041_p0_master1200.jpg";
+                        };
+                    },
+                                        {
+                        "image_urls" =                         {
+                            large = "http://i2.pixiv.net/img-original/img/2014/10/18/02/31/58/46605041_p1.jpg";
+                            medium = "http://i2.pixiv.net/c/1200x1200/img-master/img/2014/10/18/02/31/58/46605041_p1_master1200.jpg";
+                            "px_128x128" = "http://i2.pixiv.net/c/128x128/img-master/img/2014/10/18/02/31/58/46605041_p1_square1200.jpg";
+                            "px_480mw" = "http://i2.pixiv.net/c/480x960/img-master/img/2014/10/18/02/31/58/46605041_p1_master1200.jpg";
+                        };
+                    },
+                                        {
+                        "image_urls" =                         {
+                            large = "http://i2.pixiv.net/img-original/img/2014/10/18/02/31/58/46605041_p2.jpg";
+                            medium = "http://i2.pixiv.net/c/1200x1200/img-master/img/2014/10/18/02/31/58/46605041_p2_master1200.jpg";
+                            "px_128x128" = "http://i2.pixiv.net/c/128x128/img-master/img/2014/10/18/02/31/58/46605041_p2_square1200.jpg";
+                            "px_480mw" = "http://i2.pixiv.net/c/480x960/img-master/img/2014/10/18/02/31/58/46605041_p2_master1200.jpg";
+                        };
+                    },
+                                        {
+                        "image_urls" =                         {
+                            large = "http://i2.pixiv.net/img-original/img/2014/10/18/02/31/58/46605041_p3.jpg";
+                            medium = "http://i2.pixiv.net/c/1200x1200/img-master/img/2014/10/18/02/31/58/46605041_p3_master1200.jpg";
+                            "px_128x128" = "http://i2.pixiv.net/c/128x128/img-master/img/2014/10/18/02/31/58/46605041_p3_square1200.jpg";
+                            "px_480mw" = "http://i2.pixiv.net/c/480x960/img-master/img/2014/10/18/02/31/58/46605041_p3_master1200.jpg";
+                        };
+                    },
+                                        {
+                        "image_urls" =                         {
+                            large = "http://i2.pixiv.net/img-original/img/2014/10/18/02/31/58/46605041_p4.jpg";
+                            medium = "http://i2.pixiv.net/c/1200x1200/img-master/img/2014/10/18/02/31/58/46605041_p4_master1200.jpg";
+                            "px_128x128" = "http://i2.pixiv.net/c/128x128/img-master/img/2014/10/18/02/31/58/46605041_p4_square1200.jpg";
+                            "px_480mw" = "http://i2.pixiv.net/c/480x960/img-master/img/2014/10/18/02/31/58/46605041_p4_master1200.jpg";
+                        };
+                    }
+                );
+            };
+            "page_count" = 5;
+            publicity = 0;
+            "reuploaded_time" = "2014-10-18 02:31:58";
+            stats =             {
+                "commented_count" = 29;
+                "favorited_count" =                 {
+                    private = 109;
+                    public = 1418;
+                };
+                score = 10278;
+                "scored_count" = 1034;
+                "views_count" = 11673;
+            };
+            tags =             (
+                "\U30e9\U30d6\U30e9\U30a4\U30d6!",
+                "\U9ad8\U5742\U7a42\U4e43\U679c",
+                "\U30e9\U30d6\U30e9\U30a4\U30d6!1000users\U5165\U308a",
+                "\U30ed\U30ea"
+            );
+            title = "\U307b\U306e\U304b\U3061\U3083\U3093";
+            tools =             (
+                SAI
+            );
+            type = manga;
+            user =             {
+                account = "yukinko-02727";
+                id = 10539782;
+                "is_follower" = 0;
+                "is_following" = 0;
+                "is_friend" = 0;
+                name = "\U7950\U559c\Uff08\U3086\U304d\Uff09";
+                "profile_image_urls" =                 {
+                    "px_50x50" = "http://i2.pixiv.net/img142/profile/yukinko-02727/8524995_s.jpg";
+                };
+            };
+            width = 1024;
         }
-    ]
+    );
+    status = success;
 }
 ```
 
-json.response[0].image_urls.large 的结果就是原始图片地址，并且其中还包含不少SAPI拿不到的信息。下面是 users/1184799.json 的返回:
+json.response[0].image_urls.large 的结果就是原始图片地址(多张图时信息则存在metadata的pages里)，并且其中还包含不少SAPI拿不到的信息。
+
+下面是 users/1184799.json 的返回:
 
 ```json
 {
