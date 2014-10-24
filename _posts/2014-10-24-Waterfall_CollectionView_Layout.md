@@ -1,7 +1,7 @@
 ---
 layout: post
-title: 瀑布流Waterfall(CHTCollectionViewWaterfallLayout)笔记
-description: "Waterfall - CHTCollectionViewWaterfallLayout"
+title: 瀑布流(CHTCollectionViewWaterfallLayout)使用笔记
+description: "CHTCollectionViewWaterfallLayout"
 category: study
 comments: true
 share: true
