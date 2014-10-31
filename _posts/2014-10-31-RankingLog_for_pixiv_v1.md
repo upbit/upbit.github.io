@@ -36,15 +36,15 @@ share: true
 
 ## 使用说明
 
-第一次打开App会自动跳转这个页面。如果要查看R18作品，需要使用有R18作品权限的pixiv帐号进行登录，在pixiv ID和password框内填入帐号和密码(建议使用小号)，点返回(Back)保存设置：
+**第一次打开**App会自动跳转设置页面。如果要查看R18作品，需要使用有R18作品权限的pixiv帐号进行登录，在pixiv ID和password框内填入帐号和密码(建议使用小号)，点返回(Back)保存设置：
 
 ![iPad Waterfall]({{ site.url }}/images/RankingLog_iPhone5S_settings.png)
 
-等待Login完成后，就会看到默认的“昨日的周排行”数据。当滑动到末尾后，会自动载入下一页的数据，此时标题栏会更新为"榜单:pN/M - [日期]"，N是当前页码，M是最大翻页深度：
+**等待Login**完成后，就会看到默认的“昨日的周排行”数据。当滑动到末尾后，会自动载入下一页的数据，此时标题栏会更新为"榜单:pN/M - [日期]"，N是当前页码，M是最大翻页深度：
 
 ![iPad Waterfall]({{ site.url }}/images/RankingLog_iPad_waterfall.png)
 
-点选任意图片进入浏览模式，右上角按钮可以导出当前图片到相册(或文件)：
+**点选任意图片**进入浏览模式，右上角按钮可以导出当前图片到相册(或文件)：
 
 ![iPad Waterfall]({{ site.url }}/images/RankingLog_iPad_ImageExport.png)
 
@@ -54,14 +54,14 @@ share: true
 
 在用户名密码输入框下有三个开关，分别代表：
 
-* [To Doc/] 导出图片到程序的Documents/下，之后可以用iTunes等工具下载
-* [To Album] 导出到系统相册。注意第一次需要在弹出窗里选择允许RankingLog访问相册
-* [Large Image] 显示原始大图。关闭后会下载移动端用的小图，缺点是导出的作品也会变成小图
+* **[To Doc/]** 导出图片到程序的Documents/下，之后可以用iTunes等工具下载
+* **[To Album]** 导出到系统相册。注意第一次需要在弹出窗里选择允许RankingLog访问相册
+* **[Large Image]** 显示原始大图。关闭后会下载移动端用的小图，缺点是导出的作品也会变成小图
 
 ![iPad Waterfall]({{ site.url }}/images/RankingLog_iTunes_documents.png)
 
-下面的pages滑动栏用于调整最大翻页深度，Pixiv客户端默认6页，如果觉得重复作品太多，可以缩减到每3页日期减1。
+下面的**pages滑动栏**用于调整最大翻页深度，Pixiv客户端默认6页，如果觉得重复作品太多，可以缩减到每3页日期减1。
 
-屏幕底部的 "Mode | Date" 切换按钮，用于选择排行榜模式和日期。往往切换模式后希望从最新日期向前翻，此时点Yesterday按钮可以快速重置到昨天的日期。不过注意，RankingLog查看的是"过去的排行榜"数据，如果设置当天或者未来的日期，可能会取不到或得到错误的结果。
+屏幕底部的 **"Mode | Date" 切换按钮**，用于选择排行榜模式和日期。往往切换模式后希望从最新日期向前翻，此时点Yesterday按钮可以快速重置到昨天的日期。不过注意，RankingLog查看的是"过去的排行榜"数据，如果设置当天或者未来的日期，可能会取不到或得到错误的结果。
 
-目前RankingLog还处于开发阶段，以后会加入收藏按钮和相同作者作品查看功能。如果你发现BUG或者想参与开发，尽管到[https://github.com/upbit/PixivAPI_iOS](https://github.com/upbit/PixivAPI_iOS)给我提 Issues / Pull Requests 吧。
+目前**RankingLog**还处于开发阶段，以后会加入收藏按钮和相同作者作品查看功能。如果你发现BUG或者想参与开发，尽管到[https://github.com/upbit/PixivAPI_iOS](https://github.com/upbit/PixivAPI_iOS)给我提 Issues / Pull Requests 吧。
