@@ -19,7 +19,7 @@ share: true
 
 (GitHub) [RankingLog (v1.0)]({{ site.url }}/RankingLog/RankingLog_v1.0.ipa), 1.1M (无需登录的版本，pixiv ID和password可以不填)
 
-(GitHub) [RankingLog r18版 (v1.0)]({{ site.url }}/RankingLog/RankingLog_v1.0.ipa), 1.1M <span style="color:#F00;">( 18x版本，未满18岁装了也骗不过P社的:P )</span>
+(GitHub) [RankingLog r18版 (v1.0)]({{ site.url }}/RankingLog/RankingLog_r18_v1.0.ipa), 1.1M <span style="color:#F00;">( 18x版本，未满18岁装了也骗不过P社的:P )</span>
 
 (百度pan) [RankingLog (v1.0)](http://pan.baidu.com/s/1ntl070l), 1.1M
 
