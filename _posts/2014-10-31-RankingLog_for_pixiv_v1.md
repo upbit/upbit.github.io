@@ -17,7 +17,7 @@ share: true
 
 ### 下载地址：
 
-[RankingLog (v1.0)]({{ site.url }}/RankingLog/RankingLog_v1.0.ipa), 2.0M
+[RankingLog (v1.1)]({{ site.url }}/RankingLog/RankingLog_v1.1.ipa), 2.0M
 
 支持 iPhone/iPad (iOS6.1~iOS8.1, 推荐iOS7以上)，IPA安装需要**越狱机器**
 
