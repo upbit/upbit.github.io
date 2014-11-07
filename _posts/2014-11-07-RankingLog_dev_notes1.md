@@ -312,4 +312,184 @@ ScrollImageViewController只完成了基本的图片展示，图片缓存和手�
 }
 ```
 
-导出相应的函数供外部重载，至此简易的Pixiv图片下载与显示类完成。(未完待续)
+导出相应的函数供外部重载，至此简易的Pixiv图片下载与显示类完成。
+
+## RankingLogWaterfallViewController
+
+接着说主界面的 Controller - RankingLogWaterfallViewController，继承于PixivWaterfallViewController，用于显示选定历史排行的内容展示。StoryBoard的布局如下：
+
+![StoryBoard RankingLog]({{ site.url }}/images/201411/dev_RankingLog_01.png)
+
+首先是在viewDidLoad:中，根据历史设置判断是否第一次进入。第一次进入则 performSegueWithIdentifier: 转到DatePickerViewController的设置页卡，否则调用 loginAndRefreshView: 登录Pixiv并重新刷新列表内容：
+
+```objective-c
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+
+    if (![[ModelSettings sharedInstance] loadSettingFromUserDefaults]) {
+        // 第一次进入先跳转设置页卡
+        [self performSegueWithIdentifier:@"DatePickerSegue" sender:self];
+    } else {
+        [self loginAndRefreshView];
+    }
+
+    [self.navigationItem.leftBarButtonItem setEnabled:NO];
+}
+```
+
+DatePickerSegue转向的DatePickerViewController暂且不表，这里先说下返回时的处理。搜索了网上的各种资料，发现当UINavigationController返回上级页面时，先前的页面无法得到通知或返回值，
+于是只好在viewDidAppear:里做了些很low的判断：根据ModelSettings的isChanged标记判断变更的，当DatePickerViewController里的控件修改了ModelSettings的关键字段，isChanged会变成YES。
+
+```objective-c
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+
+    if ([ModelSettings sharedInstance].isChanged) {
+        // 发生过变化，重新刷新RankingLog
+        NSLog(@"refresh RankingLog");
+        [ModelSettings sharedInstance].isChanged = NO;
+
+        [self loginAndRefreshView];
+    }
+
+    [self updateTitle];
+
+    // 如果是r18类日榜，启用左侧的收藏按钮
+    if ([[ModelSettings sharedInstance].mode rangeOfString:@"r18"].location != NSNotFound) {
+        [self.navigationItem.leftBarButtonItem setEnabled:YES];
+    } else {
+        [self.navigationItem.leftBarButtonItem setEnabled:NO];
+    }
+}
+```
+
+另外如果发生改变，除了重置isChanged = NO，也会调用loginAndRefreshView:刷新内容。
+
+## SAPI RankingLog的获取
+
+loginAndRefreshView:主要显示一个Login...的提示，接着调用 PixivAPI loginIfNeeded: 来登录Pixiv。因为PixivAPI是同步的(苹果规定主线程中不应该有阻塞的网络操作)，因此需要用到 asyncBlockingQueue: 来异步执行。在 asyncBlockingQueue: 代码块中的内容，将在后台线程中依次执行。等login:成功返回后，注意调用 onMainQueue: 在main queue上更新UI操作，例如隐藏 SVProgressHUD 或更新图片等。
+
+```objective-c
+- (void)loginAndRefreshView
+{
+    self.illusts = @[];
+    self.currentPage = 0;
+
+    __weak RankingLogWaterfallViewController *weakSelf = self;
+
+    [SVProgressHUD showWithStatus:@"Login..." maskType:SVProgressHUDMaskTypeBlack];
+
+    [[PixivAPI sharedInstance] asyncBlockingQueue:^{
+        NSString *username = [ModelSettings sharedInstance].username;
+        NSString *password = [ModelSettings sharedInstance].password;
+        BOOL success = [[PixivAPI sharedInstance] loginIfNeeded:username password:password];
+
+        [[PixivAPI sharedInstance] onMainQueue:^{
+            if (!success) {
+                [SVProgressHUD showErrorWithStatus:@"Login failed! Check your pixiv ID and password."];
+                return;
+            }
+
+            [SVProgressHUD dismiss];
+            [weakSelf asyncGetRankingLog];
+        }];
+    }];
+}
+```
+
+等获PixivAPI获取到auth信息后，就可以实现 asyncGetRankingLog: 来查询过去排行了：
+
+```objective-c
+- (NSArray *)fetchNextRankingLog
+{
+    self.currentPage += 1;
+    [self updateTitle];
+
+    NSString *mode = [ModelSettings sharedInstance].mode;
+    NSCalendarUnit flags = NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear;
+    NSDateComponents *components = [[NSCalendar currentCalendar] components:flags fromDate:[ModelSettings sharedInstance].date];
+
+
+    NSArray *illusts = [[PixivAPI sharedInstance] SAPI_ranking_log:[components year] month:[components month] day:[components day]
+                                                  mode:mode page:self.currentPage requireAuth:YES];
+
+    NSLog(@"get RankingLog(%@, %ld-%ld-%ld, page=%ld) return %ld works", mode, (long)[components year], (long)[components month], (long)[components day], (long)self.currentPage, (long)illusts.count);
+
+    if ((illusts.count == 0) ||     // 已经更多数据或出错
+        (self.currentPage >= [ModelSettings sharedInstance].pageLimit)) {   // 翻页达到深度限制
+        [self goPriorRankingRound];
+    }
+
+    return illusts;
+}
+
+- (void)asyncGetRankingLog
+{
+    __weak RankingLogWaterfallViewController *weakSelf = self;
+    [ApplicationDelegate setNetworkActivityIndicatorVisible:YES];
+    [[PixivAPI sharedInstance] asyncBlockingQueue:^{
+
+        NSArray *SAPI_illusts = [weakSelf fetchNextRankingLog];
+        [[PixivAPI sharedInstance] onMainQueue:^{
+            [ApplicationDelegate setNetworkActivityIndicatorVisible:NO];
+            if (SAPI_illusts) {
+                weakSelf.illusts = [weakSelf.illusts arrayByAddingObjectsFromArray:SAPI_illusts];
+            } else {
+                NSLog(@"fetchNextRankingLog: failed.");
+            }
+        }];
+
+    }];
+}
+```
+
+每次调用 SAPI_ranking_log: 获取一页数据，一般历史排行有2页*30作品。不过因为SAPI_ranking_log:为同步API的相同原因，这里需要先封装成异步操作 asyncGetRankingLog: 并当执行结束后，追加到weakSelf.illusts。不过illusts会触发 collectionView reloadData，这同样是个UI操作，需要在main queue里更新，不然会出现界面假死或显示不出内容的各种BUG...
+
+细心的你应该发现了，在fetchNextRankingLog:末尾有个goPriorRankingRound:函数，用于在当日历史榜单没有数据可翻或达到最大翻页深度时，将日期移动到上一个周期：
+
+```objective-c
+- (void)goPriorRankingRound
+{
+    NSString *mode = [ModelSettings sharedInstance].mode;
+
+    if ([mode isEqualToString:@"weekly"] || [mode isEqualToString:@"weekly_r18"]) {
+        [[ModelSettings sharedInstance] updateDateIntervalAgo:7*86400.0];
+    } else if ([mode isEqualToString:@"monthly"]) {
+        [[ModelSettings sharedInstance] updateDateIntervalAgo:30*86400.0];
+    } else {
+        [[ModelSettings sharedInstance] updateDateIntervalAgo:86400.0];
+    }
+
+    [ModelSettings sharedInstance].isChanged = NO;
+    self.currentPage = 0;
+}
+```
+
+这个处理比较容易，根据mode如果是weekly则减去7天的秒数，monthly则减去30天的秒数，其他按1天向前回溯，并且重置当前页数使下次获取该日期的第一天数据。
+
+## DatePickerViewController
+
+设置界面，选项越来越多导致iPhone4S上都显示不下了。尽可能精简布局，在Size Class的Any|Any状态下调整好布局和边距，用Auto Layout尝试慢慢调整。必要时可以在横屏隐藏部分控件，这个现在只要在hCompact时去掉installed即可。
+
+![StoryBoard DatePicker]({{ site.url }}/images/201411/dev_RankingLog_02.png)
+
+再来说说输入框输完后隐藏键盘。先将View的Class改为UIControl，这样就可以绑定Touch Down事件到dismissKeyboard: 判断UILabel的isFirstResponder，并调用resignFirstResponder隐藏键盘。然后是两个输入框，为了在按Return/Enter时隐藏键盘，在其 Did End On Exit 上绑定hideKeyboardOnEnterClick:
+
+```objective-c
+- (IBAction)dismissKeyboard:(id)sender
+{
+    if ([self.usernameLabel isFirstResponder])
+        [self.usernameLabel resignFirstResponder];
+    if ([self.passwordLabel isFirstResponder])
+        [self.passwordLabel resignFirstResponder];
+}
+
+- (IBAction)hideKeyboardOnEnterClick:(UITextField *)sender
+{
+    [sender resignFirstResponder];
+}
+```
+
+其他控件绑定的大多是常用的Value Changed，这里就不再详述了。第二部分[Pixiv RankingLog for iOS 开发手记02](http://blog.imaou.com/opensource/2014/11/07/RankingLog_dev_notes2.html)则主要说明和StoryBoard纠缠的经历，欢迎继续查看。
