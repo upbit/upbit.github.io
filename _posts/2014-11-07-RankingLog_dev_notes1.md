@@ -201,6 +201,12 @@ ScrollImageViewController只完成了基本的图片展示，图片缓存和手�
 接着实现异步下载图片到UIImageView的核心功能reloadImage:
 
 ```objective-c
+// 图片下载进度通知
+- (void)onImageProgress:(NSInteger)receivedSize expectedSize:(NSInteger)expectedSize
+{
+    //NSLog(@"download progress: %.2f%%", (float)receivedSize/expectedSize);
+}
+
 // 图片下载完成的回掉函数，供外部感知下载结束
 - (void)onImageDownloaded:(UIImage *)image
 {
@@ -211,9 +217,8 @@ ScrollImageViewController只完成了基本的图片展示，图片缓存和手�
 {
     NSInteger illust_id = [illust_record[@"illust_id"] integerValue];
     NSString *image_url = illust_record[@"image_url"];
-    NSString *title = illust_record[@"title"];
 
-    NSLog(@"download(%@, id=%ld): %@", title, (long)illust_id, image_url);
+    NSLog(@"download(id=%ld): %@", (long)illust_id, image_url);
 
     [self simulatePixivRefererAndUserAgent:illust_id];
 
@@ -221,12 +226,15 @@ ScrollImageViewController只完成了基本的图片展示，图片缓存和手�
     [ApplicationDelegate setNetworkActivityIndicatorVisible:YES];
 
     [self.imageView sd_setImageWithURL:[NSURL URLWithString:image_url]
-                      placeholderImage:nil
+                      placeholderImage:nil options:(SDWebImageHighPriority|SDWebImageRetryFailed)
+                              progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+                                  [weakSelf onImageProgress:receivedSize expectedSize:expectedSize];
+                              }
                              completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
                                  if (error) {
-                                     NSLog(@"download(%@, id=%ld) error: %@", title, (long)illust_id, error);
+                                     NSLog(@"download(id=%ld) error: %@", (long)illust_id, error);
                                  } else {
-                                     NSLog(@"download(%@, id=%ld) completed.", title, (long)illust_id);
+                                     NSLog(@"download(id=%ld) completed.", (long)illust_id);
                                  }
 
                                  dispatch_async(dispatch_get_main_queue(), ^{
