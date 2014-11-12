@@ -7,9 +7,10 @@ comments: true
 share: true
 ---
 
-调试HTTPS请求的都知道，大部分App的HTTPS流量一经Fiddler decode就会失效，这是iOS的证书检查在作怪。于是有了[iOS SSL Kill Switch](https://github.com/iSECPartners/ios-ssl-kill-switch)，可以干掉这个检查并让你顺利追踪HTTPS请求。
+调试过HTTPS请求的都知道，如果直接用Fiddler decode目标流量，大部分App都会拒绝服务器的响应，这是iOS的证书检查在作怪。于是有了[iOS SSL Kill Switch](https://github.com/iSECPartners/ios-ssl-kill-switch)，一个可以干掉这个证书检查并让你顺利追踪HTTPS请求的Cydia插件。
 
-最近手痒升级了iOS8，一则是不确定 SSL Kill Switch 是否能作用于iOS8，另外为了解决Hook全局这个问题，于是自己动手给 SSL Kill Switch 加了个AppList，用于手动选择要Hook的目标程序（比如用户App或天气等系统应用）:
+不过最近手痒升级了iOS8，SSL Kill Switch 作者没明说是否能作用于iOS8，另外这个插件只有一个全局Hook开关，而我往往只想对要追踪的App关闭证书检查。于是自己动手给 SSL Kill Switch
+加了个AppList 来选择要Hook的应用（比如用户App或天气等系统应用），并且部署到iOS8.1上测试了下：
 
 <span style="color:#f00;">**deb下载：**</span>[com.isecpartners.nabla.sslkillswitch_v0.61-iOS_8.1.deb](http://blog.imaou.com/SSLKillSwitch/com.isecpartners.nabla.sslkillswitch_v0.61-iOS_8.1.deb) - (兼容iOS8.1，需要**AppList**)
 
