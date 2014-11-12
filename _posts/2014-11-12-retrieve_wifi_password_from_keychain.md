@@ -11,7 +11,7 @@ share: true
 
 本来以为iOS和Android一样保存在某个plist里(Android的Wifi密码明文保存在/data/misc/wifi/wpa_supplicant.conf)，不过Google了才发现iOS虽然在 /private/var/preferences/SystemConfiguration/com.apple.wifi.plist 里保存了Wifi信息，但密码却是存储在Keychain中的，而且网上没有给出具体的读取办法。
 
-对Keychain Services不熟，只好用 Hopper Disassembler 反汇编WiFiPasswords自己看了。WiFiPasswords代码不多，大部分都是和UITableView相关的内容，排除掉这些很快发现 -[RootViewController refresh] 就是要找的函数：
+对Keychain Services不熟，只好用 Hopper Disassembler 反汇编WiFiPasswords自己看了。代码不多，大部分都是和UITableView相关的内容，排除掉这些很快发现 -[RootViewController refresh] 就是要找的函数：
 
 ![StoryBoard]({{ site.url }}/images/201411/wifi_password_01.png)
 
@@ -34,7 +34,7 @@ share: true
 		...
 ```
 
-这个plist里存储的是Wifi的属性等信息，继续往后看就能发现关键数据：
+这个plist里存储的是Wifi的属性等信息，不过BSSID和信道之类的这里用不上。继续往后看就能发现关键数据：
 
 ![StoryBoard]({{ site.url }}/images/201411/wifi_password_02.png)
 
@@ -42,7 +42,20 @@ share: true
 
 ![StoryBoard]({{ site.url }}/images/201411/wifi_password_03.png)
 
-接着构造另一个NSMutableArray，内容为 [kSecClassGenericPassword, @"AirPort", kCFBooleanTrue, kSecMatchLimitAll]。根据接着调用的 SecItemCopyMatching 可以得知，这个数据是传递给 SecItemCopyMatching 参数query的CFDictionaryRef，其作用是查询 Keychain 中kSecClass=kSecClassGenericPassword，且kSecAttrService为AirPort的属性。
+接着构造另一个NSMutableArray，内容为 [kSecClassGenericPassword, @"AirPort", kCFBooleanTrue, kSecMatchLimitAll]。根据接着调用的 [SecItemCopyMatching](https://developer.apple.com/library/ios/documentation/security/reference/keychainservices/index.html#//apple_ref/c/func/SecItemCopyMatching) 可以得知，这个数据是
+参数1 CFDictionaryRef query 的内容，其作用是查询 Keychain 中 kSecClass = kSecClassGenericPassword，且 kSecAttrService 为 AirPort 的属性。
+
+Apple的 [Keychain Item Class Keys and Values](https://developer.apple.com/library/ios/documentation/security/reference/keychainservices/index.html#//apple_ref/doc/uid/TP30000898-CH4g-SW7) 里有详细介绍这些属性的含义。[kSecClass](https://developer.apple.com/library/ios/documentation/security/reference/keychainservices/index.html#//apple_ref/doc/constant_group/Item_Class_Value_Constants) 还可以是这些值：
+
+```
+CFTypeRef kSecClassGenericPassword ;
+CFTypeRef kSecClassInternetPassword ;
+CFTypeRef kSecClassCertificate ;
+CFTypeRef kSecClassKey ;
+CFTypeRef kSecClassIdentity;
+```
+
+比如网络密码，证书等等。这里枚举Wifi密码只用到了 kSecClassGenericPassword。
 
 参考[StackOverflow中SecItemCopyMatching的用法例子](http://stackoverflow.com/questions/10966969/enumerate-all-keychain-items-in-my-ios-application)，很容易还原出上面的代码。用Theos的nic.pl创建一个tools项目，输入验证用代码：
 
@@ -87,7 +100,7 @@ make后传到iOS里运行，然后顺利的失败了。提示-34018：
 [ERROR] SecItemCopyMatching() failed! error = -34018
 ```
 
-Google发现SecItemCopyMatching返回-34018(errSecMissingEntitlement)是权限问题，
+再次请出Google大神，得知SecItemCopyMatching返回-34018(errSecMissingEntitlement)是权限问题。
 用 ldid -e WiFiPasswords 查看entitlement，发现它比常规程序多了 keychain-access-groups 权限。于是编辑一个 ent.xml 如下：
 
 ```xml
@@ -107,7 +120,7 @@ Google发现SecItemCopyMatching返回-34018(errSecMissingEntitlement)是权限�
 </plist>
 ```
 
-用 ldid -Sent.xml <app> 签上keychain-access-groups后运行，成功输出保存的Wifi信息：
+用 ldid -Sent.xml <app> 签上带keychain-access-groups的签名后运行，成功打印出Wifi信息：
 
 ```
 {
@@ -122,6 +135,8 @@ Google发现SecItemCopyMatching返回-34018(errSecMissingEntitlement)是权限�
     tomb = 0;
 }
 ```
+
+acct就是kSecAttrAccount，这里也就是Wifi名 (而accc是指向 strcut SecAccessControl 的指针，只不过网上搜了很久也没找到这个结构体的定义；不过这里用不到，pass)
 
 注意，ldid签名如果失败，一般是codesign_allocate没有用对导致的。在MacOS上/usr/bin/codesign_allocate并非iOS用的版本，需要手工export一下(注意替换为你的Xcode安装目录)：
 
