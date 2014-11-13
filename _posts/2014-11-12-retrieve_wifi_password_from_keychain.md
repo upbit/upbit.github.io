@@ -109,7 +109,7 @@ make后传到iOS里运行，然后顺利的失败了。提示-34018：
 <plist version="1.0">
 <dict>
 	<key>application-identifier</key>
-	<string>com.zzz.keychain_enum</string>
+	<string>com.zzz.my-idevice-tools</string>
 	<key>get-task-allow</key>
 	<true/>
 	<key>keychain-access-groups</key>
@@ -224,3 +224,5 @@ iPhone: 123456
 ```
 
 剩下就是给控制台程序加个界面了。完整Theos工程代码见：[https://github.com/upbit/My-iDevice-Tools/blob/master/wifi_passwords.mm](https://github.com/upbit/My-iDevice-Tools/blob/master/wifi_passwords.mm)
+
+初次接触Keychain，如果文中有错误之处，欢迎拍砖:)
