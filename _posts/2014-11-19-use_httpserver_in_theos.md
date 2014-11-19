@@ -285,4 +285,33 @@ httpResponseForMethod: 里，使用NSFileManager访问外部文件。不过返�
 2. UIApplicationDidEnterBackgroundNotification:  进入后台时停止 CommandServer (后台运行好像要换GCDWebServer)
 3. UIApplicationWillEnterForegroundNotification: 从后台唤醒时，重新启动 CommandServer
 
+## Link with CocoaHTTPServer
+
+Makefile如下：
+
+~~~makefile
+ARCHS := armv7 arm64
+
+include theos/makefiles/common.mk
+
+THEOS_PACKAGE_DIR=./debs
+
+TWEAK_NAME = commandServer
+testHttpServer_FILES = Tweak.xm $(wildcard CommandServer/*.m)
+testHttpServer_CFLAGS += -I./
+testHttpServer_LDFLAGS += -L./ -lCocoaHTTPServer -lxml2
+testHttpServer_FRAMEWORKS = UIKit CFNetwork Security CoreGraphics
+
+include $(THEOS_MAKE_PATH)/tweak.mk
+
+lib::
+	rm -f libCocoaHTTPServer.a
+	cd CocoaHTTPServer/; ./build.sh
+
+after-clean::
+	rm -f $(THEOS_PACKAGE_DIR)/*.deb
+~~~
+
+链接CocoaHTTPServer需要libCocoaHTTPServer.a和libxml2.a，并且用到 UIKit CFNetwork Security CoreGraphics 四个FRAMEWORK。
+
 之后make package，用 cinject 加载dylib后，就可以通过http://<IP>:8080访问到index.html了
