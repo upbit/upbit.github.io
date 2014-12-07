@@ -65,7 +65,7 @@ configure: error:
 ~~~sh
 $ python-config --prefix
 /usr/local/Cellar/python/2.7.8_2/Frameworks/Python.framework/Versions/2.7
-$ ./autogen.sh LDFLAGS="-L/usr/local/Cellar/python/2.7.8_2/Frameworks/Python.framework/Versions/2.7/lib/"
+$ ./configure LDFLAGS="-L/usr/local/Cellar/python/2.7.8_2/Frameworks/Python.framework/Versions/2.7/lib/"
 ~~~
 
 然后顺利`make && make install`到/usr/local/include/plist/和/usr/local/lib/
@@ -83,7 +83,7 @@ $ cp plist.p* /usr/local/include/plist/cython/
 ~~~sh
 $ cd ../../
 $ cd libimobiledevice/
-$ ./configure LDFLAGS="-L/usr/local/Cellar/python/2.7.8_2/Frameworks/Python.framework/Versions/2.7/lib/"
+$ ./autogen.sh LDFLAGS="-L/usr/local/Cellar/python/2.7.8_2/Frameworks/Python.framework/Versions/2.7/lib/"
 ~~~
 
 `make && make install`后，python-imobiledevice就可用了。

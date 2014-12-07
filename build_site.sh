@@ -8,6 +8,8 @@ jekyll build
 # gen archive/ and rss.xml
 cp -Rvf _site/archive ./
 
+exit
+
 # compress CSS
 CSS_NAME_LIST="main normalize screen syntax"
 
