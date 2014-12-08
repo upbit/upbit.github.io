@@ -45,7 +45,7 @@ def lockdown_get_service_client(service_class):
 	afc = AfcClient(dev, svrport)
 ~~~
 
-其中`ld.start_service(AfcClient)`虽然传递的是Class，实际获取的是[cython/afc.pxi](https://github.com/libimobiledevice/libimobiledevice/blob/master/cython/afc.pxi#L171)中的 AfcClient.__service_name__，即 com.apple.afc。此时就可以AfcClient与AFC服务进行交互了。
+其中`ld.start_service(AfcClient)`虽然传递的是Class，实际获取的是[cython/afc.pxi](https://github.com/libimobiledevice/libimobiledevice/blob/master/cython/afc.pxi#L171)中的`AfcClient.__service_name__`，即 com.apple.afc。此时就可以AfcClient与AFC服务进行交互了。
 
 ## 使用AfcClient上传IPA文件
 
@@ -101,4 +101,16 @@ def instproxy_install_file(filename):
 
 不过注意，目前libplist对中文支持好像有问题，导出System列表时居然引起Python core dump。反正不是很常用，不管了...
 
-<span style="color:#f00;">**完整源码**</span>可以在GitHub找到：[afc_and_instproxy_upgrade_ipa.py](https://github.com/upbit/python-imobiledevice_demo/blob/master/afc_and_instproxy_upgrade_ipa.py)
+<span style="color:#f00;">**完整源码**</span>可以在GitHub找到：[`afc_and_instproxy_upgrade_ipa.py`](https://github.com/upbit/python-imobiledevice_demo/blob/master/afc_and_instproxy_upgrade_ipa.py)
+
+## 关于Afc2Client
+
+[AFC (Apple File Conduit)](http://theiphonewiki.com/wiki/AFC)是苹果自带的文件服务，其读写权限被限制在/private/var/mobile/Media下。而[AFC2 (Apple File Conduit"2")](https://cydia.saurik.com/info/com.saurik.afc2d/)则是由Saurik编写的能够让已越狱机器，访问整个root文件系统(所以Afc2Client的根目录才是/)。
+
+启动方法，在Cydia里搜索 Apple File Conduit"2" 并安装，然后将 AfcClient 换成 Afc<span style="color:#f00;">**2**</span>Client：
+
+~~~python
+	afc2 = lockdown_get_service_client(Afc2Client)
+~~~
+
+ps: afc2确实是利器，之前成功用它删掉LaunchDaemons下的plist，救活因安装虚拟内存白苹果的iPad。附带一个afc的shell[`afc_shell.py`](https://github.com/upbit/python-imobiledevice_demo/blob/master/afc_shell.py)，可以像ifuse一样上传下载和浏览机器的内容。
