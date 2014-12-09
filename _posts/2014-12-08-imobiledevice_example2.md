@@ -9,7 +9,7 @@ share: true
 
 为了加深对libimobiledevice的理解，这两天用Python重写了几个核心服务的调用例子，放在了[GitHub/python-imobiledevice_demo](https://github.com/upbit/python-imobiledevice_demo)。这是教程的第二篇，通过DebugServerClient从命令行运行和调试程序。
 
-## 环境准备:cython-dev
+## 环境准备:cython
 
 libimobiledevice目前的Cython binding没有[debugserver.pxi](https://github.com/upbit/libimobiledevice/blob/cython-dev/cython/debugserver.pxi)，可以使用我修改的[libimobiledevice/cython-dev这个分支](https://github.com/upbit/libimobiledevice/tree/cython-dev)来重新编译cython binding，增加DebugServerClient：
 
@@ -17,7 +17,7 @@ libimobiledevice目前的Cython binding没有[debugserver.pxi](https://github.co
 $ git clone https://github.com/upbit/libimobiledevice.git
 $ cd libimobiledevice/
 $ git fetch
-$ git checkout cython-dev
+$ git checkout cython
 $ ./autogen.sh
 $ make
 $ cd cython/
