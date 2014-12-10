@@ -11,7 +11,11 @@ share: true
 
 ## 环境准备:cython
 
-libimobiledevice目前的Cython binding没有[debugserver.pxi](https://github.com/upbit/libimobiledevice/blob/cython-dev/cython/debugserver.pxi)，可以使用我修改的[libimobiledevice/cython-dev这个分支](https://github.com/upbit/libimobiledevice/tree/cython-dev)来重新编译cython binding，增加DebugServerClient：
+2014-12-10日更新：<span style="color:#f00">debugserver.pxi已经提交并[merge](https://github.com/libimobiledevice/libimobiledevice/pull/159)到libimobiledevice:master了，现在只用clone最新的代码重新编译，就可以使用DebugServerClient</span>。另外赞一下FunkyM，相当认真的review了我每次提交的代码，不过能够给libimobiledevice贡献代码确实很兴奋。
+
+---
+
+libimobiledevice目前的Cython binding没有[debugserver.pxi](https://github.com/upbit/libimobiledevice/blob/cython/cython/debugserver.pxi)，可以使用我修改的[libimobiledevice/cython这个分支](https://github.com/upbit/libimobiledevice/tree/cython)来重新编译cython binding，增加DebugServerClient：
 
 ~~~sh
 $ git clone https://github.com/upbit/libimobiledevice.git
@@ -81,7 +85,7 @@ debugserver.set_argv() 就是传递启动参数了，远程调试端口也可以
         break
 
       # 获取返回并发送reply:OK，继续等待DebugServer的回应
-      result, loop_response = debugserver.handle_response(loop_response, reply=True)
+      result, loop_response = debugserver_client_handle_response(loop_response, reply=True)
       if result:
         sys.stdout.write(result)
 
@@ -91,6 +95,13 @@ debugserver.set_argv() 就是传递启动参数了，远程调试端口也可以
       print "Exiting..."
       break
 ~~~
+
+---
+
+补充使用DebugServerClient的两个限制：
+
+1. 需要mount开发者工具 `ideviceimagemounter DeveloperDiskImage.dmg` 到 /Developer 下，不然会提示 `imobiledevice.LockdownError: Invalid service (-17)`
+2. 启动或调试的程序，必须在entitlements.plist里带有"get-task-allow = True"，不然应用会闪退并返回 `Efailed to get the task for process XXX`
 
 ## 通过InstallationProxyClient获取应用的PATH
 
