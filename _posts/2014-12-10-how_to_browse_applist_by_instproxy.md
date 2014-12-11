@@ -1,6 +1,6 @@
 ---
 layout: post
-title: python-imobiledevice教程03 - 通过InstallationProxyClient获取iOS中安装的应用信息
+title: python-imobiledevice教程03 - 通过InstallationProxyClient获取iOS中安装的应用
 description: "How to browse applist by InstallationProxyClient"
 category: opensource
 comments: true
@@ -99,6 +99,6 @@ UTExportedTypeDeclarations
 UTImportedTypeDeclarations
 ~~~
 
-比如 CFBundleName(应用名) 以及 CFBundleVersion(版本号)。
+比如 CFBundleName(应用名) 以及 CFBundleVersion(版本号)，加上这两个可以轻松实现类似 `ideviceinstall -l` 的列举app功能。
 
 <span style="color:#f00;">**完整源码**</span>可以在GitHub找到：[`instproxy_browse_installed_app.py`](https://github.com/upbit/python-imobiledevice_demo/blob/master/instproxy_browse_installed_app.py)
