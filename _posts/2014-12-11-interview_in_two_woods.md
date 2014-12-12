@@ -9,7 +9,7 @@ share: true
 
 约的3:00pm面试结果提前到了，果断坐楼下刷秘密。不过附近的秘密居然都是爆CB离职的，索然无味... 然后顺手Google了下对方的电话，bingo! 邮箱和电话等信息都有了 [wumii.org](http://whois.domaintools.com/wumii.org)
 
-刷到3点多开始面试，三轮下来别说说了些啥了，连前两个面试官的长相都快记不清了 @_@ 出来时已经19:30，那个月明星稀啊... 呃，好吧，楼太高看不到月亮；今晚也没有星星 :(
+刷到3点多开始面试，三轮下来别说说了些啥，连前两个面试官的长相都快记不清了 @_@ 出来时已经19:30，那个月明星稀啊... 呃，好吧，楼太高看不到月亮；今晚也没有星星 :(
 
 唯一还记得的就是和CEO聊的时候提到的 “**分支预测器（Branch Predictor）**”，回来查了下果然是我记错了。估计是把stackoverflow上那个关于likely/unlikely的帖子搞混了，虽然同样是为了增加效率，但这个并不是分支预测：[How much do __builtin_expect(), likely(), and unlikely() improve performance?](http://blog.man7.org/2012/10/how-much-do-builtinexpect-likely-and.html)
 
