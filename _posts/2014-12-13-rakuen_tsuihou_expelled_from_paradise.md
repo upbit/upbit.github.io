@@ -13,4 +13,10 @@ share: true
 
 ![illust_id_47434961]({{ site.url }}/images/201412/illust_id_47434961.jpg)
 
-放张swd3e2大大的新作[illust_id_47434961.jpg](http://www.pixiv.net/member_illust.php?mode=medium&illust_id=47434961)，看着这远去的火箭，不禁思绪万千。
+放张swd3e2大大的新作[illust_id_47434961.jpg](http://www.pixiv.net/member_illust.php?mode=medium&illust_id=47434961)，看着这远去的火箭，不禁思绪万千:
+
+~~~
+It's so far away
+描きたいよ
+終わりのない物語の続きを
+~~~
