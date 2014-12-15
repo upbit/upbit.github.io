@@ -7,11 +7,8 @@ title: About me
 
 - Email：rmusique@gmail.com
 
----
-
 # 个人信息
 
-- 硕士/华中科技大学计算机系 信息安全
 - 工作年限：3.5年
 - GitHub: [https://github.com/upbit](https://github.com/upbit)
 - 技术博客：[http://blog.imaou.com](http://blog.imaou.com)
@@ -47,8 +44,9 @@ title: About me
 - [Pixiv-RankingLog](https://github.com/upbit/Pixiv-RankingLog) : 学习Xcode开发时写的Pixiv过去排行扫图应用。
 
 ## 技术文章
-看雪ID: [木桩](http://bbs.pediy.com/member.php?u=192350) （精华帖: 7）
+看雪ID: [木桩](http://bbs.pediy.com/member.php?u=192350) （精华帖: 8）
 
+- [【原创】Pangu8越狱中所用 /usr/libexec/neagent 漏洞原理分析](http://bbs.pediy.com/showthread.php?t=195495)
 - [【原创】GSM Sniffing入门（硬件篇1-2楼，软件篇6楼）](http://bbs.pediy.com/showthread.php?t=182574)
 - [【原创】SMM Rootkit初步 - 读写SMRAM（带你迈入CPU级Rootkit之门）](http://bbs.pediy.com/showthread.php?t=84835)
 
@@ -60,4 +58,3 @@ title: About me
 - 反汇编调试：IDA/gdb/lldb
 - 后台开发：Linux/MySQL/读扩散/容灾/SSD
 - 脚本语言：Python/Bash
-- 云平台：GAE/AWS
