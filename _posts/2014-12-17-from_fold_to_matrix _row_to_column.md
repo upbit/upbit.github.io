@@ -10,10 +10,10 @@ share: true
 晚上面试遇到个很nice的面试官，聊的很尽兴。其中要求用类似 erlang 的语法，实现无循环的fold操作。当时可是想了好久才写出来的，看看还是Wiki的解释清晰明了。
 
 ### [left fold](http://zvon.org/other/haskell/Outputprelude/foldl_f.html)
-![left fold]({{ site.url }}/images/201412/Left-fold-transformation.jpg)
+![left fold]({{ site.url }}/images/201412/left_fold_transformation.png)
 
 ### [right fold](http://zvon.org/other/haskell/Outputprelude/foldr_f.html)
-![right fold]({{ site.url }}/images/201412/Right-fold-transformation.jpg)
+![right fold]({{ site.url }}/images/201412/right_fold_transformation.png)
 
 fold对应Python的写法为：
 
