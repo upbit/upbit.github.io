@@ -64,3 +64,49 @@ foldr: reduce(lambda x,y: func(y,x), reversed(list), initval)
 ~~~
 
 大致流程就是这样，等有空了写出来验证下。
+
+补充Python版本的代码：
+
+~~~python
+result = []
+head = []
+tail = []
+
+def _split(init, ele):
+  global head
+  global tail
+
+  # 将ele内容分割到 head,tail 内
+  head.append(ele[0])
+  if len(ele) > 1:
+    tail.append(ele[1:])
+
+def wrap_trans(data):
+  if len(data) <= 0:
+    return
+
+  global head
+  global tail
+
+  # 分割data的每个元素
+  head = []
+  tail = []
+  reduce(_split, data, 0)
+
+  # head结果加入返回数组，tail继续递归处理
+  result.append(head)
+  wrap(tail)
+
+def main():
+  data = [
+    [1, 5, 7, 9],
+    [2, 6],
+    [3, 8],
+    [4]
+  ]
+
+  wrap_trans(data)
+  print result        # [[1, 2, 3, 4], [5, 6, 8], [7], [9]]
+~~~
+
+写得有点绕，而且两层递归嵌套好别扭的感觉...
