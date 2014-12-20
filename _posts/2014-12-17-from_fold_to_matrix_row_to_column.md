@@ -5,6 +5,7 @@ description: "From foldl/foldr to Matrix Rows to Columns"
 category: misc
 comments: true
 share: true
+redirect_from: /misc/2014/12/17/from_fold_to_matrix%20_row_to_column.html
 ---
 
 晚上面试遇到个很nice的面试官，聊的很尽兴。其中要求用类似 erlang 的语法，实现无循环的fold操作。当时可是想了好久才写出来的，看看还是Wiki的解释清晰明了。
