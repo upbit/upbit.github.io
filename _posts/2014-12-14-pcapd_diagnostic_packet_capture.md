@@ -39,5 +39,5 @@ $ tcpdump -i rvi0 -ntXs0
 
 # 删除映射
 $ rvictl -x 622b53c647548234ddcef0ee3abee616005051ed
-Stopping device 622b1ba0a73d9b9c3121f756f63f09c639564f98 [SUCCEEDED]
+Stopping device 622b53c647548234ddcef0ee3abee616005051ed [SUCCEEDED]
 ~~~
