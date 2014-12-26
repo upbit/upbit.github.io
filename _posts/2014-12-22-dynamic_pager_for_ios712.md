@@ -21,7 +21,7 @@ share: true
 **方法如下：**
 
 1. 用mobile用户登如iOS设备: `ssh mobile@<IP>`；
-2. su到root创建swapfile0，并chown为mobile: `cd /var/vm; touch swapfile0; chown mobile swapfile0`
+2. su到root，将/private/var/vm目录chown为mobile: `cd /var; chown mobile vm/`
 3. 退回到mobile，以后台方式运行dynamic_pager: `dynamic_pager -S 536870912 -H 1024 -L 536872000 -P 1`；
 
 dynamic_pager参数说明：
