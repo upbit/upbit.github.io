@@ -137,16 +137,6 @@ syslog里的上报内容：
 
 用cycript调用 [MTAHelper getEnv] 和 [MTAHelper getUser] 可以很轻松的获取MTAEnv和MTAUser的实例，他们的初始化则在 [MTAHelper init] 中。还原初始化的伪代码如下：
 
-r0 = ;
-r6 = @selector(systemVersion);
-r0 = [r0 systemVersion];
-if ([r0 compare:@"6.0" options:0x40] != 0xffffffff) {
-  r0 = *objc_cls_ref_UIDevice;
-  r0 = [r0 currentDevice];
-  r2 = [r0 identifierForVendor];
-  [r11 setIfv:r2];
-}
-
 ~~~objective-c
 - (id)init {
   self = [super init];
@@ -180,4 +170,4 @@ if ([r0 compare:@"6.0" options:0x40] != 0xffffffff) {
 }
 ~~~
 
-从init中可以看到，MTAEnv里收集的关键信息为 ifv、devicename、deviceid 和 mccmnc，另外MTAUser中还有个uid需要留意。如果真要防止被跟踪，可以hook MTAEnv/MTAUser里的对应getter函数，返回个随机值什么的糊弄下MTA:P
+从init中可以看到，MTAEnv里收集的关键信息为 ifv、devicename、deviceid 和 mccmnc，另外MTAUser中还有个uid需要留意。如果真要防止被跟踪，可以hook MTAEnv/MTAUser里的对应getter函数，返回个随机值什么的糊弄下MTA :P
