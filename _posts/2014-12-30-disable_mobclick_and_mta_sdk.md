@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 关于iOS第三方SDK的反跟踪与欺骗 - MobClick/MTA
+title: 关于iOS第三方SDK的反跟踪 - MobClick/MTA
 description: "Disable 3rd SDK (MobClick/MTA) tracking"
 category: theos
 comments: true
@@ -86,4 +86,4 @@ share: true
 
 `[MobClickSession startWithAppkey:reportPolicy:channelId:]` 是最内层的调用，所以替换掉这里的 appkey 就可以达到目的了。
 
-代码已经上传到GitHub: [TrackingBlocker.xm](https://github.com/upbit/iOS_3rdTrackingBlocker/blob/master/TrackingBlocker.xm)，或者直接下载deb包进行安装：[com.zzz.3rdtrackingblocker_1.0_iphoneos-arm.deb](http://blog.imaou.com/uploads/com.zzz.3rdtrackingblocker_1.0_iphoneos-arm.deb)
+代码已经上传到GitHub: [TrackingBlocker.xm](https://github.com/upbit/iOS_3rdTrackingBlocker/blob/master/TrackingBlocker.xm)，或者直接下载deb包进行安装：[`com.zzz.3rdtrackingblocker_1.0_iphoneos-arm.deb`](http://blog.imaou.com/uploads/com.zzz.3rdtrackingblocker_1.0_iphoneos-arm.deb)
