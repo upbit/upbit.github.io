@@ -7,7 +7,7 @@ comments: true
 share: true
 ---
 
-最近需要修改iOS keychain中kSecClassGenericPassword的数据，不过没有找到方便的工具，于是抽时间自己写了一个。工具可以批量查询/删除，或者更新kSecClassGenericPassword中的单条v_Data记录，方便进行调试。[keychain_cat的源码](https://github.com/upbit/My-iDevice-Tools/blob/master/keychain_cat.mm) 放在GitHub上。
+最近需要修改iOS keychain中kSecClassGenericPassword的数据，不过没有找到方便的工具，于是抽时间自己写了一个。工具可以批量查询/删除，或者更新kSecClassGenericPassword中的单条`v_Data`记录，方便进行调试。[keychain_cat的源码](https://github.com/upbit/My-iDevice-Tools/blob/master/keychain_cat.mm) 放在GitHub上。
 
 ---------------
 
