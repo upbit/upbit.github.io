@@ -83,3 +83,57 @@ lists:filter() 的解释是在[这里](http://blog.csdn.net/zhangjingyangguang/a
 3> sort1:qsort(L).
 [1,2,3,4,5,6]
 ~~~
+
+### 矩阵转置
+
+之前面试的一道题，用这两天学的erlang语法实现了一遍。不过也许是if语句用的不熟，判断list是否为[]都改成 `case length(L)>0 of` 了...
+
+~~~erlang
+-module(mt).
+
+%% ====================================================================
+%% API functions
+%% ====================================================================
+-export([transpose/1]).
+
+%% 矩阵转置
+transpose(L) -> transpose(L, [], [], []).
+
+%% ====================================================================
+%% Internal functions
+%% ====================================================================
+
+transpose([], Lhead, Ltail, Lret) ->
+  case length(Ltail) of
+    % Ltail == [] 时，说明处理完毕，附加上最后的Lhead并返回Lret中的结果
+    0 -> lists:append(Lret, [Lhead]);
+    % Ltail还有数据，继续递归。这里将之前Lhead组成一个元素，加入Lret返回中
+    _ -> transpose(Ltail, [], [], lists:append(Lret, [Lhead]))
+  end;
+
+transpose([H|T], Lhead, Ltail, Lret) ->
+  case length(H) > 0 of
+    true ->
+      % 当H是list时，TT有可能是[]，此时append会导致多余的[]加入Ltail
+      [TH|TT] = H,
+      case length(TT) > 0 of
+        % TT非[]，将TT加入Ltail等待后面递归
+        true -> transpose(T, lists:append(Lhead, [TH]), lists:append(Ltail, [TT]), Lret);
+        % TT==[]，此时直接丢弃TT的内容
+        false -> transpose(T, lists:append(Lhead, [TH]), Ltail, Lret)
+      end;
+    % H不是list，直接附加到Lhead后面
+    false -> transpose(T, lists:append(Lhead, [H]), Ltail, Lret)
+  end.
+~~~
+
+运行结果：
+
+~~~erlang
+1> M = [[1,5,7,9],[2,6],[3,8],[4]].
+[[1,5,7,9],[2,6],[3,8],[4]]
+2> mt:transpose(M).
+[[1,2,3,4],[5,6,8],[7],"\t"]      % "\t"是9，不知道怎么才能输出数值...
+~~~
+
+感觉对 TT 为[]的处理不太好，而且肯定不是最简单的写法。总之是实现了，后面等看懂了map等函数，再来想想二面里提到的方法。

@@ -96,7 +96,7 @@ def wrap_trans(data):
 
   # head结果加入返回数组，tail继续递归处理
   result.append(head)
-  wrap(tail)
+  wrap_trans(tail)
 
 def main():
   data = [
@@ -110,4 +110,4 @@ def main():
   print result        # [[1, 2, 3, 4], [5, 6, 8], [7], [9]]
 ~~~
 
-写得有点绕，而且两层递归嵌套好别扭的感觉...
+写得有点绕，而且两层递归嵌套好别扭的感觉... [2015-01-07] [更新erlang版本的转置程序](http://blog.imaou.com/study/2015/01/06/start_learning_erlang.html)
