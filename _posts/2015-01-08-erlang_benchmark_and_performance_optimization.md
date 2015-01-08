@@ -112,19 +112,19 @@ ok
 既然是库函数消耗性能，继续尝试将`lists:append()`换成`++`的方式：
 
 ~~~erlang
-transpose1([], Lhead, Ltail, Lret) ->
+transpose2([], Lhead, Ltail, Lret) ->
   if
-    Ltail =/= [] -> transpose1(Ltail, [], [], Lret ++ [Lhead]);
+    Ltail =/= [] -> transpose2(Ltail, [], [], Lret ++ [Lhead]);
     Ltail == [] -> Lret ++ [Lhead]
   end;
-transpose1([H|T], Lhead, Ltail, Lret) ->
+transpose2([H|T], Lhead, Ltail, Lret) ->
   if
     H =/= [] -> [TH|TT] = H,
     if
-      TT =/= [] -> transpose1(T, Lhead ++ [TH], Ltail ++ [TT], Lret);
-      TT == [] -> transpose1(T, Lhead ++ [TH], Ltail, Lret)
+      TT =/= [] -> transpose2(T, Lhead ++ [TH], Ltail ++ [TT], Lret);
+      TT == [] -> transpose2(T, Lhead ++ [TH], Ltail, Lret)
     end;
-    H == [] -> transpose1(T, Lhead, Ltail, Lret)
+    H == [] -> transpose2(T, Lhead, Ltail, Lret)
   end.
 ~~~
 
@@ -207,7 +207,7 @@ transpose3([], Lhead, Ltail, Lret) ->
   %io:format("Head:~p, Tail:~p~n", [Lhead, Ltail]),
   if
     Ltail =/= [] -> transpose3(lists:reverse(Ltail), [], [], [lists:reverse(Lhead)|Lret]);
-    Ltail == [] -> lists:reverse([Lhead|Lret])
+    Ltail == [] -> lists:reverse([lists:reverse(Lhead)|Lret])
   end;
 transpose3([H|T], Lhead, Ltail, Lret) ->
   %io:format("[~p | ~p]: ~p~n", [H, T, Lret]),
@@ -243,4 +243,14 @@ ok
 3. `lists:append()`替换成`++`，`lists:map()`改用自己实现，性能上几乎没有太多提升，可以直接使用；
 4. 同样的判断条件下，`case`比`if`的性能略差，能用if时还是用if吧。
 
-如果还有更高效的思路，欢迎讨论:)
+最后补个Python的一行代码实现：
+
+~~~python
+>>> transpose = lambda M: map(list, zip(*M))
+
+# 测试输出
+>>> transpose([[1,1,1], [2,2,2], [3,3,3]])
+[[1, 2, 3], [1, 2, 3], [1, 2, 3]]
+~~~
+
+看了下erlang:unzip()其实也是类似`[H|T]`的方法，只不过unzip/1和unzip/3都不符合这里的要求。如果还有更高效的思路，欢迎讨论:)
