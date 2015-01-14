@@ -254,3 +254,28 @@ ok
 ~~~
 
 看了下erlang:unzip()其实也是类似`[H|T]`的方法，只不过unzip/1和unzip/3都不符合这里的要求。如果还有更高效的思路，欢迎讨论:)
+
+### 2015-01-12更新
+
+看了list推导的语法，写了个一行的版本：
+
+~~~erlang
+transpose4([]) -> [];
+transpose4(L) ->
+  [ [ Head || [Head|_] <- L ]  | transpose4([ Tail || [_|Tail] <- L, Tail =/= [] ])].
+~~~
+
+`[ Head || [Head|_] <- L ]` 取头生成list，然后Tail部分生成list继续递归。只不过Tail这里还要除掉[]，不然 非对阵矩阵会有多余[]的附加在结果中。
+
+~~~erlang
+14> mt:benchmark(1000000).
+Test 1000000 took 1.184566 seconds
+Throughput=844191.0370549214 per sec
+ok
+15> mt:benchmark(1000000).
+Test 1000000 took 1.239197 seconds
+Throughput=806974.1937722573 per sec
+ok
+~~~
+
+比 transpose3() 的方法性能略差，不过更易懂一些。
