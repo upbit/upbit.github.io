@@ -2,9 +2,10 @@
 layout: post
 title: Aldnoah Zero 第二季开坑
 description: "Aldnoah Zero 2nd start"
-category: erlang
+category: misc
 comments: true
 share: true
+redirect_from: /erlang/2015/01/20/aldnoah_zero_2nd_start.html
 ---
 
 ![Aldnoah Zero 2]({{ site.url }}/images/201501/aldnoah_zero_2_01.png)
