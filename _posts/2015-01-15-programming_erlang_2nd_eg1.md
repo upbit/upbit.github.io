@@ -11,7 +11,7 @@ share: true
 
 ## CH4
 
-(2) 实现自己的 my_tuple_to_list(): 要点是用 element() 访问tuple，用lists:seq()生成列表推导的索引源；
+(2) 实现自己的 `my_tuple_to_list()`: 要点是用 element() 访问tuple，用lists:seq()生成列表推导的索引源；
 (5/6) 实现even/1, odd/1, filter/2；
 (7) 用2种方法实现split()，将Evens/Odds分堆；
 
@@ -59,7 +59,7 @@ split_acc([H|T], Evens, Odds) ->
 
 ## CH5
 
-(2) 实现 map_search_pred()，返回第一个使Pred()==true的 {Key, Value}
+(2) 实现 `map_search_pred()`，返回第一个使Pred()==true的 {Key, Value}
 
 最开始以为很容易，不过看过作者Joe的帖子 [Some Performance Measurements On Maps](http://joearms.github.io/2015/01/08/Some_Performance-Measurements-On-Maps.html) 后发现，这样实现在list很大时性能很差(需要全部遍历一遍)。看完学到种新的办法，throw结果然后在外面catch，这样就可以避免遍历全部list了，对比见 test()：
 
