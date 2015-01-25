@@ -65,7 +65,7 @@ get_module_lists() ->
 
 get_module_exports(Mod) ->
 	% 如果函数参数个数不确定，可以换成：erlang:apply(Mod, module_info, ['exports'])
-	case catch [ {{Mod,F,A}, 0} || {F,A} <- Mod:module_info('exports'), F=/=module_info ] of
+	case catch [ { {Mod,F,A}, 0 } || {F,A} <- Mod:module_info('exports'), F=/=module_info ] of
 		{'EXIT', _} -> [];
 		X -> X
 	end.
@@ -80,11 +80,11 @@ init_ets() ->
 % 以match方式输出ETS内容
 match_module_exports(Mod) ->
 	% lists:flatten(io_lib:format("~p~p", [atom1, atom2])) 用于将两个atom拼接为字符串
-	[ lists:flatten(io_lib:format("~p/~p", [F, A])) || [F,A] <- ets:match(?ETS_TABLE_NAME, {{Mod,'$1','$2'},'_'})].
+	[ lists:flatten(io_lib:format("~p/~p", [F, A])) || [F,A] <- ets:match(?ETS_TABLE_NAME, { {Mod,'$1','$2'}, '_' })].
 
 % 更快的select方式。遇到 parse_transform 错误时，注意引用ms_transform.hrl
 select_module_exports(Mod) ->
-	Filter = ets:fun2ms(fun({{M,F,A},_}) when M=:=Mod -> [F,A] end),
+	Filter = ets:fun2ms(fun({ {M,F,A}, _ }) when M=:=Mod -> [F,A] end),
 	Result = ets:select(?ETS_TABLE_NAME, Filter),
 	[ lists:flatten(io_lib:format("~p/~p", [F, A])) || [F,A] <- Result ].
 ~~~
