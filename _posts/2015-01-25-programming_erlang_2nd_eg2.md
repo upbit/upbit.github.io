@@ -99,6 +99,6 @@ select_module_exports(Mod) ->
 
 **一是当`Mod:module_info/1`函数不存在时，不用catch怎么处理？**听Adam说server代码里除了HTTPServer最外层会框一层try/catch，基本不会使用异常处理（因为和erlang的"任其崩溃"原则相违背？感觉像以前听人讲goto）
 
-[2015-01-26补充] 今天看代码发现种写法，可以分辨模块中某个函数是否有导出(不能是module_info)：`[ Module:foobar() || {Module, _} <- Config, lists:member({foobar, 0}, Module:module_info(exports))]`。使用lists:member/2过滤没有foobar函数的模块，最后用生成的列表调用foobar()初始化。这个写法果然很精妙！
+[2015-01-26补充] 今天看代码发现种写法，可以分辨模块中某个函数是否有导出(不能是`module_info`)：`[ Module:foobar() || {Module, _} <- ModuleLists, lists:member({foobar, 0}, Module:module_info(exports))]`。使用lists:member/2过滤没有foobar函数的模块，最后用生成的列表调用foobar()初始化。这个写法果然很精妙！
 
 **二是如何确保ETS表不丢失？**Adam提供的方案是由sup进程持有ETS，worker只通过名字来访问它。可能还没看erlang的进程模型/OTP，还是觉得对Erlang的编程思路不太理解。为什么不能是无中心的(抢占式模型)？worker进程发现没有ETS就创建新的，然后再worker死亡时交给下一个worker持有，这样就不会出现因sup这样单点进程挂掉而引起的灾难了。
