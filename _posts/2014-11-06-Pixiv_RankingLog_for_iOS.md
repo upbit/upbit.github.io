@@ -20,7 +20,7 @@ redirect_from: /opensource/2014/10/31/RankingLog_for_pixiv_v1.html
 
 “过去排行”确实是查看漏网作品的利器，只不过iOS客户端上此功能极为反人类，只有2页数据不说每每点回去修改日期，所有设置项就都重置了。于是萌生了自己写通过“过去排行”扫图的App的想法，App开源在[GitHub/Pixiv-RankingLog](https://github.com/upbit/Pixiv-RankingLog)。
 
-<span style="color:#f00;">**IPA下载：**</span>[RankingLog_v1.2.ipa](http://blog.imaou.com/RankingLog/RankingLog_v1.2.ipa) - (通用版，支持iOS6.1~iOS8.1，需越狱)
+<span style="color:#f00;">**IPA下载：**</span>[RankingLog_v1.3.ipa](http://blog.imaou.com/RankingLog/RankingLog_v1.3.ipa) - (通用版，支持iOS6.1~iOS8.1，需越狱)
 
 ## 使用说明:
 
