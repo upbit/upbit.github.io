@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 使用cowboy和relx搭建Web服务01 - 从头搭建框架
+title: 使用cowboy和relx搭建Web服务01 - 框架搭建
 description: "Build Web service with cowboy and relx 01"
 category: erlang
 comments: true
@@ -9,9 +9,9 @@ share: true
 
 好久没更新blog了，最主要的还是因为懒... 不过每次看到Chrome收藏夹里[坚强2002的Erlang分类](http://www.cnblogs.com/me-sa/category/304370.html)，都为自己还没写上1/10的章节而汗颜。于是又把之前学习cowboy的内容给整理了下。
 
-# cowboy
+## cowboy
 
-cowboy是个很流行的webserver，并且性能比老牌的mochiweb[要强不少](http://www.ostinelli.net/a-comparison-between-misultin-mochiweb-cowboy-nodejs-and-tornadoweb/)。不过照着官方User Guide写了个静态文件的例子，居然无法正确访问。。。估计是部分代码没有更新，建议参考[examples](https://github.com/ninenines/cowboy/tree/master/examples)直接获取例子。
+cowboy是个很流行的webserver，并且性能比老牌的mochiweb[要强不少](http://www.ostinelli.net/a-comparison-between-misultin-mochiweb-cowboy-nodejs-and-tornadoweb/)。不过照着官方User Guide写了个静态文件的例子，居然无法正确访问。。。估计是部分文档没有更新，建议参考[examples](https://github.com/ninenines/cowboy/tree/master/examples)直接获取例子。
 
 ## erlang.mk
 
@@ -39,7 +39,7 @@ Cloning into '.erlang.mk.build'...
 
 ## Makefile
 
-下面修改Makefile，修改成下面这样（注意最下面4行要用TAB而不是空格）：
+接着修改Makefile，修改成下面这样（注意最下面4行要用TAB而不是空格）：
 
 ~~~makefile
 PROJECT = zserver
@@ -160,7 +160,7 @@ priv/
 
 ## custom handler
 
-除了提供静态文件的访问，当然最重要的是动态处理请求。在Dispatch中加入`{"/main", main_handler, []}`，将"/main"映射到main_handler.erl中继续处理。接着像例子中一样启动cowboy server，最终zserver_app.erl看起来像这样：
+除了提供静态文件的访问，当然最重要的是动态处理请求。在Dispatch中加入`{"/main", main_handler, []}`，将"/main"映射到`main_handler.erl`中继续处理。接着像例子中一样启动cowboy server，最终`zserver_app.erl`看起来像这样：
 
 ~~~erlang
 -module(zserver_app).
@@ -192,9 +192,9 @@ stop(_State) ->
 
 ## main_handler.erl
 
-使用`cowboy_http`模板创建main_handler.erl：`make new t=cowboy_http n=main_handler`
+使用`cowboy_http`模板创建`main_handler.erl`：`make new t=cowboy_http n=main_handler`
 
-接着修改生成的src/main_handler.erl为如下内容：
+接着修改生成的`src/main_handler.erl`为如下内容：
 
 ~~~erlang
 -module(main_handler).
@@ -244,17 +244,17 @@ timestamp() ->
 
 最常见的是返回json数据，所以这里演示下如何用jsx封装json返回一个atom数组(会转成字符串)和时间戳。注意jsx:encode是不带换行符的，建议返回Body前用`<< Body/binary, <<"\n\n">>/binary >>`加2个回车在末尾。
 
-附上完整的源码包：[cowboy_zserver_src1.tar.gz]({{ site.url }}/assets/download/cowboy_zserver_src1.tar.gz)
+附上完整的源码包：[`cowboy_zserver_src1.tar.gz`]({{ site.url }}/assets/download/cowboy_zserver_src1.tar.gz)
 
 ## 运行
 
 make后就可以用`make start`启动app了。如果没有错误，就可以在[http://localhost:8080](http://localhost:8080/)看到index.html的内容：
 
-![index hello]({{ site.url }}/images/201502/zserver_index.jpg)
+![index hello]({{ site.url }}/images/201502/zserver_index.png)
 
 点击url或直接访问/main会返回main_handler中的json数据：
 
-![json response]({{ site.url }}/images/201502/zserver_json_response.jpg)
+![json response]({{ site.url }}/images/201502/zserver_json_response.png)
 
 ## 关于gzip
 
