@@ -246,6 +246,8 @@ timestamp() ->
 
 附上完整的源码包：[`cowboy_zserver_src1.tar.gz`]({{ site.url }}/assets/download/cowboy_zserver_src1.tar.gz)
 
+整个项目已经上传到GitHub，可以[在这里找到](https://github.com/upbit/zserver)。
+
 ## 运行
 
 make后就可以用`make start`启动app了。如果没有错误，就可以在[http://localhost:8080](http://localhost:8080/)看到index.html的内容：
