@@ -7,7 +7,7 @@ comments: true
 share: true
 ---
 
-昨天听朋友提到[Flipboard/FLEX](https://github.com/Flipboard/FLEX)这个项目，还有个用theos写的Tweak：[FLEX_injected](https://github.com/dtrukr/FLEX_injected)。不过用作者自带的deb安装无效，于是自己重新了个。
+昨天听朋友提到[Flipboard/FLEX](https://github.com/Flipboard/FLEX)这个项目，还有个用theos写的Tweak：[FLEX_injected](https://github.com/dtrukr/FLEX_injected)。不过用作者自带的deb安装了不能用，于是自己重新编译了个。
 
 <span style="color:#F00">**下载地址**</span>：[`com.daapps.FLEXInjected_0.0.1-FLEX_e3612e3.deb`]({{ site.url }}/assets/download/com.daapps.FLEXInjected_0.0.1-FLEX_e3612e3.deb)
 
