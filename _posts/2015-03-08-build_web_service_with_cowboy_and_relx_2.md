@@ -188,7 +188,7 @@ data: Tick(1)
 
 `info({message, Msg}`匹配到这个消息，使用`cowboy_req:chunk`发送了一个带id和data的返回数据。这个是eventsource定义的格式，data部分会被忠实的显示在/event页面上。
 
-### cowboy_loop_handler
+### `cowboy_loop_handler`
 
 #### init
 
