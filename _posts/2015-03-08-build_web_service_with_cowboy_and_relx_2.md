@@ -220,7 +220,7 @@ init(_Type, Req, _Opts) ->
 	end.
 ~~~
 
-首先导出cowboy handler的回掉，注意除了info还加了`allowed_methods`。在init中首先取请求的method，如果是POST就转为cowboy_rest处理，不然调用chunk_start准备推送信息：
+首先导出cowboy handler的回掉，注意除了info还加了`allowed_methods`。在init中首先取请求的method，如果是POST就转为`cowboy_rest`处理，不然调用`chunk_start`准备推送信息：
 
 ~~~erlang
 chunk_start(Req) ->
@@ -365,4 +365,4 @@ Source Files: ["./lib/zserver-0.1.0/src/chat_handler.erl",
 
 正常的话修改了代码就会在log里看到提示，beam被自动热更新到app上了。
 
-项目已经上传到[upbit/zserver:775bb68](https://github.com/upbit/zserver/tree/775bb686aee77659eb07d7796ccbc41b74762573)，注意clone后先make deps下载依赖库。
+完整代码已经上传到[upbit/zserver:775bb68](https://github.com/upbit/zserver/tree/775bb686aee77659eb07d7796ccbc41b74762573)，注意clone后先make deps下载依赖库。
