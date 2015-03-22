@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.2//EN" "http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd">
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>耳语 - latest</title>
+<link rel="stylesheet" href="css/reset.min.css">
+<link rel="stylesheet" href="css/waterfall.min.css">
+<style type="text/css">
+.item { background-color: rgba(238, 255, 224, .5); }
+.item:hover { background-color: rgba(238, 255, 224, 1.0); }
+</style>
+</head>
+<body>
+<div id="header">
+    <h1>耳语 - 最新排行</h1>
+</div>
+<div id="container"></div>
+
+<script type="text/x-handlebars-template" id="waterfall-tpl">
+{{#latest}}
+    <div class="item">
+        <img src="{{url}}" width="256px" height="256px" alt="{{wid}}" />
+        <p class="text"><span class="nickname">@{{nickname}}</span>: {{text}}</p>
+    </div>
+{{/latest}}
+</script>
+<script src="js/libs/jquery/jquery.min.js"></script>
+<script src="js/libs/handlebars/handlebars.min.js"></script>
+<script src="js/libs/jquery.easing.min.js"></script>
+<script src="js/waterfall.min.js"></script>
+<script>
+$(document).ready(function() {
+    var max_page = 10;
+    var last_scroll_id = null;
+    $('#container').waterfall({
+        itemCls: 'item',
+        colWidth: 278,
+        gutterWidth: 10,
+        gutterHeight: 10,
+        checkImagesLoaded: false,
+        isAnimated: true,
+        maxPage: max_page,
+        animationOptions: {
+        },
+        path: function(page) {
+            max_page--;
+            if (last_scroll_id) {
+                return 'http://prod.eryuapp.com/whispers/latest?scroll_id=' + last_scroll_id;
+            } else {
+                return 'http://prod.eryuapp.com/whispers/latest'
+            }
+        },
+        callbacks: {
+           renderData: function (data) {
+                if (max_page <= 0) {
+                    $('#container').waterfall('pause', function() {
+                        $('#waterfall-message').html('<p style="color:#666;">想要更多？你可以下载<a href="http://eryuapp.com">耳语App</a>继续查看...</p>')
+                    });
+                }
+
+                var tpl, template;
+                tpl = $('#waterfall-tpl').html();
+                template = Handlebars.compile(tpl);
+                last_scroll_id = data.scroll_id;
+                return template(data);
+           }
+        }
+    });
+});
+</script>
+</body>
+</html>
