@@ -7,7 +7,7 @@ comments: true
 share: true
 ---
 
-之前不小心敲了distclean，于是重新clone cowboy发现，relx默认的版本是1.0.0，难怪cowboy/master中的examples都无法正确运行。今天抽空跑了下示例，果然之前会失败的程序都能运行了...
+之前不小心敲了distclean折腾的死去活来，等重新clone cowboy时发现relx默认的版本是1.0.0，难怪cowboy/master中的examples都无法正确运行。今天抽空跑了下示例，果然之前会失败的程序都正常了。不过2.0的变动挺大的，需要改不少东西。
 
 总结下区别吧，从1.0.0到2.0.0-pre.1主要有下面几个变化：
 
