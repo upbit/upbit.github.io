@@ -8,15 +8,630 @@
     <title>夢沉抹大拉</title>
     <link>http://blog.imaou.com</link>
     <description>一个追寻抹大拉之地的geeker</description>
-    <pubDate>Sat, 07 Mar 2015 00:00:00 +0800</pubDate>
+    <pubDate>Thu, 02 Apr 2015 00:00:00 +0800</pubDate>
+    <item>
+      <title>跟随HackerNews一起探索React Native：HackerNews-React-Native</title>
+      <link>http://blog.imaou.com/opensource/2015/04/02/follow_hackernews_exploring_react_native.html</link>
+      <description><![CDATA[这两天沉迷于React Native，不过ES6的语法严重不熟导致走了不少弯路。更何况官方例子缺乏连贯性，比如Navigator传值以及绑定子对象的点击事件这样简单的操作，都没有文档可查。
+]]></description>
+      <pubDate>Thu, 02 Apr 2015 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/opensource/2015/04/02/follow_hackernews_exploring_react_native.html</guid>
+      <content:encoded><![CDATA[<p>这两天沉迷于<a href="https://github.com/facebook/react-native">React Native</a>，不过<a href="https://github.com/lukehoban/es6features">ES6的语法</a>严重不熟导致走了不少弯路。更何况官方例子缺乏连贯性，比如Navigator传值以及绑定子对象的点击事件这样简单的操作，都没有文档可查。</p>
+
+<h2>react-native的更新</h2>
+
+<p>除了语法问题，react-native偶尔还会有些奇怪的现象。比如require一张带有子目录的本地图片时给你红脸(RED SCREEN)，navigator.push后Command + R导致crash...</p>
+
+<p>遇上这种情况请务必使用如下命令，定期更新react-native：</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">npm install react-native -g
+</code></pre></div>
+<p>react-native更新相当频繁，昨晚还是v0.3.1的，今天中午就更新到v0.3.4了~</p>
+
+<h2><a href="https://github.com/iSimar/HackerNews-React-Native">HackerNews-React-Native</a></h2>
+
+<p>然后说说今天的主角<a href="https://github.com/iSimar/HackerNews-React-Native">HackerNews-React-Native</a>。官方的UIExplorer虽然看上去包罗万象，但遇到些&quot;简单&quot;的写法问题就没辙了，这里推荐看iSimar的HackerNews这个例子。里面的代码组织结构比较清晰，并且告诉了如何在ListView里自定义Cell并绑定事件：</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// App/Views/Posts/index.js</span>
+  <span class="nx">renderPostCell</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">post</span><span class="p">){</span>
+    <span class="k">return</span><span class="p">(</span>
+      <span class="o">&lt;</span><span class="nx">PostCell</span>
+        <span class="nx">onSelect</span><span class="o">=</span><span class="p">{()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">selectPost</span><span class="p">(</span><span class="nx">post</span><span class="p">)}</span>
+        <span class="nx">post</span><span class="o">=</span><span class="p">{</span><span class="nx">post</span><span class="p">}</span><span class="o">/&gt;</span>
+    <span class="p">);</span>
+  <span class="p">},</span>
+
+<span class="c1">// App/Views/Posts/Elements/PostCell/index.js</span>
+<span class="kd">var</span> <span class="nx">PostCell</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+  <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="o">&lt;</span><span class="nx">TouchableHighlight</span> <span class="nx">onPress</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">onSelect</span><span class="p">}</span><span class="o">&gt;</span>
+      <span class="p">...</span>
+      <span class="o">&lt;</span><span class="err">/TouchableHighlight&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>这样每个用到PostCell的地方都可以直接传递post进行render，并且根据View响应不同的selectPost()事件。</p>
+
+<p>另外一个是我试了一天的问题，navigator.push时给后面的component传值：</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// App/Views/Posts/index.js</span>
+  <span class="nx">selectPost</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">post</span><span class="p">){</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">navigator</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+      <span class="nx">title</span><span class="o">:</span> <span class="s2">&quot;Top Story #&quot;</span><span class="o">+</span><span class="nx">post</span><span class="p">.</span><span class="nx">count</span><span class="p">.</span><span class="nx">substring</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">post</span><span class="p">.</span><span class="nx">count</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+      <span class="nx">component</span><span class="o">:</span> <span class="nx">PostView</span><span class="p">,</span>
+      <span class="nx">passProps</span><span class="o">:</span> <span class="p">{</span><span class="nx">post_id</span><span class="o">:</span> <span class="nx">UtilFuncs</span><span class="p">.</span><span class="nx">getId</span><span class="p">(</span><span class="nx">post</span><span class="p">.</span><span class="nx">comments</span><span class="p">.</span><span class="nx">href</span><span class="p">),</span>
+                  <span class="nx">post_title</span><span class="o">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">title</span><span class="p">.</span><span class="nx">text</span><span class="p">,</span>
+                  <span class="nx">post_by</span><span class="o">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">username</span><span class="p">.</span><span class="nx">text</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                  <span class="nx">post_comments_count</span><span class="o">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">comments</span><span class="p">.</span><span class="nx">text</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                  <span class="nx">post_points_count</span><span class="o">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">points</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],}</span>
+    <span class="p">});</span>
+  <span class="p">},</span>
+</code></pre></div>
+<p>其实只是写法问题，passProps传递参数后，对应class里用this.props.xxx来获取。</p>
+
+<p>最后是<code>App/Utils/functions.js</code>里的技巧，可以通过这种方式导出多个函数。这样无论CSS还是一些网络API，都可以挪到View之外来写了，赞！</p>
+
+<p>不多说了，自己顺着<a href="https://github.com/iSimar/HackerNews-React-Native/blob/master/index.ios.js">index.ios.js</a>去看吧</p>
+]]></content:encoded>
+      <dc:date>2015-04-02T00:00:00+08:00</dc:date>
+    </item>
+    <item>
+      <title>升级Cowboy代码到2.0.0-pre.1的那些曲折事</title>
+      <link>http://blog.imaou.com/erlang/2015/03/25/migration_your_cowboy_to_2_0.html</link>
+      <description><![CDATA[之前不小心敲了distclean折腾的死去活来，等重新clone cowboy时发现relx默认的版本是1.0.0，难怪cowboy/master中的examples都无法正确运行。今天抽空跑了下示例，果然之前会失败的程序都正常了。不过2.0的变动挺大的，需要改不少东西。
+]]></description>
+      <pubDate>Wed, 25 Mar 2015 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/erlang/2015/03/25/migration_your_cowboy_to_2_0.html</guid>
+      <content:encoded><![CDATA[<p>之前不小心敲了distclean折腾的死去活来，等重新clone cowboy时发现relx默认的版本是1.0.0，难怪cowboy/master中的examples都无法正确运行。今天抽空跑了下示例，果然之前会失败的程序都正常了。不过2.0的变动挺大的，需要改不少东西。</p>
+
+<p>总结下区别吧，从1.0.0到2.0.0-pre.1主要有下面几个变化：</p>
+
+<h3>init/2</h3>
+
+<p>init函数从<code>init(Type, Req, Opts)</code>变成了<code>init(Req, Opts)</code>，并且<code>cowboy_req:reply</code>的返回值从{ok, Req}变成了Req，所以main_handler变成了这样：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">init</span><span class="o">/</span><span class="mi">2</span><span class="p">]).</span>
+
+<span class="nf">init</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">Opts</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Body</span> <span class="o">=</span> <span class="nn">jsx</span><span class="p">:</span><span class="nf">encode</span><span class="p">(</span><span class="err">#</span><span class="p">{</span>
+        <span class="o">&lt;&lt;</span><span class="s">&quot;messages&quot;</span><span class="o">&gt;&gt;</span> <span class="o">=&gt;</span> <span class="p">[</span>
+            <span class="n">hello</span><span class="p">,</span> <span class="n">world</span>
+        <span class="p">]</span>
+    <span class="p">}),</span>
+    <span class="nv">Req1</span> <span class="o">=</span> <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">reply</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="p">[</span>
+        <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;content-type&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;application/json&quot;</span><span class="o">&gt;&gt;</span><span class="p">},</span>
+        <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;connection&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;close&quot;</span><span class="o">&gt;&gt;</span><span class="p">}</span>
+    <span class="p">],</span> <span class="o">&lt;&lt;</span> <span class="nv">Body</span><span class="o">/</span><span class="n">binary</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">&gt;&gt;/</span><span class="n">binary</span> <span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nv">Req</span><span class="p">),</span>
+    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Req1</span><span class="p">,</span> <span class="nv">Opts</span><span class="p">}.</span>
+</code></pre></div>
+<p>没有了handle(Req, State)的处理部分，普通的处理直接在init/2里返回{ok, Req, Opts}就结束了。</p>
+
+<h3>cowboy_rest</h3>
+
+<p>REST handler不再需要<code>{upgrade, protocol, cowboy_rest}</code>：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="nf">init</span><span class="p">(_,</span> <span class="p">_</span><span class="nv">Req</span><span class="p">,</span> <span class="p">_</span><span class="nv">Opts</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="n">upgrade</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">cowboy_rest</span><span class="p">}.</span>
+</code></pre></div>
+<p>改成了下面这样：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="nf">init</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">Opts</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="n">cowboy_rest</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">Opts</span><span class="p">}.</span>
+</code></pre></div>
+<h3>cowboy_websocket</h3>
+
+<p>类似websocket也是在init/2里返回<code>{cowboy_websocket, Req, Opts}</code>即可。</p>
+
+<p>另外去掉了<code>websocket_init/3</code>，从代码上推测Opts即是原来的#state{}参数，其他没什么区别。</p>
+
+<h3>eventsource</h3>
+
+<p>看了下例子，好像没有了那些behaviour。从eventsource看维持长连接用的是<code>{cowboy_loop, Req, undefined, 5000, hibernate}</code>。新改了个chat_handler如下：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="p">-</span><span class="ni">module</span><span class="p">(</span><span class="n">chat_handler</span><span class="p">).</span>
+
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">init</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">allowed_methods</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">content_types_accepted</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">info</span><span class="o">/</span><span class="mi">3</span><span class="p">]).</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">handle_post</span><span class="o">/</span><span class="mi">2</span><span class="p">]).</span>
+
+<span class="nf">init</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">Opts</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="k">case</span> <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">method</span><span class="p">(</span><span class="nv">Req</span><span class="p">)</span> <span class="k">of</span>
+        <span class="o">&lt;&lt;</span><span class="s">&quot;POST&quot;</span><span class="o">&gt;&gt;</span> <span class="o">-&gt;</span>
+            <span class="p">{</span><span class="n">cowboy_rest</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">Opts</span><span class="p">};</span>
+        <span class="o">&lt;&lt;</span><span class="s">&quot;GET&quot;</span><span class="o">&gt;&gt;</span> <span class="o">-&gt;</span>
+            <span class="nn">random</span><span class="p">:</span><span class="nf">seed</span><span class="p">(</span><span class="nn">erlang</span><span class="p">:</span><span class="nf">now</span><span class="p">()),</span>
+            <span class="nv">Req1</span> <span class="o">=</span> <span class="n">chunk_start</span><span class="p">(</span><span class="nv">Req</span><span class="p">),</span>
+            <span class="n">ok</span> <span class="o">=</span> <span class="n">send_event</span><span class="p">(</span><span class="nv">Req1</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;(´・ω・`) I am ready.&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="o">&gt;&gt;</span><span class="p">),</span>
+            <span class="p">{</span><span class="n">cowboy_loop</span><span class="p">,</span> <span class="nv">Req1</span><span class="p">,</span> <span class="nv">Opts</span><span class="p">,</span> <span class="n">hibernate</span><span class="p">}</span>
+    <span class="k">end</span><span class="p">.</span>
+
+<span class="c">%% only allowed post for REST</span>
+<span class="nf">allowed_methods</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{[</span><span class="o">&lt;&lt;</span><span class="s">&quot;POST&quot;</span><span class="o">&gt;&gt;</span><span class="p">],</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">}.</span>
+<span class="nf">content_types_accepted</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{[{</span><span class="o">&lt;&lt;</span><span class="s">&quot;application/x-www-form-urlencoded&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">handle_post</span><span class="p">}],</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">}.</span>
+
+<span class="c">%%</span>
+<span class="nf">info</span><span class="p">({</span><span class="n">message</span><span class="p">,</span> <span class="nv">Message</span><span class="p">},</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="n">send_message</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">Message</span><span class="p">),</span>
+    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">,</span> <span class="n">hibernate</span><span class="p">}.</span>
+
+<span class="c">%% POST</span>
+
+<span class="nf">handle_post</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Body</span><span class="p">,</span> <span class="nv">Req1</span><span class="p">}</span> <span class="o">=</span> <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">body</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="p">[{</span><span class="nb">length</span><span class="p">,</span> <span class="mi">4096</span><span class="p">},</span> <span class="p">{</span><span class="n">read_length</span><span class="p">,</span> <span class="mi">4096</span><span class="p">},</span> <span class="p">{</span><span class="n">read_timeout</span><span class="p">,</span> <span class="mi">3000</span><span class="p">}]),</span>
+    <span class="err">#</span><span class="p">{</span><span class="n">type</span> <span class="p">:</span><span class="o">=</span> <span class="nv">Type</span><span class="p">,</span> <span class="n">data</span> <span class="p">:</span><span class="o">=</span> <span class="nv">Data</span><span class="p">}</span> <span class="o">=</span> <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">match_body_qs</span><span class="p">([</span>
+        <span class="p">{</span><span class="n">type</span><span class="p">,</span> <span class="k">fun</span> <span class="nn">erlang</span><span class="p">:</span><span class="nb">is_binary</span><span class="o">/</span><span class="mi">1</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;message&quot;</span><span class="o">&gt;&gt;</span><span class="p">},</span>
+        <span class="n">data</span>
+    <span class="p">],</span> <span class="nv">Body</span><span class="p">),</span>
+    <span class="nn">lager</span><span class="p">:</span><span class="nf">debug</span><span class="p">(</span><span class="s">&quot;type </span><span class="si">~p</span><span class="s"> data </span><span class="si">~p</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nv">Type</span><span class="p">,</span> <span class="nv">Data</span><span class="p">]),</span>
+    <span class="p">{</span><span class="n">true</span><span class="p">,</span> <span class="nv">Req1</span><span class="p">,</span> <span class="nv">State</span><span class="p">}.</span>
+
+
+<span class="c">%% Internal functions - chunk</span>
+
+<span class="c">%% @doc Send event-stream header to client</span>
+<span class="nf">chunk_start</span><span class="p">(</span><span class="nv">Req</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Headers</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;content-type&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;text/event-stream&quot;</span><span class="o">&gt;&gt;</span><span class="p">},</span>
+        <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;connection&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;keep-alive&quot;</span><span class="o">&gt;&gt;</span><span class="p">}</span>
+    <span class="p">],</span>
+    <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">chunked_reply</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nv">Headers</span><span class="p">,</span> <span class="nv">Req</span><span class="p">).</span>
+
+<span class="nf">send_message</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">Data</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="n">send_event</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="nv">Data</span><span class="p">).</span>
+
+<span class="p">-</span><span class="ni">spec</span> <span class="n">send_event</span><span class="p">(</span><span class="n">term</span><span class="p">(),</span> <span class="n">atom</span><span class="p">()</span> <span class="p">|</span> <span class="n">list</span><span class="p">(),</span> <span class="n">binary</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">ok</span><span class="p">.</span>
+<span class="nf">send_event</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">Event</span><span class="p">,</span> <span class="nv">Data</span><span class="p">)</span> <span class="k">when</span> <span class="nb">is_atom</span><span class="p">(</span><span class="nv">Event</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="n">send_event</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nb">atom_to_list</span><span class="p">(</span><span class="nv">Event</span><span class="p">),</span> <span class="nv">Data</span><span class="p">);</span>
+<span class="nf">send_event</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">Event</span><span class="p">,</span> <span class="nv">Data</span><span class="p">)</span> <span class="k">when</span> <span class="nb">is_list</span><span class="p">(</span><span class="nv">Event</span><span class="p">),</span> <span class="nb">is_binary</span><span class="p">(</span><span class="nv">Data</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">EventBinary</span> <span class="o">=</span> <span class="nn">binary</span><span class="p">:</span><span class="nf">list_to_bin</span><span class="p">([</span><span class="s">&quot;event: &quot;</span><span class="p">,</span> <span class="nv">Event</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">]),</span>
+    <span class="nv">IdBinary</span> <span class="o">=</span> <span class="nn">binary</span><span class="p">:</span><span class="nf">list_to_bin</span><span class="p">([</span><span class="s">&quot;id: &quot;</span><span class="p">,</span> <span class="n">gen_timestamp_id</span><span class="p">(),</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">]),</span>
+    <span class="nv">Response</span> <span class="o">=</span> <span class="o">&lt;&lt;</span>
+        <span class="nv">EventBinary</span><span class="o">/</span><span class="n">binary</span><span class="p">,</span> <span class="nv">IdBinary</span><span class="o">/</span><span class="n">binary</span><span class="p">,</span>
+        <span class="o">&lt;&lt;</span><span class="s">&quot;data: &quot;</span><span class="o">&gt;&gt;/</span><span class="n">binary</span><span class="p">,</span> <span class="nv">Data</span><span class="o">/</span><span class="n">binary</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="o">&gt;&gt;/</span><span class="n">binary</span>
+    <span class="o">&gt;&gt;</span><span class="p">,</span>
+    <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">chunk</span><span class="p">(</span><span class="nv">Response</span><span class="p">,</span> <span class="nv">Req</span><span class="p">).</span>
+
+
+<span class="c">%% Internal functions - utils</span>
+
+<span class="nf">notify_all</span><span class="p">(</span><span class="nv">Message</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nn">lists</span><span class="p">:</span><span class="nf">foreach</span><span class="p">(</span>
+        <span class="k">fun</span><span class="p">(</span><span class="nv">Listener</span><span class="p">)</span> <span class="o">-&gt;</span>
+            <span class="nn">lager</span><span class="p">:</span><span class="nf">debug</span><span class="p">(</span><span class="s">&quot;notify </span><span class="si">~p</span><span class="s">: </span><span class="si">~p</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nv">Listener</span><span class="p">,</span> <span class="nv">Message</span><span class="p">]),</span>
+            <span class="nv">Listener</span> <span class="o">!</span> <span class="p">{</span><span class="n">message</span><span class="p">,</span> <span class="nv">Message</span><span class="p">}</span>
+        <span class="k">end</span><span class="p">,</span> <span class="nn">pg2</span><span class="p">:</span><span class="nf">get_members</span><span class="p">(</span><span class="n">notify_group</span><span class="p">)).</span>
+
+<span class="nf">gen_timestamp_id</span><span class="p">()</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="nv">M</span><span class="p">,</span> <span class="nv">S</span><span class="p">,</span> <span class="nv">U</span><span class="p">}</span> <span class="o">=</span> <span class="nn">erlang</span><span class="p">:</span><span class="nf">now</span><span class="p">(),</span>  
+    <span class="nn">lists</span><span class="p">:</span><span class="nf">concat</span><span class="p">([</span><span class="nv">M</span> <span class="o">*</span> <span class="mi">1000000</span> <span class="o">+</span> <span class="nv">S</span><span class="p">,</span> <span class="s">&quot;.&quot;</span><span class="p">,</span> <span class="nv">U</span><span class="p">]).</span>
+</code></pre></div>
+<p>针对eventsource做了些封装，比如推送不同类型的event。注意chunk写utf8字符串时需要加/utf8，并且用binary传参。</p>
+
+<p>另外：<code>cowboy_req:match_body_qs</code>是我自己增加的函数。cowboy 2.0里提供了一个方便的<code>match_qs</code>函数，可以返回一个map来match请求参数。但这个函数只能对qs里的内容做出解析，需要在<code>cowboy_req</code>里增加如下函数：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">match_body_qs</span><span class="o">/</span><span class="mi">2</span><span class="p">]).</span>
+
+<span class="p">-</span><span class="ni">spec</span> <span class="n">match_body_qs</span><span class="p">(</span><span class="nn">cowboy</span><span class="p">:</span><span class="nf">fields</span><span class="p">(),</span> <span class="n">binary</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">map</span><span class="p">().</span>
+<span class="nf">match_body_qs</span><span class="p">(</span><span class="nv">Fields</span><span class="p">,</span> <span class="nv">Body</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="n">filter</span><span class="p">(</span><span class="nv">Fields</span><span class="p">,</span> <span class="n">kvlist_to_map</span><span class="p">(</span><span class="nv">Fields</span><span class="p">,</span> <span class="nn">cow_qs</span><span class="p">:</span><span class="nf">parse_qs</span><span class="p">(</span><span class="nv">Body</span><span class="p">))).</span>
+</code></pre></div>
+<p>这样就可以欢快的处理body的内容了。</p>
+]]></content:encoded>
+      <dc:date>2015-03-25T00:00:00+08:00</dc:date>
+    </item>
+    <item>
+      <title>关于erlang:send的 nosuspend / noconnect 细节</title>
+      <link>http://blog.imaou.com/erlang/2015/03/16/something_about_erlang_send.html</link>
+      <description><![CDATA[erlang的send确实比较方便，不过实际使用时可能会遇到网络不通导致消息队列暴涨的情况，并且关于nosuspend/noconnect的实现还有些细节需要深究。
+]]></description>
+      <pubDate>Mon, 16 Mar 2015 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/erlang/2015/03/16/something_about_erlang_send.html</guid>
+      <content:encoded><![CDATA[<p>erlang的send确实比较方便，不过实际使用时可能会遇到<a href="http://blog.csdn.net/mycwq/article/details/42845385">网络不通导致消息队列暴涨</a>的情况，并且关于nosuspend/noconnect的实现还有些细节需要深究。</p>
+
+<h2>起因</h2>
+
+<p>今天看代码遇到<code>erlang:send_nosuspend([noconnect])</code>的用法：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="nf">broadcast</span><span class="p">(</span><span class="nv">ServerName</span><span class="p">,</span> <span class="nv">Message</span><span class="p">)</span> <span class="o">-&gt;</span>
+  <span class="k">case</span> <span class="nn">pg2</span><span class="p">:</span><span class="nf">get_members</span><span class="p">(</span><span class="nv">ServerName</span><span class="p">)</span> <span class="k">of</span>
+    <span class="nv">E</span> <span class="o">=</span> <span class="p">{</span><span class="n">error</span><span class="p">,</span> <span class="p">{</span><span class="n">no_such_group</span><span class="p">,</span> <span class="nv">ServerName</span><span class="p">}}</span> <span class="o">-&gt;</span> <span class="n">throw</span><span class="p">(</span><span class="nv">E</span><span class="p">);</span>
+    <span class="nv">Pids</span> <span class="o">-&gt;</span>
+      <span class="nn">lists</span><span class="p">:</span><span class="nf">foreach</span><span class="p">(</span><span class="k">fun</span><span class="p">(</span><span class="nv">P</span><span class="p">)</span> <span class="o">-&gt;</span>
+        <span class="k">case</span> <span class="nn">erlang</span><span class="p">:</span><span class="nb">send_nosuspend</span><span class="p">(</span><span class="nv">P</span><span class="p">,</span> <span class="nv">Message</span><span class="p">,</span> <span class="p">[</span><span class="n">noconnect</span><span class="p">])</span> <span class="k">of</span>
+          <span class="n">false</span> <span class="o">-&gt;</span> <span class="nn">lager</span><span class="p">:</span><span class="nf">debug</span><span class="p">(</span><span class="s">&quot;</span><span class="si">~p</span><span class="s"> failed to send a message to remote pid </span><span class="si">~p</span><span class="s"> from </span><span class="si">~p</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nv">ServerName</span><span class="p">,</span> <span class="nv">P</span><span class="p">,</span> <span class="nb">node</span><span class="p">()]);</span>
+          <span class="n">true</span> <span class="o">-&gt;</span> <span class="n">nothing_to_do</span>
+        <span class="k">end</span>
+      <span class="k">end</span><span class="p">,</span> <span class="nv">Pids</span><span class="p">)</span>
+  <span class="k">end</span><span class="p">.</span>
+</code></pre></div>
+<p>这段很简单，不过和常规的broadcast不太一样，里面用的是<code>erlang:send_nosuspend([noconnect])</code>。于是跟着上面blog的讲解看了下erlang beam的实现部分。</p>
+
+<h3>nosuspend</h3>
+
+<p>send_nosuspend实际是调用的send([nosuspend])：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="c">% erlang.erl</span>
+<span class="nb">send_nosuspend</span><span class="p">(</span><span class="nv">Pid</span><span class="p">,</span> <span class="nv">Msg</span><span class="p">,</span> <span class="nv">Opts</span><span class="p">)</span> <span class="o">-&gt;</span>
+  <span class="k">case</span> <span class="nn">erlang</span><span class="p">:</span><span class="nb">send</span><span class="p">(</span><span class="nv">Pid</span><span class="p">,</span> <span class="nv">Msg</span><span class="p">,</span> <span class="p">[</span><span class="n">nosuspend</span><span class="p">|</span><span class="nv">Opts</span><span class="p">])</span> <span class="k">of</span>
+    <span class="n">ok</span> <span class="o">-&gt;</span> <span class="n">true</span><span class="p">;</span>
+    <span class="p">_</span>  <span class="o">-&gt;</span> <span class="n">false</span>
+  <span class="k">end</span><span class="p">.</span>
+</code></pre></div>
+<p>对应调用的时bif.c的<code>send_3()</code>函数。<code>send_3() -&gt; remote_send()</code>最内层会调用一个叫<code>erts_dsig_prepare</code>的函数，用于准备发送异步的消息给其他节点。</p>
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="cm">/*</span>
+<span class="cm"> * erts_dsig_prepare() prepares a send of a distributed signal.</span>
+<span class="cm"> * One of the values defined below are returned. If the returned</span>
+<span class="cm"> * value is another than ERTS_DSIG_PREP_CONNECTED, the</span>
+<span class="cm"> * distributed signal cannot be sent before apropriate actions</span>
+<span class="cm"> * have been taken. Apropriate actions would typically be setting</span>
+<span class="cm"> * up the connection.</span>
+<span class="cm"> */</span>
+
+<span class="cm">/* Connected; signal can be sent. */</span>
+<span class="cp">#define ERTS_DSIG_PREP_CONNECTED    0</span>
+<span class="cm">/* Not connected; connection needs to be set up. */</span>
+<span class="cp">#define ERTS_DSIG_PREP_NOT_CONNECTED    1</span>
+<span class="cm">/* Caller would be suspended on send operation. */</span>
+<span class="cp">#define ERTS_DSIG_PREP_WOULD_SUSPEND    2</span>
+<span class="cm">/* System not alive (distributed) */</span>
+<span class="cp">#define ERTS_DSIG_PREP_NOT_ALIVE    3</span>
+
+<span class="n">ERTS_GLB_INLINE</span> <span class="kt">int</span> <span class="nf">erts_dsig_prepare</span><span class="p">(</span><span class="n">ErtsDSigData</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">DistEntry</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">Process</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">ErtsDSigPrepLock</span><span class="p">,</span>
+                      <span class="kt">int</span><span class="p">);</span>
+</code></pre></div>
+<p><code>erts_dsig_prepare</code>在最后参数<code>no_suspend</code>非0时，会检查待发送队列是否超过限制，超过则返回<code>ERTS_DSIG_PREP_WOULD_SUSPEND -&gt; SEND_YIELD</code>告知端口正忙。</p>
+
+<p>在<code>send_3()</code>的返回值处理里，可以看到如果没有设置nosuspend则会立即<code>BIF_RET(am_nosuspend);</code>，即直接返回一个atom的nosuspend。nosuspend还有两种情况，一种是在无连接或远端节点不可用时<code>SEND_TRAP</code>（这个状态的细节在后面的noconnect讲解）；另一种则是可以发送消息的<code>ERTS_DSIG_PREP_CONNECTED</code>状态。</p>
+
+<p><code>ERTS_DSIG_PREP_CONNECTED</code>时会先用<code>erts_dsig_send_msg -&gt; dsig_send</code>把消息放入发送队列，并返回0后等待<code>port_task</code>工作线程来处理。如果<code>erts_dsig_send_*</code>阻塞(<code>ERTS_DSIG_SEND_YIELD</code>)则会返回<code>SEND_YIELD_RETURN</code>，此时<code>send_3()</code>也是对外返回nosuspend。</p>
+
+<p>结合上面blog中关于消息队列堆积的解释，可以知道使用nosuspend时，需要注意send会在繁忙时返回nosuspend；此时如果继续调用send则会造成消息的继续堆积，直到erlang检测到远端节点不可用为止。</p>
+
+<h3>noconnect</h3>
+
+<p>在<code>erts_dsig_prepare</code>中还有2种情况，会导致Trap动作：<code>ERTS_DSIG_PREP_CONNECTED/ERTS_DSIG_PREP_NOT_ALIVE -&gt; SEND_TRAP</code></p>
+
+<p>结合<code>send_3()</code>函数对<code>SEND_TRAP</code>的处理，noconnect在遇到节点无法连接的情况，会直接返回noconnect。否则会调用<code>BIF_TRAP3(dsend3_trap, p, to, msg, opts);</code>进入一个Trap操作，在下一次调度时调用dsend/3：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="nf">dsend</span><span class="p">(</span><span class="nv">Pid</span><span class="p">,</span> <span class="nv">Msg</span><span class="p">,</span> <span class="nv">Opts</span><span class="p">)</span> <span class="k">when</span> <span class="nn">erlang</span><span class="p">:</span><span class="nb">is_pid</span><span class="p">(</span><span class="nv">Pid</span><span class="p">)</span> <span class="o">-&gt;</span>
+  <span class="k">case</span> <span class="nn">net_kernel</span><span class="p">:</span><span class="nf">connect</span><span class="p">(</span><span class="nn">erlang</span><span class="p">:</span><span class="nb">node</span><span class="p">(</span><span class="nv">Pid</span><span class="p">))</span> <span class="k">of</span>
+    <span class="n">true</span> <span class="o">-&gt;</span> <span class="nn">erlang</span><span class="p">:</span><span class="nb">send</span><span class="p">(</span><span class="nv">Pid</span><span class="p">,</span> <span class="nv">Msg</span><span class="p">,</span> <span class="nv">Opts</span><span class="p">);</span>
+    <span class="n">false</span> <span class="o">-&gt;</span> <span class="n">ok</span>
+  <span class="k">end</span><span class="p">;</span>
+</code></pre></div>
+<p>在dsend中会先阻塞的调用<code>net_kernel:connect</code>，如果远端节点无法连接则会一直等待到超时。</p>
+
+<p>了解了这些细节，再来看<code>erlang:send_nosuspend(P, Message, [noconnect])</code>就比较好理解了：即相对send，遇到网络抖动或发送端口繁忙时将消息无条件放入发送队列，并且在进一步网络中断或无连接时放弃发送。</p>
+]]></content:encoded>
+      <dc:date>2015-03-16T00:00:00+08:00</dc:date>
+    </item>
+    <item>
+      <title>使用cowboy和relx搭建Web服务02 - handler和代码自动更新</title>
+      <link>http://blog.imaou.com/erlang/2015/03/08/build_web_service_with_cowboy_and_relx_2.html</link>
+      <description><![CDATA[继续记录使用cowboy搭建服务器遇到的各种坑，算是备忘吧。在上一篇Blog里说到了如何创建简单的cowboy handler，现在来重点介绍下cowboy的几种handler写法。
+]]></description>
+      <pubDate>Sun, 08 Mar 2015 00:00:00 +0800</pubDate>
+      <guid>http://blog.imaou.com/erlang/2015/03/08/build_web_service_with_cowboy_and_relx_2.html</guid>
+      <content:encoded><![CDATA[<p>继续记录使用cowboy搭建服务器遇到的各种坑，算是备忘吧。在<a href="http://blog.imaou.com/erlang/2015/02/24/build_web_service_with_cowboy_and_relx_1.html">上一篇Blog</a>里说到了如何创建简单的cowboy handler，现在来重点介绍下cowboy的几种handler写法。</p>
+
+<h2>REST handler</h2>
+
+<p>这个算是最简单的，官方教程里例子还可以使用。主要是默认的几个导出函数名，可以在<a href="http://ninenines.eu/docs/en/cowboy/HEAD/guide/rest_handlers/">REST handlers</a>部分找到。</p>
+
+<p>下面只用<code>content_types_provided</code>演示下如何接受html(默认)以及json的返回格式：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="p">-</span><span class="ni">module</span><span class="p">(</span><span class="n">rest_handler</span><span class="p">).</span>
+
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">init</span><span class="o">/</span><span class="mi">3</span><span class="p">]).</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">content_types_provided</span><span class="o">/</span><span class="mi">2</span><span class="p">]).</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">get_html</span><span class="o">/</span><span class="mi">2</span><span class="p">]).</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">get_json</span><span class="o">/</span><span class="mi">2</span><span class="p">]).</span>
+
+<span class="nf">init</span><span class="p">(_,</span> <span class="p">_</span><span class="nv">Req</span><span class="p">,</span> <span class="p">_</span><span class="nv">Opts</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="n">upgrade</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">cowboy_rest</span><span class="p">}.</span>
+
+<span class="nf">content_types_provided</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{[</span>
+        <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;text/html&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">get_html</span><span class="p">},</span>
+        <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;application/json&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">get_json</span><span class="p">}</span>
+    <span class="p">],</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">}.</span>
+
+<span class="nf">get_html</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;&lt;html&gt;&lt;body&gt;This is REST!&lt;/body&gt;&lt;/html&gt;&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">}.</span>
+
+<span class="nf">get_json</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Body</span> <span class="o">=</span> <span class="nn">jsx</span><span class="p">:</span><span class="nf">encode</span><span class="p">(</span><span class="err">#</span><span class="p">{</span>
+        <span class="o">&lt;&lt;</span><span class="s">&quot;body&quot;</span><span class="o">&gt;&gt;</span> <span class="o">=&gt;</span> <span class="o">&lt;&lt;</span><span class="s">&quot;This is REST!&quot;</span><span class="o">&gt;&gt;</span>
+    <span class="p">}),</span>
+    <span class="p">{</span><span class="nv">Body</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">}.</span>
+</code></pre></div>
+<p>这个handler会处理请求头部的Accept，根据需要的格式调用对应处理函数：</p>
+<div class="highlight"><pre><code class="language-sh" data-lang="sh">curl -i -H <span class="s2">&quot;Accept: application/json&quot;</span> http://localhost:8080/rest
+</code></pre></div>
+<p>关于其他函数的应用，以及如何区分处理GET/POST请求，可以参考：<a href="https://github.com/inaka/canillita/blob/master/src/canillita_news_handler.erl"><code>canillita_news_handler.erl</code></a></p>
+
+<h2>websocket handler</h2>
+
+<p>官方websocket的例子太过简单，这里完善了下对网页端请求的处理，并且可以根据输入做出不同响应：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="p">-</span><span class="ni">module</span><span class="p">(</span><span class="n">ws_handler</span><span class="p">).</span>
+<span class="p">-</span><span class="ni">behaviour</span><span class="p">(</span><span class="n">cowboy_websocket_handler</span><span class="p">).</span>
+
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">init</span><span class="o">/</span><span class="mi">3</span><span class="p">]).</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">websocket_init</span><span class="o">/</span><span class="mi">3</span><span class="p">]).</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">websocket_handle</span><span class="o">/</span><span class="mi">3</span><span class="p">]).</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">websocket_info</span><span class="o">/</span><span class="mi">3</span><span class="p">]).</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">websocket_terminate</span><span class="o">/</span><span class="mi">3</span><span class="p">]).</span>
+
+<span class="p">-</span><span class="ni">record</span><span class="p">(</span><span class="nl">state</span><span class="p">,</span> <span class="p">{</span>
+    <span class="n">message_position</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="p">}).</span>
+
+<span class="nf">init</span><span class="p">(_,</span> <span class="p">_,</span> <span class="p">_)</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="n">upgrade</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">cowboy_websocket</span><span class="p">}.</span>
+
+<span class="nf">websocket_init</span><span class="p">(_,</span> <span class="nv">Req</span><span class="p">,</span> <span class="p">_</span><span class="nv">Opts</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Req2</span> <span class="o">=</span> <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">compact</span><span class="p">(</span><span class="nv">Req</span><span class="p">),</span>
+    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Req2</span><span class="p">,</span> <span class="nl">#state</span><span class="p">{}}.</span>
+
+<span class="nf">websocket_handle</span><span class="p">({</span><span class="n">text</span><span class="p">,</span> <span class="nv">RawData</span><span class="p">},</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Data</span> <span class="o">=</span> <span class="nn">re</span><span class="p">:</span><span class="nf">replace</span><span class="p">(</span><span class="nv">RawData</span><span class="p">,</span> <span class="s">&quot;(^</span><span class="se">\\</span><span class="s">s+)|(</span><span class="se">\\</span><span class="s">s+$)&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="p">[{</span><span class="n">return</span><span class="p">,</span> <span class="n">list</span><span class="p">}]),</span>
+    <span class="n">parse_message</span><span class="p">(</span><span class="nv">Data</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">);</span>
+<span class="nf">websocket_handle</span><span class="p">(_</span><span class="nv">Frame</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">}.</span>
+
+<span class="nf">websocket_info</span><span class="p">({</span><span class="n">timeout</span><span class="p">,</span> <span class="p">_</span><span class="nv">Ref</span><span class="p">,</span> <span class="nv">Msg</span><span class="p">},</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nn">erlang</span><span class="p">:</span><span class="nb">start_timer</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">self</span><span class="p">(),</span> <span class="o">&lt;&lt;</span><span class="s">&quot;How are you doing?&quot;</span><span class="o">&gt;&gt;</span><span class="p">),</span>
+    <span class="p">{</span><span class="n">reply</span><span class="p">,</span> <span class="p">{</span><span class="n">text</span><span class="p">,</span> <span class="nv">Msg</span><span class="p">},</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">};</span>
+<span class="nf">websocket_info</span><span class="p">(_</span><span class="nv">Info</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">}.</span>
+
+<span class="nf">websocket_terminate</span><span class="p">(_</span><span class="nv">Reason</span><span class="p">,</span> <span class="p">_</span><span class="nv">Req</span><span class="p">,</span> <span class="p">_</span><span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="n">ok</span><span class="p">.</span>
+
+<span class="nf">parse_message</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Body</span> <span class="o">=</span> <span class="p">{</span><span class="n">text</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;&gt;&gt;&gt; WebSocket help:</span><span class="se">\n</span><span class="s">&quot;</span>
+                    <span class="s">&quot;  WebSocket is a protocol providing full-duplex &quot;</span>
+                    <span class="s">&quot;communications channels over a single TCP connection.&quot;</span>
+                    <span class="s">&quot;The WebSocket protocol was standardized by the IETF as RFC 6455 in 2011, &quot;</span>
+                    <span class="s">&quot;and the WebSocket API in Web IDL is being standardized by the W3C.</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">&gt;&gt;</span><span class="p">},</span>
+    <span class="p">{</span><span class="n">reply</span><span class="p">,</span> <span class="nv">Body</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">};</span>
+<span class="nf">parse_message</span><span class="p">(</span><span class="s">&quot;exit&quot;</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="n">shutdown</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">};</span>
+<span class="nf">parse_message</span><span class="p">(</span><span class="nv">Command</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Body</span> <span class="o">=</span> <span class="p">{</span><span class="n">text</span><span class="p">,</span> <span class="nn">binary</span><span class="p">:</span><span class="nf">list_to_bin</span><span class="p">([</span><span class="s">&quot;WS&gt; &quot;</span><span class="p">,</span> <span class="nv">Command</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">])},</span>
+    <span class="p">{</span><span class="n">reply</span><span class="p">,</span> <span class="nv">Body</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">}.</span>
+</code></pre></div>
+<p>首先需要注意的是init/3，查了好久才知道原来要改成这样，并且返回：<code>{upgrade, protocol, cowboy_websocket}</code>。这样当handler初始化完成，就可以接受连接了。</p>
+
+<p><code>websocket_init/3</code>貌似没有被调用，而<code>websocket_info/3</code>也是到后来我才知道，这个是响应erlang消息用的，所以核心只有<code>websocket_handle/3</code>。</p>
+
+<p><code>websocket_handle</code>匹配除了text好像还有binary，不过从<a href="https://github.com/upbit/zserver/blob/master/priv/static/websocket.html">网页</a><code>websocket.send(data)</code>过来的就被识别为text了，暂时还不明白怎么回事：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="nf">websocket_handle</span><span class="p">({</span><span class="n">text</span><span class="p">,</span> <span class="nv">RawData</span><span class="p">},</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Data</span> <span class="o">=</span> <span class="nn">re</span><span class="p">:</span><span class="nf">replace</span><span class="p">(</span><span class="nv">RawData</span><span class="p">,</span> <span class="s">&quot;(^</span><span class="se">\\</span><span class="s">s+)|(</span><span class="se">\\</span><span class="s">s+$)&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="p">[{</span><span class="n">return</span><span class="p">,</span> <span class="n">list</span><span class="p">}]),</span>
+    <span class="n">parse_message</span><span class="p">(</span><span class="nv">Data</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">);</span>
+<span class="nf">websocket_handle</span><span class="p">(_</span><span class="nv">Frame</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">}.</span>
+</code></pre></div>
+<p>另外因为是在input里获取的data，匹配到的RawData带有换行符，于是找到个用正则trim字符串的方法，最后传给<code>parse_message/3</code>去响应。偷懒就直接用list匹配了，更安全的方法应该是尝试转为atom吧。</p>
+
+<p>最后如果不是help或exit就返回一个包含原字符串的binary。</p>
+
+<h2>loop handler</h2>
+
+<h3>event handler</h3>
+
+<p>这是摸索了最久的一种handler，官方例子各种不好用，连上去自己给自己丢消息有意思吗？不过还是照着做了个，访问/event会去接收eventsource里的event-stream：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="p">-</span><span class="ni">module</span><span class="p">(</span><span class="n">event_handler</span><span class="p">).</span>
+
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">init</span><span class="o">/</span><span class="mi">3</span><span class="p">]).</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">info</span><span class="o">/</span><span class="mi">3</span><span class="p">]).</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">terminate</span><span class="o">/</span><span class="mi">3</span><span class="p">]).</span>
+
+<span class="p">-</span><span class="ni">record</span><span class="p">(</span><span class="nl">state</span><span class="p">,</span> <span class="p">{</span>
+    <span class="nn">count</span><span class="p">::</span><span class="nf">integer</span><span class="p">()</span>
+<span class="p">}).</span>
+
+
+<span class="nf">init</span><span class="p">(_</span><span class="nv">Type</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="p">_</span><span class="nv">Opts</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Headers</span> <span class="o">=</span> <span class="p">[{</span><span class="o">&lt;&lt;</span><span class="s">&quot;content-type&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;text/event-stream&quot;</span><span class="o">&gt;&gt;</span><span class="p">}],</span>
+    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Req2</span><span class="p">}</span> <span class="o">=</span> <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">chunked_reply</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nv">Headers</span><span class="p">,</span> <span class="nv">Req</span><span class="p">),</span>
+    <span class="nn">erlang</span><span class="p">:</span><span class="nb">send_after</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">self</span><span class="p">(),</span> <span class="p">{</span><span class="n">message</span><span class="p">,</span> <span class="s">&quot;Init Tick&quot;</span><span class="p">}),</span>
+    <span class="p">{</span><span class="n">loop</span><span class="p">,</span> <span class="nv">Req2</span><span class="p">,</span> <span class="nl">#state</span><span class="p">{</span><span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">},</span> <span class="n">hibernate</span><span class="p">}.</span>
+
+<span class="nf">info</span><span class="p">({</span><span class="n">message</span><span class="p">,</span> <span class="nv">Msg</span><span class="p">},</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">chunk</span><span class="p">([</span><span class="s">&quot;id: &quot;</span><span class="p">,</span> <span class="n">id</span><span class="p">(),</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">data: &quot;</span><span class="p">,</span> <span class="nv">Msg</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">],</span> <span class="nv">Req</span><span class="p">),</span>
+    <span class="nn">erlang</span><span class="p">:</span><span class="nb">send_after</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">self</span><span class="p">(),</span> <span class="p">{</span><span class="n">message</span><span class="p">,</span> <span class="nn">lists</span><span class="p">:</span><span class="nf">flatten</span><span class="p">(</span><span class="nn">io_lib</span><span class="p">:</span><span class="nf">format</span><span class="p">(</span><span class="s">&quot;Tick(</span><span class="si">~p</span><span class="s">)</span><span class="si">~n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nv">State</span><span class="nl">#state.count</span><span class="p">]))}),</span>
+    <span class="p">{</span><span class="n">loop</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="nl">#state</span><span class="p">{</span><span class="n">count</span> <span class="o">=</span> <span class="nv">State</span><span class="nl">#state.count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">},</span> <span class="n">hibernate</span><span class="p">}.</span>
+
+<span class="nf">terminate</span><span class="p">(_</span><span class="nv">Reason</span><span class="p">,</span> <span class="p">_</span><span class="nv">Req</span><span class="p">,</span> <span class="p">_</span><span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="n">ok</span><span class="p">.</span>
+
+<span class="nf">id</span><span class="p">()</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="nv">Mega</span><span class="p">,</span> <span class="nv">Sec</span><span class="p">,</span> <span class="nv">Micro</span><span class="p">}</span> <span class="o">=</span> <span class="nn">erlang</span><span class="p">:</span><span class="nf">now</span><span class="p">(),</span>
+    <span class="nv">Id</span> <span class="o">=</span> <span class="p">(</span><span class="nv">Mega</span> <span class="o">*</span> <span class="mi">1000000</span> <span class="o">+</span> <span class="nv">Sec</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000000</span> <span class="o">+</span> <span class="nv">Micro</span><span class="p">,</span>
+    <span class="nb">integer_to_list</span><span class="p">(</span><span class="nv">Id</span><span class="p">,</span> <span class="mi">16</span><span class="p">).</span>
+</code></pre></div>
+<p>首先要理解<code>text/event-stream</code>是怎么回事，拿curl访问/eventsource会得到如下返回：</p>
+<div class="highlight"><pre><code class="language-sh" data-lang="sh">curl -i http://localhost:8080/eventsource
+HTTP/1.1 <span class="m">200</span> OK
+transfer-encoding: chunked
+connection: keep-alive
+server: Cowboy
+date: Sat, <span class="m">07</span> Mar <span class="m">2015</span> 15:25:54 GMT
+content-type: text/event-stream
+
+id: 510B46AD5D6D1
+data: Init Tick
+
+id: 510B46AE51CF7
+data: Tick<span class="o">(</span>0<span class="o">)</span>
+
+id: 510B46AF4631D
+data: Tick<span class="o">(</span>1<span class="o">)</span>
+</code></pre></div>
+<p>这是一个长连接请求，在连接创建时会先进入init/3里，返回<code>cowboy_req:chunked_reply</code>表示以chunked方式返回数据。注意init函数的返回<code>{loop, Req, #state{}}.</code>，loop会让handler进入循环状态，最后的hibernate会使进程hibernation直到有消息到达。</p>
+
+<p>为了触发info/3操作，于是这里首先在init里send_after了一个<code>{message, &quot;Init Tick&quot;}</code>，于是一秒后info/3被调用。</p>
+
+<p><code>info({message, Msg}</code>匹配到这个消息，使用<code>cowboy_req:chunk</code>发送了一个带id和data的返回数据。这个是eventsource定义的格式，data部分会被忠实的显示在/event页面上。</p>
+
+<h3><code>cowboy_loop_handler</code></h3>
+
+<h4>init</h4>
+
+<p>实际使用中肯定不会如此简单，往往我们希望在一个接口上提供数据的推送(GET)，并且还能接收要推送的内容(POST)。这里融合REST和loop来实现这样一个handler：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="p">-</span><span class="ni">module</span><span class="p">(</span><span class="n">loop_handler</span><span class="p">).</span>
+<span class="p">-</span><span class="ni">behaviour</span><span class="p">(</span><span class="n">cowboy_loop_handler</span><span class="p">).</span>
+
+<span class="c">%% cowboy handler callbacks</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span>
+        <span class="n">init</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">allowed_methods</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">content_types_accepted</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">info</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">terminate</span><span class="o">/</span><span class="mi">3</span>
+    <span class="p">]).</span>
+
+<span class="p">-</span><span class="ni">record</span><span class="p">(</span><span class="nl">state</span><span class="p">,</span> <span class="p">{}).</span>
+
+<span class="nf">init</span><span class="p">(_</span><span class="nv">Type</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="p">_</span><span class="nv">Opts</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="k">case</span> <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">method</span><span class="p">(</span><span class="nv">Req</span><span class="p">)</span> <span class="k">of</span>
+        <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;POST&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="p">_}</span> <span class="o">-&gt;</span>
+            <span class="p">{</span><span class="n">upgrade</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">cowboy_rest</span><span class="p">};</span>
+        <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;GET&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nv">Req1</span><span class="p">}</span> <span class="o">-&gt;</span>
+            <span class="nv">Req2</span> <span class="o">=</span> <span class="n">chunk_start</span><span class="p">(</span><span class="nv">Req1</span><span class="p">),</span>
+            <span class="n">ok</span> <span class="o">=</span> <span class="nn">pg2</span><span class="p">:</span><span class="nf">join</span><span class="p">(</span><span class="n">notify_group</span><span class="p">,</span> <span class="n">self</span><span class="p">()),</span>
+            <span class="p">{</span><span class="n">loop</span><span class="p">,</span> <span class="nv">Req2</span><span class="p">,</span> <span class="nl">#state</span><span class="p">{},</span> <span class="n">hibernate</span><span class="p">}</span>
+    <span class="k">end</span><span class="p">.</span>
+</code></pre></div>
+<p>首先导出cowboy handler的回掉，注意除了info还加了<code>allowed_methods</code>。在init中首先取请求的method，如果是POST就转为<code>cowboy_rest</code>处理，不然调用<code>chunk_start</code>准备推送信息：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="nf">chunk_start</span><span class="p">(</span><span class="nv">Req</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Headers</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;content-type&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;text/event-stream&quot;</span><span class="o">&gt;&gt;</span><span class="p">},</span>
+        <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;connection&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;keep-alive&quot;</span><span class="o">&gt;&gt;</span><span class="p">}</span>
+    <span class="p">],</span>
+    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Req2</span><span class="p">}</span> <span class="o">=</span> <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">chunked_reply</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nv">Headers</span><span class="p">,</span> <span class="nv">Req</span><span class="p">),</span>
+    <span class="nv">Data</span> <span class="o">=</span> <span class="nn">jsx</span><span class="p">:</span><span class="nf">encode</span><span class="p">(</span><span class="err">#</span><span class="p">{</span>
+        <span class="o">&lt;&lt;</span><span class="s">&quot;messages&quot;</span><span class="o">&gt;&gt;</span> <span class="o">=&gt;</span> <span class="o">&lt;&lt;</span><span class="s">&quot;connected&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+        <span class="o">&lt;&lt;</span><span class="s">&quot;timestamp&quot;</span><span class="o">&gt;&gt;</span> <span class="o">=&gt;</span> <span class="n">timestamp</span><span class="p">()</span>
+    <span class="p">}),</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">chunk</span><span class="p">([</span><span class="s">&quot;data: &quot;</span><span class="p">,</span> <span class="nv">Data</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">],</span> <span class="nv">Req2</span><span class="p">),</span>
+    <span class="nv">Req2</span><span class="p">.</span>
+</code></pre></div>
+<p>这里直接推送<code>data: {json}</code>格式的数据，使用jsx:encode可以方便的转化record为json。</p>
+
+<h4>POST请求的处理</h4>
+
+<p>接着来看POST处理部分，既然是REST handler，那么少不了这样的定义：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="c">%% only allowed post for REST</span>
+<span class="nf">allowed_methods</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{[</span><span class="o">&lt;&lt;</span><span class="s">&quot;POST&quot;</span><span class="o">&gt;&gt;</span><span class="p">],</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">}.</span>
+
+<span class="nf">content_types_accepted</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{[{</span><span class="o">&lt;&lt;</span><span class="s">&quot;application/json&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">handle_post</span><span class="p">}],</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">}.</span>
+</code></pre></div>
+<p>这里先用<code>allowed_methods</code>限制只接受POST请求(正常情况也是如此)，并且用<code>content_types_accepted</code>将输入限制为json，并转交handle_post处理：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="nf">handle_post</span><span class="p">(</span><span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Body</span><span class="p">,</span> <span class="nv">Req1</span><span class="p">}</span> <span class="o">=</span> <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">body</span><span class="p">(</span><span class="nv">Req</span><span class="p">),</span>
+    <span class="k">case</span> <span class="nn">jsx</span><span class="p">:</span><span class="nf">decode</span><span class="p">(</span><span class="nv">Body</span><span class="p">)</span> <span class="k">of</span>
+        <span class="nv">Data</span> <span class="o">-&gt;</span>
+            <span class="n">notify_all</span><span class="p">(</span><span class="nv">Data</span><span class="p">),</span>
+            <span class="p">{</span><span class="n">true</span><span class="p">,</span> <span class="nv">Req1</span><span class="p">,</span> <span class="nv">State</span><span class="p">}</span>
+    <span class="k">end</span><span class="p">.</span>
+</code></pre></div>
+<p>处理也很简单，从请求中取出Body的json数据并decode为对象，接着调用<code>notify_all(Data)</code>发给其他进程</p>
+
+<h4>pg2 notify</h4>
+
+<p>细心的你应该注意到init里的<code>pg2:join(notify_group, self())</code>了。因为cowboy为每个连接分配了一个进程，在初始化中又使用pg2模块将这些进程添加到notify<em>group里，这样就得到一个类似在线(进程)列表的东西，可以用`pg2:get</em>members(notify_group)`取到：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="nf">notify_all</span><span class="p">(</span><span class="nv">Msg</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nn">lists</span><span class="p">:</span><span class="nf">foreach</span><span class="p">(</span>
+        <span class="k">fun</span><span class="p">(</span><span class="nv">Listener</span><span class="p">)</span> <span class="o">-&gt;</span>
+            <span class="nn">lager</span><span class="p">:</span><span class="nf">info</span><span class="p">(</span><span class="s">&quot;notify </span><span class="si">~p</span><span class="s">: </span><span class="si">~p</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nv">Listener</span><span class="p">,</span> <span class="nv">Msg</span><span class="p">]),</span>
+            <span class="nv">Listener</span> <span class="o">!</span> <span class="p">{</span><span class="n">message</span><span class="p">,</span> <span class="nv">Msg</span><span class="p">}</span>
+        <span class="k">end</span><span class="p">,</span> <span class="nn">pg2</span><span class="p">:</span><span class="nf">get_members</span><span class="p">(</span><span class="n">notify_group</span><span class="p">)).</span>
+</code></pre></div>
+<p><code>notify_all/1</code>里对每个notify_group里的进程（以GET方式连进来的请求），都发送了一个<code>{message, Msg}</code>消息给对应进程的loop handler处理。</p>
+
+<p>最后就是info里将进程收到的消息，以chunk的方式发给连接在自己上面的客户端：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="nf">info</span><span class="p">({</span><span class="n">message</span><span class="p">,</span> <span class="nv">Msg</span><span class="p">},</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Data</span> <span class="o">=</span> <span class="nn">jsx</span><span class="p">:</span><span class="nf">encode</span><span class="p">(</span><span class="err">#</span><span class="p">{</span>
+        <span class="o">&lt;&lt;</span><span class="s">&quot;messages&quot;</span><span class="o">&gt;&gt;</span> <span class="o">=&gt;</span> <span class="nv">Msg</span><span class="p">,</span>
+        <span class="o">&lt;&lt;</span><span class="s">&quot;timestamp&quot;</span><span class="o">&gt;&gt;</span> <span class="o">=&gt;</span> <span class="n">timestamp</span><span class="p">()</span>
+    <span class="p">}),</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="nn">cowboy_req</span><span class="p">:</span><span class="nf">chunk</span><span class="p">([</span><span class="s">&quot;data: &quot;</span><span class="p">,</span> <span class="nv">Data</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">],</span> <span class="nv">Req</span><span class="p">),</span>
+    <span class="p">{</span><span class="n">loop</span><span class="p">,</span> <span class="nv">Req</span><span class="p">,</span> <span class="nv">State</span><span class="p">,</span> <span class="n">hibernate</span><span class="p">}.</span>
+</code></pre></div>
+<p>注: pg2相对全局的register好处是不会广播到飞组外的进程，减小foreach的规模。</p>
+
+<h2>在relx里集成sync和其它自带app</h2>
+
+<h3>observer</h3>
+
+<p>observer是Erlang里的利器，不过relx默认打包的release却没有加载它。网上找了好久才找到解决办法，修改relx.config如下：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="p">{</span><span class="n">release</span><span class="p">,</span> <span class="p">{</span><span class="n">zserver_release</span><span class="p">,</span> <span class="s">&quot;1&quot;</span><span class="p">},</span> <span class="p">[</span><span class="n">zserver</span><span class="p">,</span>
+        <span class="n">syntax_tools</span><span class="p">,</span> <span class="n">compiler</span><span class="p">,</span> <span class="n">sync</span><span class="p">,</span>
+        <span class="n">debugger</span><span class="p">,</span>
+        <span class="n">observer</span><span class="p">,</span> <span class="n">runtime_tools</span><span class="p">,</span> <span class="n">wx</span>
+    <span class="p">]}.</span>
+<span class="p">{</span><span class="n">extended_start_script</span><span class="p">,</span> <span class="n">true</span><span class="p">}.</span>
+</code></pre></div>
+<p>observer要添加<code>observer, runtime_tools, wx</code>三个库，类似debuger和tools也是加在release这里。</p>
+
+<h3>sync</h3>
+
+<p>sync是个动态更新代码的利器，不过官方的relx部分写的比较简单，实际配置还要进行如下操作：</p>
+
+<ol>
+<li>relx.config里加上<code>syntax_tools, compiler, sync</code>，加sync是为了让sync自动运行；</li>
+<li>erlang.mk里relx-rel的命令，需要加上-d参数：<code>@$(RELX) -d -c $(RELX_CONFIG) $(RELX_OPTS)</code></li>
+<li>rel/sys.config里，改成下面这样：</li>
+</ol>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="p">[</span>
+    <span class="p">{</span><span class="n">sync</span><span class="p">,</span> <span class="p">[</span>
+        <span class="p">{</span><span class="n">src_dirs</span><span class="p">,</span> <span class="p">{</span><span class="n">replace</span><span class="p">,</span> <span class="p">[{</span><span class="s">&quot;./lib/zserver-0.1.0/src/&quot;</span><span class="p">,</span> <span class="p">[{</span><span class="n">outdir</span><span class="p">,</span> <span class="s">&quot;./lib/zserver-0.1.0/ebin/&quot;</span><span class="p">}]}]}}</span>
+    <span class="p">]}</span>
+<span class="p">].</span>
+</code></pre></div>
+<p>虽然第二步-d使用dev模式生成软连接，但运行的代码却是在zserver_release下的，所以src要指向<code>./lib/zserver-版本/</code>这个软连接下。这样sync就能找到要reload的代码了：</p>
+<div class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="p">(</span><span class="n">zserver</span><span class="p">@</span><span class="mi">127</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">1</span><span class="p">)</span><span class="mi">2</span><span class="o">&gt;</span> <span class="nn">sync_scanner</span><span class="p">:</span><span class="nf">info</span><span class="p">().</span>
+<span class="nv">Sync</span> <span class="nv">Info</span><span class="p">...</span>
+<span class="nf">ok</span>
+<span class="p">(</span><span class="n">zserver</span><span class="p">@</span><span class="mi">127</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">1</span><span class="p">)</span><span class="mi">3</span><span class="o">&gt;</span> <span class="nv">Modules</span><span class="p">:</span> <span class="p">[</span><span class="n">chatroom_manager</span><span class="p">,</span><span class="n">chatroom_server</span><span class="p">,</span><span class="n">zserver_sup</span><span class="p">,</span><span class="n">ranch_acceptor</span><span class="p">,</span>
+          <span class="n">ranch_acceptors_sup</span><span class="p">,</span><span class="n">ranch_conns_sup</span><span class="p">,</span><span class="n">ranch_listener_sup</span><span class="p">,</span><span class="n">ranch_tcp</span><span class="p">,</span>
+          <span class="n">ranch</span><span class="p">,</span><span class="n">lager_default_formatter</span><span class="p">,</span><span class="n">cowboy</span><span class="p">,</span><span class="n">lager_msg</span><span class="p">,</span><span class="n">cowboy_router</span><span class="p">,</span>
+          <span class="n">lager_stdlib</span><span class="p">,</span><span class="n">zserver_app</span><span class="p">,</span><span class="n">lager_format</span><span class="p">,</span><span class="n">lager_default_tracer</span><span class="p">,</span><span class="n">glc_code</span><span class="p">,</span>
+          <span class="n">glc_lib</span><span class="p">,</span><span class="n">gr_manager</span><span class="p">,</span><span class="n">gr_counter</span><span class="p">,</span><span class="n">lager_trunc_io</span><span class="p">,</span><span class="n">gr_param</span><span class="p">,</span><span class="n">glc_ops</span><span class="p">,</span><span class="n">glc</span><span class="p">,</span>
+          <span class="n">error_logger_lager_h</span><span class="p">,</span><span class="n">lager_file_backend</span><span class="p">,</span><span class="n">lager_console_backend</span><span class="p">,</span><span class="n">lager</span><span class="p">,</span>
+          <span class="n">lager_backend_throttle</span><span class="p">,</span><span class="n">lager_handler_watcher</span><span class="p">,</span><span class="n">lager_crash_log</span><span class="p">,</span>
+          <span class="n">lager_handler_watcher_sup</span><span class="p">,</span><span class="n">lager_util</span><span class="p">,</span><span class="n">lager_config</span><span class="p">,</span><span class="n">lager_sup</span><span class="p">,</span>
+          <span class="n">lager_app</span><span class="p">,</span><span class="n">cowboy_clock</span><span class="p">,</span><span class="n">cowboy_sup</span><span class="p">,</span><span class="n">cowboy_app</span><span class="p">,</span><span class="n">gr_manager_sup</span><span class="p">,</span>
+          <span class="n">gr_param_sup</span><span class="p">,</span><span class="n">gr_counter_sup</span><span class="p">,</span><span class="n">gr_sup</span><span class="p">,</span><span class="n">gr_app</span><span class="p">,</span><span class="n">sync_notify</span><span class="p">,</span><span class="n">sync_utils</span><span class="p">,</span>
+          <span class="n">sync_scanner</span><span class="p">,</span><span class="n">sync_options</span><span class="p">,</span><span class="n">sync</span><span class="p">,</span><span class="n">ranch_server</span><span class="p">,</span><span class="n">ranch_sup</span><span class="p">,</span><span class="n">ranch_app</span><span class="p">,</span>
+          <span class="n">erts_internal</span><span class="p">,</span><span class="n">erlang</span><span class="p">,</span><span class="n">erl_prim_loader</span><span class="p">,</span><span class="n">prim_zip</span><span class="p">,</span><span class="n">zlib</span><span class="p">,</span><span class="n">prim_file</span><span class="p">,</span>
+          <span class="n">prim_inet</span><span class="p">,</span><span class="n">prim_eval</span><span class="p">,</span><span class="n">init</span><span class="p">,</span><span class="n">otp_ring0</span><span class="p">]</span>
+<span class="nv">Source</span> <span class="nv">Dirs</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;./lib/zserver-0.1.0/src/&quot;</span><span class="p">]</span>
+<span class="nv">Source</span> <span class="nv">Files</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;./lib/zserver-0.1.0/src/chat_handler.erl&quot;</span><span class="p">,</span>
+               <span class="s">&quot;./lib/zserver-0.1.0/src/chatroom_manager.erl&quot;</span><span class="p">,</span>
+               <span class="s">&quot;./lib/zserver-0.1.0/src/chatroom_server.erl&quot;</span><span class="p">,</span>
+               <span class="s">&quot;./lib/zserver-0.1.0/src/event_handler.erl&quot;</span><span class="p">,</span>
+               <span class="s">&quot;./lib/zserver-0.1.0/src/loop_handler.erl&quot;</span><span class="p">,</span>
+               <span class="s">&quot;./lib/zserver-0.1.0/src/main_handler.erl&quot;</span><span class="p">,</span>
+               <span class="s">&quot;./lib/zserver-0.1.0/src/rest_handler.erl&quot;</span><span class="p">,</span>
+               <span class="s">&quot;./lib/zserver-0.1.0/src/ws_handler.erl&quot;</span><span class="p">,</span>
+               <span class="s">&quot;./lib/zserver-0.1.0/src/zserver_app.erl&quot;</span><span class="p">,</span>
+               <span class="s">&quot;./lib/zserver-0.1.0/src/zserver_sup.erl&quot;</span><span class="p">]</span>
+</code></pre></div>
+<p>不过实际中也遇到<code>sync_scanner</code>什么也不输出的情况，目前找到的办法是重新<code>make &amp;&amp; make restart</code>一下。而且实际中也遇到第一次修改了代码只编译但不reload的情况，实在是不明白什么原因引起的...</p>
+
+<p>正常的话修改了代码就会在log里看到提示，beam被自动热更新到app上了。</p>
+
+<p>完整代码已经上传到<a href="https://github.com/upbit/zserver/tree/775bb686aee77659eb07d7796ccbc41b74762573">upbit/zserver:775bb68</a>，注意clone后先make deps下载依赖库。</p>
+]]></content:encoded>
+      <dc:date>2015-03-08T00:00:00+08:00</dc:date>
+    </item>
     <item>
       <title>使用最新FLEX代码编译 FLEX injected 并打包</title>
       <link>http://blog.imaou.com/erlang/2015/03/07/make_dtrukr_injected_with_latest_flex.html</link>
-      <description><![CDATA[昨天听朋友提到Flipboard/FLEX这个项目，还有个用theos写的Tweak：FLEX_injected。不过用作者自带的deb安装无效，于是自己重新了个。
+      <description><![CDATA[昨天听朋友提到Flipboard/FLEX这个项目，还有个用theos写的Tweak：FLEX_injected。不过用作者自带的deb安装了不能用，于是自己重新编译了个。
 ]]></description>
       <pubDate>Sat, 07 Mar 2015 00:00:00 +0800</pubDate>
       <guid>http://blog.imaou.com/erlang/2015/03/07/make_dtrukr_injected_with_latest_flex.html</guid>
-      <content:encoded><![CDATA[<p>昨天听朋友提到<a href="https://github.com/Flipboard/FLEX">Flipboard/FLEX</a>这个项目，还有个用theos写的Tweak：<a href="https://github.com/dtrukr/FLEX_injected">FLEX_injected</a>。不过用作者自带的deb安装无效，于是自己重新了个。</p>
+      <content:encoded><![CDATA[<p>昨天听朋友提到<a href="https://github.com/Flipboard/FLEX">Flipboard/FLEX</a>这个项目，还有个用theos写的Tweak：<a href="https://github.com/dtrukr/FLEX_injected">FLEX_injected</a>。不过用作者自带的deb安装了不能用，于是自己重新编译了个。</p>
 
 <p><span style="color:#F00"><strong>下载地址</strong></span>：<a href="http://blog.imaou.com/assets/download/com.daapps.FLEXInjected_0.0.1-FLEX_e3612e3.deb"><code>com.daapps.FLEXInjected_0.0.1-FLEX_e3612e3.deb</code></a></p>
 
@@ -281,6 +896,8 @@ Cloning into <span class="s1">&#39;.erlang.mk.build&#39;</span>...
 <p>最常见的是返回json数据，所以这里演示下如何用jsx封装json返回一个atom数组(会转成字符串)和时间戳。注意jsx:encode是不带换行符的，建议返回Body前用<code>&lt;&lt; Body/binary, &lt;&lt;&quot;\n\n&quot;&gt;&gt;/binary &gt;&gt;</code>加2个回车在末尾。</p>
 
 <p>附上完整的源码包：<a href="http://blog.imaou.com/assets/download/cowboy_zserver_src1.tar.gz"><code>cowboy_zserver_src1.tar.gz</code></a></p>
+
+<p>整个项目已经上传到GitHub，可以<a href="https://github.com/upbit/zserver">在这里找到</a>。</p>
 
 <h2>运行</h2>
 
@@ -5854,6 +6471,6 @@ _netblocks.google.com.  3599    IN  TXT &quot;v=spf1 ip4:216.239.32.0/19 ip4:64.
 ]]></content:encoded>
       <dc:date>2014-08-01T00:00:00+08:00</dc:date>
     </item>
-    <dc:date>2015-03-07T00:00:00+08:00</dc:date>
+    <dc:date>2015-04-02T00:00:00+08:00</dc:date>
   </channel>
 </rss>
