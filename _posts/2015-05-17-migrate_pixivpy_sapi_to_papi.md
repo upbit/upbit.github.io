@@ -174,7 +174,7 @@ User-Agent: PixivIOSApp/5.6.0
 
 可以看到，json结构的最外层多了个分页相关的pagination，再也不用像以前一样调SAPI翻到没数据才切日期了。response里是个数组，但大部分接口的count都是1，里面才是需要的ranking数据。
 
-ranking数据中除了告诉这个返回的查询模式和参数，works是最终的榜单内容。其中每个illust都有rank和previous_rank来标记它的上升/下降情况，以及一个`image_urls`数组返回`image_sizes`指定的图片URL。当`include_stats=true`时，stats里会带回作品的评分、收藏计数等信息。最后还有个user，包含了该作品作者的基本信息，以及是否follow过`is_following`等标志。作品也带有`favorite_id`标记来判断是否已经收藏，这回再也不用一个个查询了..
+ranking数据中除了告诉这个返回的查询模式和参数，works是最终的榜单内容。其中每个illust都有rank和`previous_rank`来标记它的上升/下降情况，以及一个`image_urls`数组返回`image_sizes`指定的图片URL。当`include_stats=true`时，stats里会带回作品的评分、收藏计数等信息。最后还有个user，包含了该作品作者的基本信息，以及是否follow过`is_following`等标志。作品也带有`favorite_id`标记来判断是否已经收藏，这回再也不用一个个查询了..
 
 相信后面几个版本Pixiv iOS会逐步抛弃SAPI（目前还有个拉取评论接口在用），如果你的App还有在用这些接口的，早日切换到更好用的Public-API吧。
 
