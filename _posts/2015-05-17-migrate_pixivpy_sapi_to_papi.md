@@ -26,6 +26,7 @@ for img in ranking.works:
 ~~~
 
 查询**过去排行**，可以这样增加一个date参数，此时返回的就是2015-05-01的历史周排行数据：
+
 ~~~python
 rank_list = api.papi.ranking_all('weekly', 1, 50, date='2015-05-01')
 ~~~
