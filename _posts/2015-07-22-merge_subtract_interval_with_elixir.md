@@ -35,7 +35,7 @@ share: true
     Enum.reverse([{tmpst,tmped} | acc])
   end
   defp merge_interval(tmpst, tmped, [{st,ed}|tail], acc) do
-    case tmped > st do
+    case tmped >= st do
       true -> merge_interval(tmpst, max(tmped, ed), tail, acc)
       false -> merge_interval(st, ed, tail, [{tmpst,tmped} | acc])
     end
