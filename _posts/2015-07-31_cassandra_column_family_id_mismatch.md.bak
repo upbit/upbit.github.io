@@ -18,12 +18,24 @@ ERROR [Thrift:15] 2015-07-31 11:24:54,781 CustomTThreadPoolServer.java:224 - Err
 java.lang.RuntimeException: java.util.concurrent.ExecutionException: java.lang.RuntimeException: org.apache.cassandra.exceptions.ConfigurationException: Column family ID mismatch (found 1660db50-3717-11e5-bb49-4d1f4d3a1785; expected 16490d90-3717-11e5-baae-43ee31cfdaef)
 ~~~
 
-按Aleksey Yeschenko在CASSANDRA-8387里的回复，
+可以看到该节点接收到一个`1660db50-3717-11e5-bb49-4d1f4d3a1785`的CFID，但本机的内容为`16490d90-3717-11e5-baae-43ee31cfdaef`。遇上这种情况如果这个表有多个replicas(copys)，可能会因为无法同步导致写入阻塞或超时。
+
+也许你也曾经和我一样，天真的以为作者会在新版里修复。不过截止2.1.5里，按Aleksey Yeschenko在CASSANDRA-8387里的回复，这个会在CASSANDRA-6038(大概3.x)里修复：
 
 ~~~
 Your issue is a consequence of CASSANDRA-5202, that made table uuids non-deterministic.
 I don't see a good way to fix this in 2.1. I will try to handle this scenario in CASSANDRA-6038, with the new schema change protocol, but even then, I don't see an immediate solution - yet.
 ~~~
+
+曾经因为两次ALTER TABLE了同一张表，而把整个keyspace弄得卡死无法写入，最后无意中rolling重启所有节点后问题解决。最后找到[Cassandra keyspace does not propagate to newly added node](http://stackoverflow.com/a/27629161)这篇回答：
+
+~~~
+1. stop the Cassandra service/process, typically by running: nodetool drain
+2. Remove the Schema* and Migration* sstables inside of your system keyspace
+3. After starting Cassandra again, this node will notice the missing information and pull in the correct schema from one of the other nodes.
+~~~
+
+其实2做不做无所谓，2.x的Cassandra重启后，会找其他节点拉取正确的schema让自己
 
 ~~~
 WARN  [Thread-21] 2015-07-31 12:08:15,879 IncomingTcpConnection.java:94 - UnknownColumnFamilyException reading from socket; closing
