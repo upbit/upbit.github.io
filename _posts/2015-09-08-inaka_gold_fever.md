@@ -7,7 +7,7 @@ comments: true
 share: true
 ---
 
-对inaka没什么好感，是因为`inaka_json`里封装的那个难用的json结构。不过最近看到他们新开源的一个GameServer `[gold_fever](https://github.com/inaka/gold_fever): A Treasure Hunt for Erlangers`，正好可以一睹带状态的游戏Server写法，于是抽空读了便代码。
+对inaka没什么好感，是因为`inaka_json`里封装的那个难用的json结构。不过最近看到他们新开源的一个GameServer `[gold_fever](https://github.com/inaka/gold_fever): A Treasure Hunt for Erlangers`，正好可以一睹带状态的游戏Server写法。
 
 ## 运行gold_fever
 
@@ -37,4 +37,4 @@ Eshell V7.0.2  (abort with ^G)
 
 默认用的是`generic.config`，还可以指定自己的关卡。
 
-## 代码结构
+貌似有固定的模式，玩法除了猜，就是直接读源码了。
