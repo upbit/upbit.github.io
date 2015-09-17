@@ -7,7 +7,6 @@ jekyll build
 
 # gen archive/ and rss.xml
 cp -Rvf _site/archive ./
-cp -vf _site/rss.xml ./
 exit
 
 # compress CSS
