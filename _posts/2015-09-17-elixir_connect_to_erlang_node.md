@@ -96,7 +96,7 @@ defmodule ApiBridge do
 
   # 导出rpc宏，可以像写本地调用一样调远程函数，例如：rpc :erlang.node()
   defmacro rpc(exp, timeout \\ 1000) do
-    
+    {{:., _, [module, function]}, _, args} = exp
     quote do call(unquote(module), unquote(function), unquote(args), unquote(timeout)) end
   end
 
