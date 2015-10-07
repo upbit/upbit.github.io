@@ -96,27 +96,10 @@ defmodule ApiBridge do
 
   # 导出rpc宏，可以像写本地调用一样调远程函数，例如：rpc :erlang.node()
   defmacro rpc(exp, timeout \\ 1000) do
+    node = rpc_nodename(:api)
     { {:., _, [module, function]}, _, args } = exp
-    quote do call(unquote(module), unquote(function), unquote(args), unquote(timeout)) end
+    quote do :rpc.call(unquote(node), unquote(module), unquote(function), unquote(args), unquote(timeout)) end
   end
-
-  defstart start_link, gen_server_opts: [name: :api] do
-    # 从config中取得连接信息
-    set_cookie
-    rpc_node = rpc_nodename('api')
-    # 启动时尝试ping节点（这里还有待改进，比如检查cookie以及定期检查是否可以联通）
-    case Node.ping(rpc_node) do
-      :pang -> raise RuntimeError, message: "Failed to connect to node #{rpc_node}"
-      :pong -> initial_state(%{:rpc_node => rpc_node})
-    end
-  end
-
-  defcall call(module, function, args, timeout \\ 1000), state: %{:rpc_node => rpc_node} do
-    :rpc.call(rpc_node, module, function, args, timeout)
-    |> reply
-  end
-
-  defcast stop, do: stop_server(:normal)
 
   ## priv
   defp config(key) do
@@ -125,19 +108,11 @@ defmodule ApiBridge do
 
   defp rpc_nodename(prefix) do
     # 如果有配置rpc_node则使用该IP地址，不然则使用本机eth0的IP
-    str_ip = case to_string(config(:rpc_node)) do
+    str_ip = case config(:rpc_node) do
       nil -> {:ok, [{:addr, tmp_ip}]} = :inet.ifget('eth0', [:addr]); :inet_parse.ntoa(tmp_ip)
       conf_ip -> conf_ip
     end
-    String.to_atom(to_string(prefix) <> "@" <> str_ip)
-  end
-  defp set_cookie do
-    # 要求在config/prod.secret.exs中提供cookie信息，不然抛出RuntimeError
-    atom_cookie = case config(:cookie) do
-      nil -> raise RuntimeError, message: "Couldn't get node cookie, please set cookie in config/#{Mix.env}.exs"
-      cookie -> cookie |> to_string |> String.to_atom
-    end
-    Node.set_cookie(atom_cookie)
+    String.to_atom(to_string(prefix) <> "@" <> to_string(str_ip))
   end
 end
 ~~~
