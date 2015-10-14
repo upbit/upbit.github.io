@@ -5,14 +5,31 @@
 <title>耳语 - popular</title>
 <link rel="stylesheet" href="css/reset.min.css">
 <link rel="stylesheet" href="css/waterfall.min.css">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"> -->
 <style type="text/css">
+.text {
+display: block;
+padding: 0 8px;
+margin-top: 10px;
+margin-bottom: 2px;
+line-height: 1.35em;
+overflow: hidden;
+word-wrap: break-word;
+width: 240px;
+color: #333;
+font-size: 14px;
+font-family: arial,helvetica;
+}
+.nickname {
+font-weight: bold;
+color: #8F77B5;
+}
 .item { background-color: rgba(255, 224, 238, .4); }
 .item:hover { background-color: rgba(255, 224, 238, 0.8); }
 .gender_1 { color: #33A6B8; }
 .gender_2 { color: #E16B8C; }
 .icon_true {
-float:right;
+position: absolute;
 padding:4px;
 color:rgba(255,228,228,0.6);
 background-color:rgba(33,33,66,0.1);
@@ -21,6 +38,18 @@ border-radius:4px;
 }
 .icon_ {
 display:none;
+}
+.whisper_image {
+width:256px;
+height:256px;
+}
+.meta {
+font-size: 12px;
+color: #DAC9A6;
+}
+.bold {
+font-weight: bold;
+color: #BC9F77;
 }
 </style>
 </head>
@@ -33,10 +62,18 @@ display:none;
 <script type="text/x-handlebars-template" id="waterfall-tpl">
 {{#popular}}
 <div class="item">
-    <div style="width:256px;height:256px;background-image:url({{url}});background-size:contain;">
+    <div class="image">
         <i class="icon_{{user_upload}} fa fa-upload"></i>
+        <img class="whisper_image" src="{{url}}" alt="{{wid}}">
     </div>
-    <p class="text"><span class="nickname gender_{{gender}}">@{{nickname}}</span>: {{text}}</p>
+    <div class="text">
+        <div class="content"><span class="nickname gender_{{gender}}">@{{nickname}}</span>: {{text}}</div>
+        <div class="meta">
+            赞:<span class="bold me2">{{me2}}</span>&nbsp;
+            回复:<span class="bold replies">{{replies}}</span>&nbsp;
+            ts:<span class="bold ts">{{ts}}</span>
+        </div>
+    </div>
 </div>
 {{/popular}}
 </script>
