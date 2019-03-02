@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>   
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+<title>Ingress-iOS ports代码阅读1 - ScannerViewController - 夢沉抹大拉</title>
+<meta name="description" content="生命不息，折腾不止" />
+
+<meta name="HandheldFriendly" content="True" />
+<meta name="MobileOptimized" content="320" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<link rel="apple-touch-icon" href="/assets/images/profile.png"/>
+
+<link rel="stylesheet" type="text/css" href="/assets/css/normalize.min.css" />
+<link rel="stylesheet" type="text/css" href="/assets/css/screen.min.css" />
+<!-- This is for syntax highlight -->
+<link rel="stylesheet" type="text/css" href="/assets/css/syntax.min.css">
+<!-- Customisation  -->
+<link rel="stylesheet" type="text/css" href="/assets/css/main.min.css">
+</head>
+<body class="home-template">
+<main class="content" role="main">
+
+	<article class="post">
+		<header class="post-header">
+			
+				<span class="blog-title"><a id="blog-logo" href="/">夢沉抹大拉</a></span>
+			 
+			&nbsp;&nbsp;
+			<span class="post-meta">
+			
+				<span style="color:#646A58">opensource on</span>
+			
+				<time datetime="2014-09-04">
+					<a href="/archive/2014/">04 Sep 2014</a>
+				</time>
+			</span>
+		</header>
+
+		<h2 class="post-title">Ingress-iOS ports代码阅读1 - ScannerViewController</h2>
+
+		<section class="post-content">
+			<p>昨晚装上VPN兴冲冲出去把Ingress升到了Lv2，觉得这种实境”世界”实在是让宅男出门的最佳办法，何况它还打着拯救/奴役世界的幌子。想想不用实现的这么复杂，只要有个简单的户外游戏，就能够持续给予我外出的动力：能够根据行走的距离累计游戏内的点数(或金钱)，完成一些特殊地点才能取得的成就，乃至通过自己的努力改变虚拟世界的状态(例如经商模拟类游戏，通过物品的交易提升某个地域的贸易等级，从而慢慢从小镇发展为城邦甚至王国)</p>
+
+<p>于是在GitHub上找到了曾经有人ports的 <a href="https://github.com/marstone/ingress-ios">Ingress for iOS</a>，打算下载下代码自己研究下，于是有了这篇文章。</p>
+
+<p>先研究主界面，虽然没有现在Ingress那么绚丽，但也足够满足最初的需求了。以下是运行截图：</p>
+
+<p><img src="/images/ingress-ios_screenshot.png" alt="Ingress for iOS" /></p>
+
+<p>从StoryBoard里可以看到，最初显示的由LoadingViewController控制，出口一个是Enbed Segue: GLKView，另一个则是Model Segue: ScannerViewController，也就是上面的正题 MapKit 界面。根据 Model Seque 的Identifier “LoadingCompletedSegue”可以找到如下代码：</p>
+
+<pre><code class="language-objective-c">- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    if ([segue.identifier isEqualToString:@"LoadingCompletedSegue"]) {
+        [[AppDelegate instance] setScannerViewController:(ScannerViewController *)segue.destinationViewController];
+
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:DeviceSoundToggleBackground]) {
+            [[SoundManager sharedManager] playMusic:@"Sound/sfx_ambient_scanner_base.aif" looping:YES];
+        }
+    }
+}
+</code></pre>
+
+<p>在loading动画结束后，切换ScannerViewController，并播放背景音效”Sound/sfx_ambient_scanner_base.aif”</p>
+
+<p>转到ScannerViewController，从它的两个连接都是处理地图点击的，暂时不用关心：</p>
+
+<ol>
+  <li>Model Seque<PortalDetailSegue>: PortalDetailViewController</PortalDetailSegue></li>
+  <li>Model Seque<FactionChooseSegue>: MissionViewController</FactionChooseSegue></li>
+</ol>
+
+<p>回到ScannerViewController的 viewDidLoad:，先初始化几个单例类，然后将自身的_mapView导出到AppDelegate里的mapView变量里，并检查app是否有定位权限：</p>
+
+<pre><code class="language-objective-c">- (void)viewDidLoad {
+
+    [[AppDelegate instance] setMapView:_mapView];
+
+    // 检查app是否有定位服务的权限
+    [self validateLocationServicesAuthorization];
+    ...
+}
+
+- (void)validateLocationServicesAuthorization {
+    if ([CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
+        // 没有定位权限，显示 "Please allow location services" 的提示
+        if (!locationAllowHUD) {
+            _mapView.hidden = YES;
+            playerArrowImage.hidden = YES;
+            // MBProgressHUD: Displays a simple HUD window containing a progress indicator and two optional labels for short messages
+            locationAllowHUD = [[MBProgressHUD alloc] initWithView:self.view];
+            locationAllowHUD.userInteractionEnabled = NO;
+            locationAllowHUD.mode = MBProgressHUDModeCustomView;
+            locationAllowHUD.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"warning.png"]];
+            locationAllowHUD.labelText = @"Please allow location services";
+            locationAllowHUD.labelFont = [UIFont fontWithName:[[[UILabel appearance] font] fontName] size:16];
+            locationAllowHUD.removeFromSuperViewOnHide = YES;
+            __weak __block typeof(locationAllowHUD) weakLocationAllowHUD = locationAllowHUD;
+            locationAllowHUD.completionBlock = ^{
+                weakLocationAllowHUD = nil;
+            };
+            [self.view addSubview:locationAllowHUD];
+            [locationAllowHUD show:YES];
+        }
+    } else {
+        if (locationAllowHUD) {
+            [locationAllowHUD hide:YES];
+            _mapView.hidden = NO;
+            playerArrowImage.hidden = NO;
+        }
+    }
+    
+    [self updateRangeCircleView];
+}
+</code></pre>
+
+<p>接着从StoryBoard里读取CommViewController模板，添加到SubView中：</p>
+
+<pre><code class="language-objective-c">- (void)viewDidLoad {
+
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"MainStoryboard_iPhone" bundle:nil];
+    commVC = [storyboard instantiateViewControllerWithIdentifier:@"CommViewController"];
+    [self.view addSubview:commVC.view];
+
+    [self updateCommViewControllerFrame];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(statusBarFrameDidChange:) name:UIApplicationDidChangeStatusBarFrameNotification object:nil];
+    [self addChildViewController:commVC];
+
+}
+</code></pre>
+
+<p>根据StoryBoard布局，这个层是对话框界面，暂时pass继续向后看。接着初始化LocationManager和手势操作：</p>
+
+<pre><code class="language-objective-c">- (void)viewDidLoad {
+
+    [[LocationManager sharedInstance] addDelegate:self];
+
+    UIPinchGestureRecognizer *recognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
+    [_mapView addGestureRecognizer:recognizer];
+
+    UILongPressGestureRecognizer *mapViewLognPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(mapLongPress:)];
+    [_mapView addGestureRecognizer:mapViewLognPressGestureRecognizer];
+
+    #if __IPHONE_OS_VERSION_MAX_ALLOWED &gt;= 70000
+
+    if ([_mapView respondsToSelector:@selector(isPitchEnabled)]) {
+        _mapView.pitchEnabled = NO;
+    }
+
+    if ([_mapView respondsToSelector:@selector(isRotateEnabled)]) {
+        _mapView.rotateEnabled = NO;
+    }
+
+    #endif
+
+}
+</code></pre>
+
+<p>先设置 LocationManager <CLLocationManagerDelegate> 为self，然后绑定Pinch手势到handlePinch:，LongPress手势到mapLongPress:。iOS7.0以上SDK时，还设置MapKit本身无法Pitch和Rotate。</CLLocationManagerDelegate></p>
+
+<p>LocationManager是一个自定义对CLLocationManager的单例封装，里面包含了对CLLocationManager的初始化操作：</p>
+
+<pre><code class="language-objective-c">- (id)init {
+    self = [super init];
+    if (self) {
+        
+        _delegates = [NSMutableArray array];
+        
+        _locationManager = [[CLLocationManager alloc] init];
+        _locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation;        // 设置为最佳精度(不怕过于耗电?)
+        if ([_locationManager respondsToSelector:@selector(activityType)]) {
+            _locationManager.activityType = CLActivityTypeFitness;                      // 当位置改变时才进行跟踪
+        }
+        _locationManager.delegate = self;
+        
+        [_locationManager startUpdatingLocation];
+        [_locationManager startUpdatingHeading];
+        
+    }
+    return self;
+}
+</code></pre>
+
+<p>XMOverlay是一个MKOverlay协议的对象，貌似是用于绘制什么内容到Map上的。暂时看不懂，不过也有<a href="http://stackoverflow.com/questions/5283741/how-do-i-create-an-image-overlay-and-add-to-mkmapview">How do I create an image overlay and add to MKMapView?</a>这样的例子可以参考，暂时也不用管它：</p>
+
+<pre><code class="language-objective-c">- (void)viewDidLoad {
+
+    _xmOverlay = [XMOverlay new];
+    [_mapView addOverlay:_xmOverlay];
+
+}
+</code></pre>
+
+<p>后面的quickActionsMenu初始化和NSNotificationCenter部分，无关地图绘制的部分就先pass了。</p>
+
+<p>未完待续：<a href="http://blog.imaou.com/opensource/2014/09/16/ingress_ios_code_reading2.html">Ingress-iOS ports代码阅读2 - Portal的绘制</a></p>
+
+		</section>
+
+		<footer class="post-footer">
+		<!-- If we want to display author's name and bio -->
+		
+			<section class="author">
+				<header> <a href="/about/"> <img class="profile" src="/assets/images/profile.png" alt="Author's profile picture"></a></header>
+				<article>
+					<!-- Author Name -->
+					<h4> 木桩 </h4>
+					<!-- Author Bio -->
+					<p> 
+					这是一个追寻抹大拉之地的geeker<BR />
+					生命不息，折腾不止。
+					</p>
+				</article>
+			</section>				
+		
+
+		
+		<section class="share">
+			<h4>Share this post</h4>
+			<a class="icon-twitter" href="http://twitter.com/share?text=Ingress-iOS ports代码阅读1 - ScannerViewController&amp;url=http://blog.imaou.com/opensource/2014/09/04/ingress_ios_code_reading1.html"
+				onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+				<span class="hidden">Twitter</span>
+			</a>
+			<a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.imaou.com/opensource/2014/09/04/ingress_ios_code_reading1.html"
+				onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+				<span class="hidden">Facebook</span>
+			</a>
+			<a class="icon-google-plus" href="https://plus.google.com/share?url=http://blog.imaou.com/opensource/2014/09/04/ingress_ios_code_reading1.html"
+			   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+				<span class="hidden">Google+</span>
+			</a>
+		</section>
+		
+		
+		
+		<section class="disqus">
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+				var disqus_shortname = 'magdalene'; // required: replace example with your forum shortname
+
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+					})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+			<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		</section>
+		
+			
+		</footer>
+
+	</article>
+
+</main>
+
+	<footer class="site-footer">
+		<a class="subscribe icon-feed" href="/archive/2019/"><span class="tooltip">Archive 2019</span></a>
+		<div class="inner">
+			 <section class="copyright">All content copyright <a href="/">夢沉抹大拉</a> &copy;  &bull; All rights reserved.</section>
+			 <section class="poweredby">Made with Jekyll using <a href="http://github.com/rosario/kasper">Kasper theme</a></section>
+		</div>
+	</footer>
+
+	<script asynsc type="text/javascript" src="/assets/js/jquery-1.11.1.min.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/index.js"></script>
+
+	<script type="text/javascript">
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-53731588-1', 'auto');
+		ga('send', 'pageview');
+
+	</script>
+
+</body>
+</html>

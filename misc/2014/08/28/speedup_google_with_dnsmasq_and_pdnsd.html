@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>   
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+<title>使用dnsmasq+pdnsd在WNDRMACv2(OpenWrt)上，让全家科学上网 - 夢沉抹大拉</title>
+<meta name="description" content="生命不息，折腾不止" />
+
+<meta name="HandheldFriendly" content="True" />
+<meta name="MobileOptimized" content="320" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<link rel="apple-touch-icon" href="/assets/images/profile.png"/>
+
+<link rel="stylesheet" type="text/css" href="/assets/css/normalize.min.css" />
+<link rel="stylesheet" type="text/css" href="/assets/css/screen.min.css" />
+<!-- This is for syntax highlight -->
+<link rel="stylesheet" type="text/css" href="/assets/css/syntax.min.css">
+<!-- Customisation  -->
+<link rel="stylesheet" type="text/css" href="/assets/css/main.min.css">
+</head>
+<body class="home-template">
+<main class="content" role="main">
+
+	<article class="post">
+		<header class="post-header">
+			
+				<span class="blog-title"><a id="blog-logo" href="/">夢沉抹大拉</a></span>
+			 
+			&nbsp;&nbsp;
+			<span class="post-meta">
+			
+				<span style="color:#646A58">misc on</span>
+			
+				<time datetime="2014-08-28">
+					<a href="/archive/2014/">28 Aug 2014</a>
+				</time>
+			</span>
+		</header>
+
+		<h2 class="post-title">使用dnsmasq+pdnsd在WNDRMACv2(OpenWrt)上，让全家科学上网</h2>
+
+		<section class="post-content">
+			<p><a href="https://plus.google.com/100484131192950935968/about">imouto.host</a>的Google地址又抽风了，各种打不开。</p>
+
+<p>虽然这个更新很及时，但一来没有可以用curl脚本获取的地址(作者提供的是Google Drive和Dropbox)，二来台式机和笔记本都要增量更新这个host(因为里面还有防adobe激活的条目)，于是打算一劳永逸的在路由器里解决问题。</p>
+
+<p>其实早就给家里WNDRMACv2刷了OpenWrt，但自从发现跑go-agent经常莫名退出后(当然现在go-agent也不好用了)，它唯一的用途就是拿来做samba服务器了→_→</p>
+
+<p><br /></p>
+
+<p>今天逛Github无意中看到<a href="https://github.com/clowwindy">clowwindy大大</a>的ChinaDNS-C，以前就看过ChinaDNS的python代码，里面很巧妙的用黑名单丢弃无效的DNS应答，于是在路由器里搭建个干净的DNS想法又冒了出来。</p>
+
+<p>然而折腾到中午才意识到，ChinaDNS-C是配合dnsmasq用的，而且需要定时更新黑名单IP列表。于是改用dnsmasq+pdnsd方案，让pdnsd强制用tcp方式访问远端dns，来得到干净的DNS返回。</p>
+
+<p>在墙内科学上网并非简单的事，这里记录下整个过程免得以后再走弯路…</p>
+
+<p><br /></p>
+
+<h3 id="1-安装dnsmasq和pdnsd">1. 安装dnsmasq和pdnsd</h3>
+
+<pre><code># opkg update
+# opkg install dnsmasq pdnsd
+</code></pre>
+
+<p>配置方面文章 <a href="https://wido.me/sunteya/use-openwrt-resolve-gfw-dns-spoofing">openwrt 上通过 pdnsd 和 dnsmasq 解决 dns 污染</a> 解释的比较清楚，这里就只列出我的参数配置：</p>
+
+<p>首先为dnsmasq.conf增加conf-dir，并生成个gfw.conf：</p>
+
+<pre><code class="language-bash">mkdir /etc/dnsmasq.d/
+touch /etc/dnsmasq.d/gfw.conf
+echo "conf-dir=/etc/dnsmasq.d" &gt;&gt; /etc/dnsmasq.conf
+</code></pre>
+
+<h3 id="2-配置pdnsdetcpdnsdconf">2. 配置pdnsd(/etc/pdnsd.conf)：</h3>
+
+<pre><code class="language-bash">global {
+    server_ip = 192.168.1.1;
+    server_port = 5353;             # 因为dnsmasq用了53，这里要换一个
+    query_method=tcp_only;
+}
+server {
+    label= "Main";
+    ip = 8.8.8.8;                   # 使用Google的DNS，其实OpenDNS的也可以
+    root_server = on;
+    uptest = none;
+}
+</code></pre>
+
+<p>接着配置/etc/dnsmasq.d/gfw.conf将Google转发到路由器(192.168.1.1)的pdnsd(5353)端口上：</p>
+
+<pre><code class="language-bash">server=/.google.com/192.168.1.1#5353
+server=/.google.com.hk/192.168.1.1#5353
+server=/.gmail.com/192.168.1.1#5353
+</code></pre>
+
+<p>重启dnsmasq和pdnsd：</p>
+
+<pre><code>/etc/init.d/dnsmasq restart
+/etc/init.d/pdnsd restart
+</code></pre>
+
+<h3 id="3-解决google丢包无法访问的问题">3. 解决Google丢包无法访问的问题</h3>
+
+<p>试着dig下gmail：</p>
+
+<pre><code># dig @192.168.1.1 www.gmail.com
+
+;; ANSWER SECTION:
+www.gmail.com.      26832   IN  CNAME   mail.google.com.
+mail.google.com.    105726  IN  CNAME   googlemail.l.google.com.
+googlemail.l.google.com. 628    IN  A   173.194.33.85
+googlemail.l.google.com. 628    IN  A   173.194.33.86
+</code></pre>
+
+<p>173.194.33.85/173.194.33.86 返回是对了，但是怎么ping不通？拿<a href="http://ping.chinaz.com">工具</a>测试了下，发现虽然这个是Google的IP，但国内很多地方都无法访问。</p>
+
+<p>换了著名的404域名facebook.com，用tcp模式直接对pdnsd dig了下，果然返回了正确地址(假的一般是37.61.54.158)。这个返回IP直接用https是可以访问的：</p>
+
+<pre><code># dig @192.168.1.1 -p5353 www.facebook.com
+
+;; ANSWER SECTION:
+www.facebook.com.   1436    IN  CNAME   star.c10r.facebook.com.
+star.c10r.facebook.com. 900 IN  A   31.13.79.96
+</code></pre>
+
+<p>看来最近GFW对Google服务器有特殊照顾，有些地址ping各种丢包，有些则直接100% lost。</p>
+
+<p>想了下imouto.host的解决办法————找到最稳定的Google服务器，imouto.host容易失效无非是那个IP被重新封掉而已，只要找到足够多的有效IP(而不是DNS返回的国外可用IP)，就能保证Google的访问变得流畅。</p>
+
+<p>先查询Google的IP地址段：</p>
+
+<pre><code># dig @8.8.8.8 _netblocks.google.com txt
+
+; &lt;&lt;&gt;&gt; DiG 9.9.1-P3 &lt;&lt;&gt;&gt; @8.8.8.8 _netblocks.google.com txt
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 30349
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 512
+;; QUESTION SECTION:
+;_netblocks.google.com.     IN  TXT
+
+;; ANSWER SECTION:
+_netblocks.google.com.  3599    IN  TXT "v=spf1 ip4:216.239.32.0/19 ip4:64.233.160.0/19 ip4:66.249.80.0/20 ip4:72.14.192.0/18 ip4:209.85.128.0/17 ip4:66.102.0.0/20 ip4:74.125.0.0/16 ip4:64.18.0.0/20 ip4:207.126.144.0/20 ip4:173.194.0.0/16 ~all"
+
+;; Query time: 196 msec
+;; SERVER: 8.8.8.8#53(8.8.8.8)
+;; WHEN: Thu Aug 28 17:13:19 2014
+;; MSG SIZE  rcvd: 265
+</code></pre>
+
+<p>“v=spf1 ip4:216.239.32.0/19 ip4:64.233.160.0/19 ip4:66.249.80.0/20 ip4:72.14.192.0/18 ip4:209.85.128.0/17 ip4:66.102.0.0/20 ip4:74.125.0.0/16 ip4:64.18.0.0/20 ip4:207.126.144.0/20 ip4:173.194.0.0/16 ~all”</p>
+
+<p>这个就是Google的IP分段，参考imouto.host里google.com/google.com.hk的IP，前后连续ping了几个服务器，然后用https访问确认下是不是Google的搜索服务器。</p>
+
+<p>得到IP后直接在/etc/hosts里增加本地host，重启dnsmasq：</p>
+
+<pre><code class="language-bash"># Google
+64.233.168.103  www.google.com
+64.233.168.104  www.google.com
+64.233.168.105  www.google.com
+64.233.168.106  www.google.com
+210.242.125.84  www.google.com.hk
+210.242.125.88  www.google.com.hk
+</code></pre>
+
+<p>重启后，Google就被固定在上面几个速度较快的服务器上了。至此成功科学上网。</p>
+
+<p><br /></p>
+
+<h3 id="另外给一个dnsmasq的完整gfwconf">另外给一个dnsmasq的完整gfw.conf</h3>
+
+<pre><code class="language-bash">server=/.android.com/192.168.1.1#5353
+server=/.appspot.com/192.168.1.1#5353
+server=/.blogspot.com/192.168.1.1#5353
+server=/.box.com/192.168.1.1#5353
+server=/.chrome.com/192.168.1.1#5353
+server=/.dropbox.com/192.168.1.1#5353
+server=/.dropboxusercontent.com/192.168.1.1#5353
+server=/.facebook.com/192.168.1.1#5353
+server=/.facebook.net/192.168.1.1#5353
+server=/.fbcdn.net/192.168.1.1#5353
+server=/.flickr.com/192.168.1.1#5353
+server=/.g.cn/192.168.1.1#5353
+server=/.g.co/192.168.1.1#5353
+server=/.ggpht.com/192.168.1.1#5353
+server=/.gmail.com/192.168.1.1#5353
+server=/.goo.gl/192.168.1.1#5353
+server=/.google-analytics.com/192.168.1.1#5353
+server=/.google.cn/192.168.1.1#5353
+server=/.google.co.jp/192.168.1.1#5353
+server=/.google.com/192.168.1.1#5353
+server=/.google.com.hk/192.168.1.1#5353
+server=/.google.com.sg/192.168.1.1#5353
+server=/.google.com.tw/192.168.1.1#5353
+server=/.googleadservices.com/192.168.1.1#5353
+server=/.googleapis.com/192.168.1.1#5353
+server=/.googlecode.com/192.168.1.1#5353
+server=/.googledrive.com/192.168.1.1#5353
+server=/.googlehosted.com/192.168.1.1#5353
+server=/.googlelabs.com/192.168.1.1#5353
+server=/.googlemail.com/192.168.1.1#5353
+server=/.googlesource.com/192.168.1.1#5353
+server=/.googlesyndication.com/192.168.1.1#5353
+server=/.googleusercontent.com/192.168.1.1#5353
+server=/.gstatic.cn/192.168.1.1#5353
+server=/.gstatic.com/192.168.1.1#5353
+server=/.live.com/192.168.1.1#5353
+server=/.mediawiki.org/192.168.1.1#5353
+server=/.panoramio.com/192.168.1.1#5353
+server=/.staticflickr.com/192.168.1.1#5353
+server=/.t.co/192.168.1.1#5353
+server=/.tfbnw.net/192.168.1.1#5353
+server=/.thefacebook.com/192.168.1.1#5353
+server=/.tinypic.com/192.168.1.1#5353
+server=/.tweetdeck.com/192.168.1.1#5353
+server=/.twimg.com/192.168.1.1#5353
+server=/.twitpic.com/192.168.1.1#5353
+server=/.twitter.com/192.168.1.1#5353
+server=/.wikimedia.org/192.168.1.1#5353
+server=/.wikinews.org/192.168.1.1#5353
+server=/.wikipedia.org/192.168.1.1#5353
+server=/.wordpress.com/192.168.1.1#5353
+server=/.wordpress.org/192.168.1.1#5353
+server=/.wp.com/192.168.1.1#5353
+server=/.yimg.com/192.168.1.1#5353
+server=/.youtube.com/192.168.1.1#5353
+server=/.ytimg.com/192.168.1.1#5353
+</code></pre>
+
+<p>ps: 好吧，我认了… 原来不光Google.com，绝大多数Google的服务器访问都不太稳定。估计GFW是定期对DNS解析返回的Goolge IP进行封锁，这也就是为什么有些不常用的地址相反又可以访问。看来要想想其他办法了</p>
+
+		</section>
+
+		<footer class="post-footer">
+		<!-- If we want to display author's name and bio -->
+		
+			<section class="author">
+				<header> <a href="/about/"> <img class="profile" src="/assets/images/profile.png" alt="Author's profile picture"></a></header>
+				<article>
+					<!-- Author Name -->
+					<h4> 木桩 </h4>
+					<!-- Author Bio -->
+					<p> 
+					这是一个追寻抹大拉之地的geeker<BR />
+					生命不息，折腾不止。
+					</p>
+				</article>
+			</section>				
+		
+
+		
+		<section class="share">
+			<h4>Share this post</h4>
+			<a class="icon-twitter" href="http://twitter.com/share?text=使用dnsmasq+pdnsd在WNDRMACv2(OpenWrt)上，让全家科学上网&amp;url=http://blog.imaou.com/misc/2014/08/28/speedup_google_with_dnsmasq_and_pdnsd.html"
+				onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+				<span class="hidden">Twitter</span>
+			</a>
+			<a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.imaou.com/misc/2014/08/28/speedup_google_with_dnsmasq_and_pdnsd.html"
+				onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+				<span class="hidden">Facebook</span>
+			</a>
+			<a class="icon-google-plus" href="https://plus.google.com/share?url=http://blog.imaou.com/misc/2014/08/28/speedup_google_with_dnsmasq_and_pdnsd.html"
+			   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+				<span class="hidden">Google+</span>
+			</a>
+		</section>
+		
+		
+		
+		<section class="disqus">
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+				var disqus_shortname = 'magdalene'; // required: replace example with your forum shortname
+
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+					})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+			<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		</section>
+		
+			
+		</footer>
+
+	</article>
+
+</main>
+
+	<footer class="site-footer">
+		<a class="subscribe icon-feed" href="/archive/2019/"><span class="tooltip">Archive 2019</span></a>
+		<div class="inner">
+			 <section class="copyright">All content copyright <a href="/">夢沉抹大拉</a> &copy;  &bull; All rights reserved.</section>
+			 <section class="poweredby">Made with Jekyll using <a href="http://github.com/rosario/kasper">Kasper theme</a></section>
+		</div>
+	</footer>
+
+	<script asynsc type="text/javascript" src="/assets/js/jquery-1.11.1.min.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/index.js"></script>
+
+	<script type="text/javascript">
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-53731588-1', 'auto');
+		ga('send', 'pageview');
+
+	</script>
+
+</body>
+</html>

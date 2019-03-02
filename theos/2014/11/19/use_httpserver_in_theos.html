@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<head>   
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+<title>在Tweak中嵌入CocoaHTTPServer, 并访问任意目录文件 - 夢沉抹大拉</title>
+<meta name="description" content="生命不息，折腾不止" />
+
+<meta name="HandheldFriendly" content="True" />
+<meta name="MobileOptimized" content="320" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<link rel="apple-touch-icon" href="/assets/images/profile.png"/>
+
+<link rel="stylesheet" type="text/css" href="/assets/css/normalize.min.css" />
+<link rel="stylesheet" type="text/css" href="/assets/css/screen.min.css" />
+<!-- This is for syntax highlight -->
+<link rel="stylesheet" type="text/css" href="/assets/css/syntax.min.css">
+<!-- Customisation  -->
+<link rel="stylesheet" type="text/css" href="/assets/css/main.min.css">
+</head>
+<body class="home-template">
+<main class="content" role="main">
+
+	<article class="post">
+		<header class="post-header">
+			
+				<span class="blog-title"><a id="blog-logo" href="/">夢沉抹大拉</a></span>
+			 
+			&nbsp;&nbsp;
+			<span class="post-meta">
+			
+				<span style="color:#646A58">theos on</span>
+			
+				<time datetime="2014-11-19">
+					<a href="/archive/2014/">19 Nov 2014</a>
+				</time>
+			</span>
+		</header>
+
+		<h2 class="post-title">在Tweak中嵌入CocoaHTTPServer, 并访问任意目录文件</h2>
+
+		<section class="post-content">
+			<p>网上没有过多关于Theos中集成CocoaPods库的简单方案，只好学<a href="https://github.com/BishopFox/iSpy">iSpy</a>里自己动手写了。最终顺利将CocoaHTTPServer集成到Tweak中，实现%hook UIApplication并随目标程序监听指定端口，另外记录下CocoaHTTPServer访问沙盒外文件的方法。</p>
+
+<h2 id="编译libcocoahttpservera">编译libCocoaHTTPServer.a</h2>
+
+<p>先下载<a href="https://github.com/robbiehanson/CocoaHTTPServer">CocoaHTTPServer的源码</a>，并将需要的.h和.m放到同一个目录，如 CocoaHTTPServer/ 下。注意，子目录下的文件也需要放到一个目录里</p>
+
+<p>接着在目录中新建一个build.sh，输入如下内容：</p>
+
+<pre><code class="language-sh">#!/bin/sh
+
+OBJ="./objs"
+LIBNAME="libCocoaHTTPServer.a"
+ARCHS="-arch armv7 -arch armv7s -arch arm64"
+
+SDK=$(ls -1d /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iP* | tail -n1)
+echo $SDK
+
+# remove object files to build nice n clean
+echo '[+] Removing old object files ...'
+rm -Rf ${OBJ}
+mkdir ${OBJ}
+
+# compile the Objective-C stuff
+echo '[+] Compiling Objective-C files ...'
+CLANG_CFLAGS="-fobjc-arc -I /usr/include/libxml2 -Wno-format -Wno-mismatched-parameter-types -Wno-unused-function -Wno-deprecated-declarations -Wno-enum-conversion"
+cd ${OBJ}
+clang -c ../*.m ${ARCHS} -isysroot $SDK ${CLANG_CFLAGS}
+
+# See Makefile.* in the parent directory.
+echo "[+] Creating ${LIBNAME} archive"
+ar -rs ${LIBNAME} *.o &gt;/dev/null 2&gt;&amp;1
+
+mv -f ${LIBNAME} ../../
+echo '[+] done.'
+</code></pre>
+
+<p>此脚本用于查找同级目录下的所有.m文件，并编译链接为libCocoaHTTPServer.a，移动到上一层目录中。注意，多arch时务必添加 ar -s，为这个问题搞了好久。</p>
+
+<h2 id="封装httpserver">封装HTTPServer</h2>
+
+<p>封装一个单例模式的 CommandServer，方便在tweak中使用</p>
+
+<h3 id="commandserverh">CommandServer.h</h3>
+
+<pre><code class="language-objective-c">#ifndef __COMMAND_SERVER_H__
+#define __COMMAND_SERVER_H__
+
+#import &lt;Foundation/Foundation.h&gt;
+#import "CocoaHTTPServer/HTTPServer.h"
+
+@interface CommandServer : NSObject {
+@public
+	HTTPServer *httpServer;
+}
+
++ (CommandServer *)sharedInstance;
+- (void)initialize;
+- (BOOL)startServer;
+- (void)stopServer;
+
+@end
+
+#endif
+</code></pre>
+
+<h3 id="commandserverm">CommandServer.m</h3>
+
+<pre><code class="language-objective-c">#import "CommandServer/CommandServer.xm"
+#import "CommandServer.h"
+#import "ZLogDefines.h"
+
+#import "RootHTTPConnection.h"
+
+@implementation CommandServer
+
++ (CommandServer *)sharedInstance {
+	static CommandServer *sharedInstance = nil;
+	static dispatch_once_t once;
+	dispatch_once(&amp;once, ^{
+		sharedInstance = [[self alloc] init];
+	});
+	return sharedInstance;
+}
+
+- (void)initialize {
+	static dispatch_once_t once;
+
+	dispatch_once(&amp;once, ^{
+		ZLogNotice("Initializing CommandServer on: %s", TO_CSTR([[NSBundle mainBundle] bundleIdentifier]));
+
+		httpServer = [[HTTPServer alloc] init];
+		[httpServer setType:@"_http._tcp."];
+		[httpServer setConnectionClass:[RootHTTPConnection class]];
+
+
+		[httpServer setPort:8080];
+		[httpServer setDocumentRoot:@"/var/www/sites"];
+
+		NSError *error = nil;
+		if (![httpServer start:&amp;error]) {
+			ZLogError("Error starting HTTP Server: %s", TO_CSTR(error));
+			return;
+		}
+
+		ZLogWarn("Initialized CommandServer(%s), port %hu", TO_CSTR(httpServer.documentRoot), httpServer.port);
+
+	});
+}
+
+- (BOOL)startServer {
+	NSError *error;
+	BOOL ret = [httpServer start:&amp;error];
+	if (!ret) {
+		ZLogError("Error start HTTP server: %s", TO_CSTR(error));
+	}
+	return ret;
+}
+
+- (void)stopServer {
+	[httpServer stop];
+}
+
+@end
+</code></pre>
+
+<p>在 initialize: 里初始化HTTPServer并监听8080端口，documentRoot设为沙盒外的路径。<strong>这里如果直接运行会404</strong>，需要先实现 RootHTTPConnection。</p>
+
+<h3 id="roothttpconnectionh">RootHTTPConnection.h</h3>
+
+<pre><code class="language-objective-c">#ifndef __ROOT_HTTP_CONNECTION_H__
+#define __ROOT_HTTP_CONNECTION_H__
+
+#import "CocoaHTTPServer/HTTPConnection.h"
+@interface RootHTTPConnection : HTTPConnection {}
+@end
+
+#endif
+</code></pre>
+
+<h3 id="roothttpconnectionm">RootHTTPConnection.m</h3>
+
+<pre><code class="language-objective-c">#import "RootHTTPConnection.h"
+#import "RootStaticFileResponse.h"
+#import "ZLogDefines.h"
+
+@implementation RootHTTPConnection
+
+// Handle static content in system path
+- (NSObject&lt;HTTPResponse&gt; *)httpResponseForMethod:(NSString *)method URI:(NSString *)path {
+	ZLogNotice("[HTTP %s] %s", TO_CSTR(method), TO_CSTR(path));
+
+	NSString *filePath = [self filePathForURI:path allowDirectory:NO];
+	BOOL isDir = NO;
+	if (filePath &amp;&amp; [[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&amp;isDir] &amp;&amp; !isDir) {
+		return [[RootStaticFileResponse alloc] initWithFilePath:filePath forConnection:self];
+	}
+
+	return nil;		// 404
+}
+</code></pre>
+
+<p>httpResponseForMethod: 里，使用NSFileManager访问外部文件。不过返回的HTTPResponse对象，这里需要封装下Headers</p>
+
+<h3 id="rootstaticfileresponseh">RootStaticFileResponse.h</h3>
+
+<pre><code class="language-objective-c">#ifndef __ROOT_STATIC_FILE_RESPONSE_H__
+#define __ROOT_STATIC_FILE_RESPONSE_H__
+
+#import "CocoaHTTPServer/HTTPFileResponse.h"
+@interface RootStaticFileResponse : HTTPFileResponse {}
+@end
+
+#endif
+</code></pre>
+
+<h3 id="rootstaticfileresponsem">RootStaticFileResponse.m</h3>
+
+<pre><code class="language-objective-c">#import "RootStaticFileResponse.h"
+
+@implementation RootStaticFileResponse
+
+- (NSDictionary *)httpHeaders {
+	NSDictionary *contentTypes = @{
+		@"html": @"text/html; charset=UTF-8",
+		@"js": @"text/javascript",
+		@"css": @"text/css",
+		@"png": @"image/png",
+		@"jpg": @"image/jpeg",
+		@"jpeg": @"image/jpeg",
+		@"ico": @"image/ico",
+		@"gif": @"image/gif",
+		@"svg": @"image/svg+xml",
+		@"tff": @"application/x-font-ttf",
+		@"eot": @"application/vnd.ms-fontobject",
+		@"woff": @"application/x-font-woff",
+		@"otf": @"application/x-font-otf",
+	};
+
+	/* If we don't know the mime-type we serve the file as binary data */
+	NSString *contentType = [contentTypes valueForKey:[filePath pathExtension]];
+	if ([contentType length] == 0) {
+		contentType = @"application/octet-stream";
+	}
+
+	NSDictionary *headers = [[NSDictionary alloc] initWithObjectsAndKeys:
+		contentType, @"Content-type",
+	nil];
+
+	return headers;
+}
+
+@end
+</code></pre>
+
+<p>更多详细代码，可以看<a href="https://github.com/BishopFox/iSpy">iSpy</a>的HttpServer部分。</p>
+
+<h2 id="use-in-tweakxm">Use in Tweak.xm</h2>
+
+<p>封装好 CommandServer，使用就很简单了：</p>
+
+<pre><code class="language-objective-c">#import "CommandServer/CommandServer.h"
+#import "ZLogDefines.h"
+
+%group InitHTTPServer
+
+%hook UIApplication
+- (id)init {
+  self = %orig;
+  if (self) {
+    // init server when launched
+    [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+      ZLogNotice("HTTP Server init");
+      [[CommandServer sharedInstance] initialize];
+    }];
+
+    // start/stop server for background
+    [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidEnterBackgroundNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+      ZLogNotice("HTTP Server stop");
+      [[CommandServer sharedInstance] stopServer];
+    }];
+    [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationWillEnterForegroundNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+      ZLogNotice("HTTP Server start");
+      [[CommandServer sharedInstance] startServer];
+    }];
+
+  }
+
+  return self;
+}
+%end
+
+%end	// end of group InitHTTPServer
+
+
+%ctor {
+  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+  ZLogPrint("Init");
+  %init(InitHTTPServer);
+
+  [pool drain];
+}
+</code></pre>
+
+<p>%hook UIApplication的init，在其中添加3个事件：</p>
+
+<ol>
+  <li>UIApplicationDidFinishLaunchingNotification:  启动完成后，初始化 CommandServer</li>
+  <li>UIApplicationDidEnterBackgroundNotification:  进入后台时停止 CommandServer (后台运行好像要换GCDWebServer)</li>
+  <li>UIApplicationWillEnterForegroundNotification: 从后台唤醒时，重新启动 CommandServer</li>
+</ol>
+
+<h2 id="link-with-cocoahttpserver">Link with CocoaHTTPServer</h2>
+
+<p>Makefile如下：</p>
+
+<pre><code class="language-makefile">ARCHS := armv7 arm64
+
+include theos/makefiles/common.mk
+
+THEOS_PACKAGE_DIR=./debs
+
+TWEAK_NAME = commandServer
+testHttpServer_FILES = Tweak.xm $(wildcard CommandServer/*.m)
+testHttpServer_CFLAGS += -I./
+testHttpServer_LDFLAGS += -L./ -lCocoaHTTPServer -lxml2
+testHttpServer_FRAMEWORKS = UIKit CFNetwork Security CoreGraphics
+
+include $(THEOS_MAKE_PATH)/tweak.mk
+
+lib::
+	rm -f libCocoaHTTPServer.a
+	cd CocoaHTTPServer/; ./build.sh
+
+after-clean::
+	rm -f $(THEOS_PACKAGE_DIR)/*.deb
+</code></pre>
+
+<p>链接CocoaHTTPServer需要libCocoaHTTPServer.a和libxml2.a，并且用到 UIKit CFNetwork Security CoreGraphics 四个FRAMEWORK。</p>
+
+<p>之后make package，用 cinject 加载dylib后，就可以通过http://<IP>:8080访问到index.html了</IP></p>
+
+		</section>
+
+		<footer class="post-footer">
+		<!-- If we want to display author's name and bio -->
+		
+			<section class="author">
+				<header> <a href="/about/"> <img class="profile" src="/assets/images/profile.png" alt="Author's profile picture"></a></header>
+				<article>
+					<!-- Author Name -->
+					<h4> 木桩 </h4>
+					<!-- Author Bio -->
+					<p> 
+					这是一个追寻抹大拉之地的geeker<BR />
+					生命不息，折腾不止。
+					</p>
+				</article>
+			</section>				
+		
+
+		
+		<section class="share">
+			<h4>Share this post</h4>
+			<a class="icon-twitter" href="http://twitter.com/share?text=在Tweak中嵌入CocoaHTTPServer, 并访问任意目录文件&amp;url=http://blog.imaou.com/theos/2014/11/19/use_httpserver_in_theos.html"
+				onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+				<span class="hidden">Twitter</span>
+			</a>
+			<a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.imaou.com/theos/2014/11/19/use_httpserver_in_theos.html"
+				onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+				<span class="hidden">Facebook</span>
+			</a>
+			<a class="icon-google-plus" href="https://plus.google.com/share?url=http://blog.imaou.com/theos/2014/11/19/use_httpserver_in_theos.html"
+			   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+				<span class="hidden">Google+</span>
+			</a>
+		</section>
+		
+		
+		
+		<section class="disqus">
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+				var disqus_shortname = 'magdalene'; // required: replace example with your forum shortname
+
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+					})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+			<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		</section>
+		
+			
+		</footer>
+
+	</article>
+
+</main>
+
+	<footer class="site-footer">
+		<a class="subscribe icon-feed" href="/archive/2019/"><span class="tooltip">Archive 2019</span></a>
+		<div class="inner">
+			 <section class="copyright">All content copyright <a href="/">夢沉抹大拉</a> &copy;  &bull; All rights reserved.</section>
+			 <section class="poweredby">Made with Jekyll using <a href="http://github.com/rosario/kasper">Kasper theme</a></section>
+		</div>
+	</footer>
+
+	<script asynsc type="text/javascript" src="/assets/js/jquery-1.11.1.min.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/index.js"></script>
+
+	<script type="text/javascript">
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-53731588-1', 'auto');
+		ga('send', 'pageview');
+
+	</script>
+
+</body>
+</html>

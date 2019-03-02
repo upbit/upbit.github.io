@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html>
+<head>   
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+<title>gensim：关于 word2vec 模型的训练与效果对比 - 夢沉抹大拉</title>
+<meta name="description" content="生命不息，折腾不止" />
+
+<meta name="HandheldFriendly" content="True" />
+<meta name="MobileOptimized" content="320" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<link rel="apple-touch-icon" href="/assets/images/profile.png"/>
+
+<link rel="stylesheet" type="text/css" href="/assets/css/normalize.min.css" />
+<link rel="stylesheet" type="text/css" href="/assets/css/screen.min.css" />
+<!-- This is for syntax highlight -->
+<link rel="stylesheet" type="text/css" href="/assets/css/syntax.min.css">
+<!-- Customisation  -->
+<link rel="stylesheet" type="text/css" href="/assets/css/main.min.css">
+</head>
+<body class="home-template">
+<main class="content" role="main">
+
+	<article class="post">
+		<header class="post-header">
+			
+				<span class="blog-title"><a id="blog-logo" href="/">夢沉抹大拉</a></span>
+			 
+			&nbsp;&nbsp;
+			<span class="post-meta">
+			
+				<span style="color:#646A58">opensource on</span>
+			
+				<time datetime="2015-08-31">
+					<a href="/archive/2015/">31 Aug 2015</a>
+				</time>
+			</span>
+		</header>
+
+		<h2 class="post-title">gensim：关于 word2vec 模型的训练与效果对比</h2>
+
+		<section class="post-content">
+			<p><a href="https://code.google.com/p/word2vec/">word2vec</a>是Google开源的<code>word to vector</code>工具，通过将词映射到N可配的向量空间，然后基于这个进行聚类、找近似词以及词性分析等。关于word2vec原理和核心算法CBOW(Continuous Bag-Of-Words)、Skip-Gram，有道的同学那篇<a href="http://techblog.youdao.com/?p=915">Deep Learning 实战之 word2vec</a>已经解释得很详细了，不过里面对训练word2vec并不十分详细。这里记录下用社交网络的短语料，训练python版<a href="https://radimrehurek.com/gensim/">gensim</a>的word2vec，并给出几种参数下的结果对比。</p>
+
+<p>个人理解word2vec计算的并不仅仅是同义词，而是“说XX时大家还在说啥”。比如CBOW算法下“未来”在训练语料中的近似词：</p>
+
+<pre><code># 未来
+0.731042385101 将来
+0.626714587212 未知
+0.620467960835 前方
+0.60384118557 前途
+0.597409725189 前路
+0.573458373547 今后
+0.564740657806 何方
+0.553156137466 光明
+0.535071134567 方向
+0.515792012215 迷惘
+</code></pre>
+
+<p>从算法原理上讲，其实word2vec是先计算输入词“未来”的上下文，然后根据这些上下文看还有哪些词会出现在这些上下文中。因此说“未来”时一般还会提到“未知”等近似词。</p>
+
+<h2 id="语料预处理">语料预处理</h2>
+
+<p>输入语料是我们社交网络平台中，用户发表的文字内容。除了需要过滤其中的话题，还需要将emoji等不想训练的字符给去掉。</p>
+
+<ol>
+  <li>用<code>re.sub(r'(#.+#$)|(^#.+#)', r'', line)</code>去掉句子前后的<code>#话题#</code>；</li>
+  <li>用jieba切词（试了不少词库发现效果都没自带的dict.txt.big，开启hmm效果好）；</li>
+  <li>用<code>u'([\u4E00-\u9FA5a-zA-Z0-9+_]+)'</code>去掉特殊字符和标点（注意因为是unicode范围，输入word需要decode(‘utf8’)）；</li>
+  <li>(word2vec可选) 用stop_words表去停用词，因为后续doc2vec也会用到。</li>
+</ol>
+
+<p>处理完将分词结果用空格分隔，写入文件备用。</p>
+
+<h2 id="训练word2vec">训练word2vec</h2>
+
+<p>训练代码如下。定义了一个<code>WORD2VEC_LIST</code>方便对比效果，其中参数意义可以参考gensim的<a href="https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec">Word2Vec</a>，但需要注意如下几个地方：</p>
+
+<ol>
+  <li>默认sg=1是<code>skip-gram</code>算法，对低频词敏感；不过这里因为是计算近似词所以要选择CBOW(sg=0)；</li>
+  <li>size是向量的维数，太小的话词映射后会因为冲突而影响结果。但如果太大则会吃更多内存并让算法计算变慢；</li>
+  <li>window是前后看词的单位，3表示在目标词前看3-b个词，后面看b个词（b在0-3之间随机）；这里因为语料的句子太短，设置过大的window会导致结果并不那么理想，最后CBOW用的3。</li>
+  <li>negative和sample根据训练结果微调即可，sample采样虽然根据官网介绍设置1e-5，不过因为训练语料只有198w，不能降低太多高频词的采样率；</li>
+</ol>
+
+<pre><code class="language-python">#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+
+import os
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
+sys.dont_write_bytecode = True
+
+import random
+import multiprocessing
+import logging
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
+from gensim.models import Word2Vec
+from gensim.models.word2vec import LineSentence
+
+WORD2VEC_INDEX = 2
+CPU_COUNT = multiprocessing.cpu_count()
+WORD2VEC_LIST = [
+  (0, 'word2vec/whispers_SG_s400_w5_m5.word2vec', Word2Vec(size=400, window=5, min_count=5, workers=CPU_COUNT)),
+  (1, 'word2vec/whispers_SG_s800_w6_m5_n3_s1e5.word2vec', Word2Vec(sg=1, size=800, window=6, min_count=5, negative=3, sample=0.001, hs=1, workers=CPU_COUNT)),
+  (2, 'word2vec/whispers_CBOW_s800_w3_m5_n3_s1e3.word2vec', Word2Vec(sg=0, size=800, window=3, min_count=5, negative=3, sample=0.001, hs=1, workers=CPU_COUNT)),
+]
+
+def train(model, sentences, output_file='test.word2vec', train_sentences=None):
+  model.build_vocab(sentences)
+  if train_sentences:
+    model.train(train_sentences)
+  #model.save_word2vec_format(output_file)
+  model.save(output_file)
+  return model
+
+def test_model_random(sentences, output_file):
+  #model = Word2Vec.load_word2vec_format(output_file, binary=False)
+  model = Word2Vec.load(output_file)
+  list_sentences = list(sentences)
+  for i in range(10):
+    sentence = random.choice(list_sentences)
+    while len(sentence) &lt; 3:
+      sentence = random.choice(list_sentences)
+
+    word = random.choice(sentence)
+    print "&gt;&gt;&gt; %s: %s" % (word, "".join(sentence))
+    try:
+      for w,s in model.most_similar(word):
+        print "%.6f %s" % (s, w)
+    except:
+      print "[WARN] low-frequency word"
+
+def test_model(word_file, output_file):
+  model = Word2Vec.load(output_file)
+  print "# %s %s" % (model, output_file)
+  for line in file(word_file):
+    word = line.strip().decode('utf8')
+    print "&gt;&gt;&gt; %s" % (word)
+    try:
+      for w,s in model.most_similar(word):
+        print "%.6f %s" % (s, w)
+    except:
+      print "[WARN] low-frequency word"
+
+def main():
+  (index, output_file, model) = WORD2VEC_LIST[WORD2VEC_INDEX]
+  sentences = LineSentence('data/whispers.default_hmm.cut')
+
+  if not os.path.exists(output_file):
+    train_sentences = LineSentence('data/whispers.default_hmm.random.cut')
+    train(model, sentences, output_file, train_sentences)
+  else:
+    #test_model_random(sentences, output_file)
+    test_model('data/exam_words.txt', output_file)
+
+if __name__ == '__main__':
+  main()
+</code></pre>
+
+<p>第一遍运行脚本，先从data下读取切词后的原始结果<code>data/whispers.default_hmm.cut</code>，训练集则用gshuf打乱过的<code>data/whispers.default_hmm.random.cut</code>结果。</p>
+
+<p>word2vec在MacBook Pro上跑，速度就已经足够快了，198w切好的句子跑完2分钟多一点。然后再次运行脚本，load之前训练好的模型用<code>exam_words.txt</code>中的词验证训练结果。</p>
+
+<h2 id="word2vec的应用">word2vec的应用</h2>
+
+<p>从训练的结果看，word2vec比doc2vec要好训练（推测是doc2vec的训练语料太少，后面通过调整alpha训练10轮的结果对比，也验证了这个推论），能够较准确的找出相似的词。</p>
+
+<p>另外看了word2vec的几种应用，其中有个通过用户下载行为对app进行归类推荐的想法，让思路豁然开朗。word2vec的输入并不一定要word，还可以是用户动作，比如通过购买行为记录，计算“买这个东西的人还买过什么”。</p>
+
+<p>而doc2vec则可以理解把文档id也作为一个词参与计算，然后计算id中其他词作为上下文时，还有哪些id会出现。</p>
+
+<h2 id="附录结果对比">附录：结果对比</h2>
+
+<h3 id="whispers_cbow_s800_w3_m5_n3_s1e3"><code>whispers_CBOW_s800_w3_m5_n3_s1e3</code></h3>
+
+<p>CBOW的这组结果应该算是比较满意的，不过也有些失败的例子，还有些错误和分词有关：</p>
+
+<pre><code># word2vec/whispers_CBOW_s800_w3_m5_n3_s1e3.word2vec
+&gt;&gt;&gt; 爱
+0.564116 恨
+0.560403 被爱
+0.546249 爱而
+0.539997 爱吧
+0.526085 爱就
+0.523703 爱是
+0.518686 爱不
+0.518104 爱才
+0.516561 爱得
+0.515721 易
+&gt;&gt;&gt; 项羽
+[WARN] low-frequency word
+&gt;&gt;&gt; 欢乐谷
+0.745494 爬山
+0.702343 动物园
+0.698726 漫展
+0.687801 海边
+0.687060 自驾
+0.684906 走起
+0.683502 溜冰
+0.681430 公园
+0.680788 求偶遇
+0.679675 泰国
+&gt;&gt;&gt; 失恋
+0.621785 被甩
+0.605838 失业
+0.599387 热恋
+0.589815 失眠
+0.574171 生病
+0.559140 求安慰
+0.558890 感冒
+0.555163 发烧
+0.554850 想哭
+0.547747 莫名其妙
+&gt;&gt;&gt; 暧昧
+0.572567 玩暧昧
+0.572470 的关系
+0.570271 亲密
+0.534876 暧昧的
+0.534097 不清不楚
+0.530855 一夜情
+0.528726 上床
+0.524055 交往
+0.523750 纠缠不清
+0.521261 开玩笑
+&gt;&gt;&gt; 夜晚
+0.781178 深夜
+0.699581 黑夜
+0.693043 的夜
+0.664650 夜里
+0.664033 雨夜
+0.662923 午夜
+0.658913 午后
+0.650000 寂寞的夜晚
+0.647464 夜啊
+0.638766 无眠
+&gt;&gt;&gt; 小姑娘
+0.677786 妹纸
+0.673918 帅哥
+0.673189 小妹妹
+0.665101 小女孩
+0.664320 女孩子
+0.662617 少妇
+0.661902 女的
+0.655488 00后
+0.651500 美女
+0.649677 姑凉
+&gt;&gt;&gt; 享受
+0.620551 享受孤独
+0.608163 自由自在
+0.607659 向往
+0.598412 安静
+0.587269 宁静
+0.579711 过活
+0.574437 享受生活
+0.573531 独处
+0.571954 品尝
+0.546671 行走
+&gt;&gt;&gt; 懦弱
+0.797787 倔强
+0.778501 软弱
+0.744164 胆小
+0.739091 固执
+0.713551 自卑
+0.712069 高傲
+0.693034 懦弱的
+0.689877 幼稚
+0.676650 自私
+0.672967 偏执
+&gt;&gt;&gt; 喜欢
+0.699987 我喜欢
+0.686192 比较喜欢
+0.662038 很喜欢
+0.659349 也喜欢
+0.652134 我很喜欢
+0.650156 特别喜欢
+0.649414 不喜欢
+0.644869 你喜欢
+0.632568 更喜欢
+0.618014 好喜欢
+&gt;&gt;&gt; 老婆
+0.833186 媳妇
+0.805695 老公
+0.760434 媳妇儿
+0.698002 男朋友
+0.695719 女朋友
+0.659052 女儿
+0.658306 男票
+0.636658 女盆友
+0.633680 男盆友
+0.632905 婆婆
+&gt;&gt;&gt; 性幻想
+0.451057 占有欲
+0.432852 或者女
+0.430510 介绍的
+0.409727 处过
+0.402731 找着
+0.400996 冒充
+0.393901 度蜜月
+0.385035 要找
+0.379691 赌约
+0.379119 先找
+&gt;&gt;&gt; 性格
+0.690843 长相
+0.684794 人品
+0.682543 的性格
+0.660626 思想
+0.657098 脾气
+0.642229 家境
+0.635133 内向
+0.632929 相貌
+0.632877 家庭条件
+0.629978 主见
+&gt;&gt;&gt; 压力
+0.798548 鸭梨
+0.783457 工作压力
+0.731695 学习压力
+0.725600 心理压力
+0.708320 生活压力
+0.693891 雨下得
+0.645027 差距
+0.627032 差别
+0.614607 天气变化
+0.613181 火气
+&gt;&gt;&gt; 骗纸
+[WARN] low-frequency word
+&gt;&gt;&gt; 面试
+0.806865 考试
+0.783473 体检
+0.780214 复试
+0.756645 月考
+0.754434 比赛
+0.752604 期末考试
+0.737260 中考
+0.736696 考完
+0.735540 实习
+0.731693 科目二
+&gt;&gt;&gt; 上班
+0.810730 上课
+0.810295 加班
+0.777899 上夜班
+0.770350 值班
+0.741603 干活
+0.734991 起床
+0.734322 上班了
+0.733916 下班
+0.733592 夜班
+0.720292 训练
+&gt;&gt;&gt; 超短裙
+0.659912 丝袜
+0.609479 高跟鞋
+0.604985 胸
+0.596650 衣服的
+0.587038 内内
+0.586481 高跟
+0.581994 裙子
+0.581419 背心
+0.580022 的衣服
+0.577875 胸部
+&gt;&gt;&gt; 露出
+0.618245 那一抹
+0.607302 扬起
+0.600638 嘴角
+0.584342 挤出
+0.573203 泪水
+0.572025 脸庞
+0.570737 目光
+0.565287 仰望
+0.562852 挂在
+0.560921 中流
+&gt;&gt;&gt; 女朋友
+0.881711 男朋友
+0.864671 女盆友
+0.861890 女票
+0.848751 女友
+0.828945 男票
+0.812187 男盆友
+0.812117 对象
+0.798292 男闺蜜
+0.785202 媳妇
+0.775840 红颜知己
+&gt;&gt;&gt; 欲望
+0.728853 鲜芋仙
+0.662464 快高
+0.656944 呷
+0.653274 方为人上人
+0.650733 要高
+0.650393 图森
+0.649414 真痛
+0.647922 相扰
+0.626121 上了床
+0.625244 做情
+&gt;&gt;&gt; 自尊
+0.800306 尊严
+0.723090 执念
+0.719035 底线
+0.695680 原则
+0.695174 自尊心
+0.678654 我的骄傲
+0.674832 权利
+0.672818 践踏
+0.662299 面子
+0.652123 信仰
+&gt;&gt;&gt; 失眠
+0.803749 睡不着
+0.789356 失眠了
+0.724558 不想睡
+0.718042 睡不着觉
+0.699382 熬夜
+0.697161 睡不着怎么办
+0.690771 想睡觉
+0.683447 头疼
+0.678473 犯困
+0.676929 头痛
+&gt;&gt;&gt; 怎么啦
+0.737443 肿么了
+0.713616 怎么了
+0.681696 有病
+0.680498 为什么呢
+0.677983 要闹
+0.668245 我怕谁
+0.662368 处女男
+0.661410 不是太
+0.660207 为什么啊
+0.656885 不是有
+&gt;&gt;&gt; 虚情假意
+0.621015 花言巧语
+0.608035 十全十美
+0.606978 可有可无
+0.597419 口是心非
+0.597240 忽视
+0.597055 自私自利
+0.594826 掏心掏肺
+0.592322 感性
+0.588729 敷衍
+0.584638 不信任
+</code></pre>
+
+<h3 id="whispers_sg_s800_w6_m5_n3_s1e5"><code>whispers_SG_s800_w6_m5_n3_s1e5</code></h3>
+
+<p>SG算法受分词的影响更严重，另外因为window=6的关系，有些相似度高的词相反并不怎么相关：</p>
+
+<pre><code># word2vec/whispers_SG_s400_w5_m5_n3_s1e3.word2vec
+&gt;&gt;&gt; 爱
+0.580073 被爱
+0.560099 判处
+0.547991 爱而
+0.547556 非爱
+0.547396 爱缺
+0.544900 爱才
+0.540361 爱为
+0.536044 敢恨
+0.530316 爱呢
+0.528528 一辈子的承诺
+&gt;&gt;&gt; 项羽
+[WARN] low-frequency word
+&gt;&gt;&gt; 欢乐谷
+0.803042 漫展
+0.790240 自驾
+0.784766 万达影城
+0.784713 野炊
+0.776952 观音桥
+0.774461 动物园
+0.773712 植物园
+0.771998 万达
+0.771843 大丰
+0.771125 滑雪
+&gt;&gt;&gt; 失恋
+0.548127 被甩
+0.536294 失恋的
+0.508631 和谈
+0.502625 还痛
+0.493451 单相思
+0.489735 我失恋了
+0.488872 流血的
+0.479863 被追
+0.476935 心痛的感觉
+0.476895 苦叫
+&gt;&gt;&gt; 暧昧
+0.639995 玩暧昧
+0.635194 调情
+0.631496 人搞
+0.600586 不清不楚
+0.584890 暧昧的
+0.582401 上过床
+0.572200 暧昧关系
+0.570466 纠缠不清
+0.568993 关系暧昧
+0.567784 示好
+&gt;&gt;&gt; 夜晚
+0.657358 寂静的
+0.631456 失眠的夜
+0.621194 安静的夜晚
+0.620196 一个人的夜晚
+0.614327 夜啊
+0.601787 午夜
+0.599383 的夜
+0.596566 深夜里
+0.595267 孤枕难眠
+0.594345 无眠
+&gt;&gt;&gt; 小姑娘
+0.692884 小妹妹
+0.628538 小男生
+0.627230 小男孩
+0.625094 的叔
+0.624193 大老爷们
+0.623692 老男人
+0.622079 小朋友
+0.620938 大叔们
+0.619539 小萝莉
+0.617274 小女生
+&gt;&gt;&gt; 享受
+0.583507 一个人的精彩
+0.575207 时光吧
+0.564482 惬意
+0.551104 享受生活
+0.547345 惬意的
+0.543327 无拘无束
+0.540098 是一种享受
+0.537960 不能享受
+0.536965 舒适
+0.530209 宁静
+&gt;&gt;&gt; 懦弱
+0.697641 软弱
+0.679659 胆小
+0.658081 懦弱的
+0.610549 太软弱
+0.598342 自卑
+0.591156 怯懦
+0.590881 胆怯
+0.583285 狭隘
+0.582937 不够勇敢
+0.582617 虚张声势
+&gt;&gt;&gt; 喜欢
+0.684325 我喜欢
+0.641723 也喜欢
+0.638344 又喜欢
+0.623145 更喜欢
+0.621961 比较喜欢
+0.620589 非常喜欢
+0.614038 阿喜
+0.603560 不喜欢
+0.603235 JustinBieber
+0.600609 不讨厌
+&gt;&gt;&gt; 老婆
+0.731708 老公
+0.669617 媳妇
+0.644299 媳妇儿
+0.608430 你老公
+0.607545 儿媳妇
+0.601609 人养
+0.601384 来老
+0.595271 找小三
+0.587556 老婆老婆
+0.580456 婆
+&gt;&gt;&gt; 性幻想
+0.668231 兼容
+0.665965 保护欲
+0.664974 某件
+0.662757 定位在
+0.659269 喜恶
+0.659232 精神错乱
+0.658870 戒心
+0.656839 问题时
+0.654240 黑点
+0.653809 是甚
+&gt;&gt;&gt; 性格
+0.660811 的性格
+0.633861 古怪
+0.624236 不合的
+0.617718 直爽
+0.616608 随和
+0.613201 孤僻的
+0.610965 外向
+0.600011 很内向
+0.595711 异性缘
+0.595424 温和
+&gt;&gt;&gt; 压力
+0.666520 工作压力
+0.658021 生活压力
+0.647697 鸭梨
+0.644485 心理压力
+0.613670 学习压力
+0.611916 喘不过气
+0.596348 好大
+0.593107 压得我
+0.587693 压的
+0.585277 山大啊
+&gt;&gt;&gt; 骗纸
+[WARN] low-frequency word
+&gt;&gt;&gt; 面试
+0.680119 复试
+0.672818 笔试
+0.630252 面试成功
+0.623614 应聘
+0.619135 新公司
+0.605759 入职
+0.599340 祝我好运
+0.598885 科目三
+0.598652 好紧张
+0.595966 招聘会
+&gt;&gt;&gt; 上班
+0.707432 轮休
+0.679053 打瞌睡
+0.670513 下班
+0.666432 加班
+0.664735 等下班
+0.662638 画图
+0.662486 上夜班
+0.656338 班心
+0.654931 睡大觉
+0.654712 加班的
+&gt;&gt;&gt; 超短裙
+0.769396 穿低胸
+0.761685 打底裤
+0.755437 穿短裙
+0.754707 裙下
+0.751898 低胸
+0.746875 短裙
+0.746233 欢迎广大
+0.742546 爱穿
+0.741867 潮男
+0.737799 短袜
+&gt;&gt;&gt; 露出
+0.619319 直直的
+0.618849 用手指
+0.598977 笑意
+0.598244 神情
+0.590136 镜子里
+0.585501 迷人的
+0.584364 上扬
+0.584335 得笑
+0.582946 弧度
+0.581245 脸红的
+&gt;&gt;&gt; 女朋友
+0.785835 男朋友
+0.752592 女盆友
+0.736058 女票
+0.732013 女友
+0.677200 对象
+0.668721 男票
+0.654842 对像
+0.632108 真心诚意
+0.629616 男盆友
+0.628810 好媳妇
+&gt;&gt;&gt; 欲望
+0.640495 清单
+0.508511 江苏省
+0.489315 我长大后
+0.482393 性慾
+0.478396 环游世界
+0.478000 孵化室
+0.475465 考军校
+0.474818 过雅思
+0.473394 快高
+0.472534 做网站
+&gt;&gt;&gt; 自尊
+0.676899 我的骄傲
+0.646413 尊严
+0.610033 自尊心
+0.607713 身段
+0.594193 委屈求全
+0.593379 尊严的
+0.589757 装糊涂
+0.587433 要面子
+0.584679 高姿态
+0.584325 一切为你
+&gt;&gt;&gt; 失眠
+0.705690 睡不着
+0.703397 失眠了
+0.647305 睡不着觉
+0.639974 整夜的
+0.623592 睡不着怎么办
+0.617555 不想睡
+0.601918 晚睡强迫症
+0.600793 就是睡不着
+0.600183 嗜睡
+0.586728 失眠的
+&gt;&gt;&gt; 怎么啦
+0.672468 怎么了
+0.655032 肿么了
+0.624932 咋啦
+0.624023 咋回事
+0.607279 有病的
+0.602299 为什么呀
+0.590823 要闹
+0.586885 滚粗
+0.580174 为什么啊
+0.574099 在逗
+&gt;&gt;&gt; 虚情假意
+0.689380 假惺惺
+0.673704 伪善
+0.659757 笑里藏刀
+0.656690 以诚相待
+0.643383 虚伪
+0.641435 两面三刀
+0.641297 阿谀奉承
+0.639964 欺骗的
+0.638113 假情假意
+0.627193 狼心狗肺
+</code></pre>
+
+		</section>
+
+		<footer class="post-footer">
+		<!-- If we want to display author's name and bio -->
+		
+			<section class="author">
+				<header> <a href="/about/"> <img class="profile" src="/assets/images/profile.png" alt="Author's profile picture"></a></header>
+				<article>
+					<!-- Author Name -->
+					<h4> 木桩 </h4>
+					<!-- Author Bio -->
+					<p> 
+					这是一个追寻抹大拉之地的geeker<BR />
+					生命不息，折腾不止。
+					</p>
+				</article>
+			</section>				
+		
+
+		
+		<section class="share">
+			<h4>Share this post</h4>
+			<a class="icon-twitter" href="http://twitter.com/share?text=gensim：关于 word2vec 模型的训练与效果对比&amp;url=http://blog.imaou.com/opensource/2015/08/31/how_to_train_word2vec.html"
+				onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+				<span class="hidden">Twitter</span>
+			</a>
+			<a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.imaou.com/opensource/2015/08/31/how_to_train_word2vec.html"
+				onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+				<span class="hidden">Facebook</span>
+			</a>
+			<a class="icon-google-plus" href="https://plus.google.com/share?url=http://blog.imaou.com/opensource/2015/08/31/how_to_train_word2vec.html"
+			   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+				<span class="hidden">Google+</span>
+			</a>
+		</section>
+		
+		
+		
+		<section class="disqus">
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+				var disqus_shortname = 'magdalene'; // required: replace example with your forum shortname
+
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+					})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+			<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		</section>
+		
+			
+		</footer>
+
+	</article>
+
+</main>
+
+	<footer class="site-footer">
+		<a class="subscribe icon-feed" href="/archive/2019/"><span class="tooltip">Archive 2019</span></a>
+		<div class="inner">
+			 <section class="copyright">All content copyright <a href="/">夢沉抹大拉</a> &copy;  &bull; All rights reserved.</section>
+			 <section class="poweredby">Made with Jekyll using <a href="http://github.com/rosario/kasper">Kasper theme</a></section>
+		</div>
+	</footer>
+
+	<script asynsc type="text/javascript" src="/assets/js/jquery-1.11.1.min.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/index.js"></script>
+
+	<script type="text/javascript">
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-53731588-1', 'auto');
+		ga('send', 'pageview');
+
+	</script>
+
+</body>
+</html>

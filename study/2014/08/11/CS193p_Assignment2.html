@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>   
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+<title>CS193p作业2完成，另外自己打造了个带同花顺匹配的版本，代码见文末 - 夢沉抹大拉</title>
+<meta name="description" content="生命不息，折腾不止" />
+
+<meta name="HandheldFriendly" content="True" />
+<meta name="MobileOptimized" content="320" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<link rel="apple-touch-icon" href="/assets/images/profile.png"/>
+
+<link rel="stylesheet" type="text/css" href="/assets/css/normalize.min.css" />
+<link rel="stylesheet" type="text/css" href="/assets/css/screen.min.css" />
+<!-- This is for syntax highlight -->
+<link rel="stylesheet" type="text/css" href="/assets/css/syntax.min.css">
+<!-- Customisation  -->
+<link rel="stylesheet" type="text/css" href="/assets/css/main.min.css">
+</head>
+<body class="home-template">
+<main class="content" role="main">
+
+	<article class="post">
+		<header class="post-header">
+			
+				<span class="blog-title"><a id="blog-logo" href="/">夢沉抹大拉</a></span>
+			 
+			&nbsp;&nbsp;
+			<span class="post-meta">
+			
+				<span style="color:#646A58">study on</span>
+			
+				<time datetime="2014-08-11">
+					<a href="/archive/2014/">11 Aug 2014</a>
+				</time>
+			</span>
+		</header>
+
+		<h2 class="post-title">CS193p作业2完成，另外自己打造了个带同花顺匹配的版本，代码见文末</h2>
+
+		<section class="post-content">
+			<p>第二个作业难度确实陡增，整整花了一下午才搞定3张牌的匹配问题：</p>
+
+<p><img src="https://raw.github.com/upbit/CS193p_Homework/master/screenshot/screenshot2.png" alt="Assignment 2 Screenshot" /></p>
+
+<p>大部分实现在<a href="https://github.com/upbit/CS193p_Homework/blob/fb53c021c455cf53d85341ce61f9fb20ae3c3b7f/Matchismo/Matchismo/Model/CardMatchingGame.m">CardMatchingGame.m</a>里，直接<a href="https://github.com/upbit/CS193p_Homework/tree/fb53c021c455cf53d85341ce61f9fb20ae3c3b7f">clone这个分支</a>查看吧</p>
+
+<hr />
+
+<h3 id="关于joker分支">关于<a href="https://github.com/upbit/CS193p_Homework/tree/joker">Joker分支</a></h3>
+
+<p>玩了会觉得游戏略显单调，于是加了顺子和王的匹配。调整后的规则如下：</p>
+
+<ol>
+  <li>随机分布 8,9,10,J,Q,K,A 以及2张Joker，一共30张牌</li>
+  <li>三张为顺子（如 A,K,Q 或 8,9,10）且同花色，得64分；不同花色得24分；</li>
+  <li>三张中rank相同，得32分；</li>
+  <li>三张的花色相同，得8分；</li>
+  <li>Joker可以代替任意一张牌，且按最大分值组合。</li>
+</ol>
+
+<p><img src="https://raw.github.com/upbit/CS193p_Homework/joker/screenshot/joker.png" alt="Screenshot" /></p>
+
+<p>主要的<a href="https://github.com/upbit/CS193p_Homework/blob/joker/Matchismo/Matchismo/Model/PlayingCard.m">match函数</a>实现。貌似还可以简化，不过由他去了→_→</p>
+
+<pre><code class="language-objective-c">- (NSInteger)match:(NSArray *)otherCards
+{
+    int score = 0;
+    
+    if ([otherCards count] == 1) {          // 2x model
+        PlayingCard *otherCard = [otherCards firstObject];
+        
+        if ((self.rank &gt; 0) &amp;&amp; (otherCard.rank &gt; 0)) {
+            if (self.rank == otherCard.rank) {
+                score += 4;
+            } else if ([self.suit isEqualToString:otherCard.suit]) {
+                score += 1;
+            }
+        } else {
+            // joker match any cards
+            score += 4;
+        }
+        
+    } else if ([otherCards count] == 2) {     // 3x model
+        // sort cards by rank
+        NSSortDescriptor *sortDescriptor;
+        sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"rank" ascending:YES];
+        NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
+        NSArray *sortedCards = [@[self, [otherCards firstObject], [otherCards lastObject]] sortedArrayUsingDescriptors:sortDescriptors];
+
+
+        BOOL isStraight = NO;
+        
+        // 1. 检查排序后数组中joker的数量0-2
+        NSUInteger jokerCount = 0;
+        for (PlayingCard *card in sortedCards) {
+            if (card.rank == 0) {
+                jokerCount++;
+                continue;
+            }
+        }
+
+        PlayingCard *lowCard = sortedCards[jokerCount];
+        PlayingCard *midCard = sortedCards[(jokerCount+2)/2];
+        PlayingCard *highCard = sortedCards[2];
+        NSUInteger rankDiff = highCard.rank - lowCard.rank;
+        
+        if (jokerCount == 0) {
+            // 2. 如果joker为0，检查high-low的差值，不是2则肯定不为顺子
+            if (rankDiff == 2) {
+                // 为2时，检查牌的两两差值是否为1
+                if (((midCard.rank-lowCard.rank) == 1) &amp;&amp; ((highCard.rank-midCard.rank) == 1))
+                    isStraight = YES;
+            }
+        } else if (jokerCount == 1) {
+            // 3. 如果Joker为1，检查high-low差值是否为1或2，不是则不为顺子
+            if ((rankDiff == 1) || (rankDiff == 2))
+                isStraight = YES;
+        } else if (jokerCount == 2) {
+            // 4. 如果Joker为2，此时一定组成顺子
+            isStraight = YES;
+        }
+        
+        if (isStraight) {
+            if (([lowCard.suit isEqualToString:midCard.suit]) &amp;&amp; ([lowCard.suit isEqualToString:highCard.suit])) {
+                score += 16;    // straight flush
+            } else {
+                score += 6;     // straight
+            }
+        } else if ((lowCard.rank == midCard.rank) &amp;&amp; (lowCard.rank == highCard.rank)) {
+            score += 8;         // same rank
+        } else if (([lowCard.suit isEqualToString:midCard.suit]) &amp;&amp; ([lowCard.suit isEqualToString:highCard.suit])) {
+            score += 2;         // same suit
+        }
+    }
+    
+    return score;
+}
+</code></pre>
+
+<p><strong>下载</strong>：Github的<a href="https://github.com/upbit/CS193p_Homework/archive/joker.zip">工程源码</a></p>
+
+<p>ps: 如果在PlayingCardDeck.m里将牌扩展到全部54张，难度就会大幅增加。</p>
+
+		</section>
+
+		<footer class="post-footer">
+		<!-- If we want to display author's name and bio -->
+		
+			<section class="author">
+				<header> <a href="/about/"> <img class="profile" src="/assets/images/profile.png" alt="Author's profile picture"></a></header>
+				<article>
+					<!-- Author Name -->
+					<h4> 木桩 </h4>
+					<!-- Author Bio -->
+					<p> 
+					这是一个追寻抹大拉之地的geeker<BR />
+					生命不息，折腾不止。
+					</p>
+				</article>
+			</section>				
+		
+
+		
+		<section class="share">
+			<h4>Share this post</h4>
+			<a class="icon-twitter" href="http://twitter.com/share?text=CS193p作业2完成，另外自己打造了个带同花顺匹配的版本，代码见文末&amp;url=http://blog.imaou.com/study/2014/08/11/CS193p_Assignment2.html"
+				onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+				<span class="hidden">Twitter</span>
+			</a>
+			<a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.imaou.com/study/2014/08/11/CS193p_Assignment2.html"
+				onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+				<span class="hidden">Facebook</span>
+			</a>
+			<a class="icon-google-plus" href="https://plus.google.com/share?url=http://blog.imaou.com/study/2014/08/11/CS193p_Assignment2.html"
+			   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+				<span class="hidden">Google+</span>
+			</a>
+		</section>
+		
+		
+		
+		<section class="disqus">
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+				var disqus_shortname = 'magdalene'; // required: replace example with your forum shortname
+
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+					})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+			<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		</section>
+		
+			
+		</footer>
+
+	</article>
+
+</main>
+
+	<footer class="site-footer">
+		<a class="subscribe icon-feed" href="/archive/2019/"><span class="tooltip">Archive 2019</span></a>
+		<div class="inner">
+			 <section class="copyright">All content copyright <a href="/">夢沉抹大拉</a> &copy;  &bull; All rights reserved.</section>
+			 <section class="poweredby">Made with Jekyll using <a href="http://github.com/rosario/kasper">Kasper theme</a></section>
+		</div>
+	</footer>
+
+	<script asynsc type="text/javascript" src="/assets/js/jquery-1.11.1.min.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/index.js"></script>
+
+	<script type="text/javascript">
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-53731588-1', 'auto');
+		ga('send', 'pageview');
+
+	</script>
+
+</body>
+</html>

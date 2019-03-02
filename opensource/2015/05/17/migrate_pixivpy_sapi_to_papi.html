@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>   
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+<title>Pixiv老接口停用提醒，请迁移PixivPy的SAPI到新的PAPI - 夢沉抹大拉</title>
+<meta name="description" content="生命不息，折腾不止" />
+
+<meta name="HandheldFriendly" content="True" />
+<meta name="MobileOptimized" content="320" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<link rel="apple-touch-icon" href="/assets/images/profile.png"/>
+
+<link rel="stylesheet" type="text/css" href="/assets/css/normalize.min.css" />
+<link rel="stylesheet" type="text/css" href="/assets/css/screen.min.css" />
+<!-- This is for syntax highlight -->
+<link rel="stylesheet" type="text/css" href="/assets/css/syntax.min.css">
+<!-- Customisation  -->
+<link rel="stylesheet" type="text/css" href="/assets/css/main.min.css">
+</head>
+<body class="home-template">
+<main class="content" role="main">
+
+	<article class="post">
+		<header class="post-header">
+			
+				<span class="blog-title"><a id="blog-logo" href="/">夢沉抹大拉</a></span>
+			 
+			&nbsp;&nbsp;
+			<span class="post-meta">
+			
+				<span style="color:#646A58">opensource on</span>
+			
+				<time datetime="2015-05-17">
+					<a href="/archive/2015/">17 May 2015</a>
+				</time>
+			</span>
+		</header>
+
+		<h2 class="post-title">Pixiv老接口停用提醒，请迁移PixivPy的SAPI到新的PAPI</h2>
+
+		<section class="post-content">
+			<p>周三晚用<a href="https://github.com/upbit/Pixiv-RankingLog">RankingLog</a>爬P站图片，突然发现什么都抓不到了。因为最近要找房子这事一直拖到今天(都是借口…)，直到抓包才发现原来Pixiv已经抛弃了用了几年的SAPI。</p>
+
+<p>不得不说废弃SAPI是个好事情，Public-API有更方便的json返回，并且带有分页和作品的各种详细信息。不过因为新的PAPI已经长得不太一样了，我这里还是以ranking/ranking_log为例，写一下如何从SAPI迁移到PAPI。</p>
+
+<pre><code class="language-python"># SAPI的写法，目前已经废弃
+# rank_list = api.sapi.ranking("all", 'day', 1)
+# for img in rank_list:
+#   print img
+
+# 使用新的PAPI代替上面的代码
+rank_list = api.papi.ranking_all('daily', 1, 50)
+ranking = rank_list.response[0]
+for img in ranking.works:
+	#print img.work
+	print "[%s(id=%s)] %s" % (img.work.title, img.work.id, img.work.image_urls.px_480mw)
+</code></pre>
+
+<p>查询<strong>过去排行</strong>，可以这样增加一个date参数，此时返回的就是2015-05-01的历史周排行数据：</p>
+
+<pre><code class="language-python">rank_list = api.papi.ranking_all('weekly', 1, 50, date='2015-05-01')
+</code></pre>
+
+<p>ps: <strong>请先升级PixivPy到最新版</strong>，之后就可以用新的<code>papi.ranking_all</code>来取数据了</p>
+
+<h3 id="关于v1rankingall">关于/v1/ranking/all</h3>
+
+<p>如果想确认PAPI接口的请求和返回数据，除了自己抓包还可以<a href="https://github.com/upbit/pixivpy/wiki/sniffer">看这里</a>，里面列举了一些常用接口的json返回结构供参考。可以看到，新的ranking路径为<code>https://public-api.secure.pixiv.net/v1/ranking/all</code>，并且SAPI的ranking_log(过去排行榜)也合并到了这个接口：</p>
+
+<pre><code class="language-python"># 排行榜/过去排行榜
+# mode: [daily, weekly, monthly, male, female, rookie, daily_r18, weekly_r18, ...]
+# page: [1-n]
+# date: '2015-04-01' (仅过去排行榜)
+def ranking_all(self, mode='daily', page=1, per_page=50, date=None,
+		image_sizes=['px_128x128', 'px_480mw', 'large'],
+		profile_image_sizes=['px_170x170', 'px_50x50'],
+		include_stats=True, include_sanity_level=True):
+	self.api._require_auth()
+
+	url = 'https://public-api.secure.pixiv.net/v1/ranking/all'
+	headers = {
+		'Authorization': 'Bearer %s' % self.api.access_token,
+		'Cookie': 'PHPSESSID=%s' % self.api.session,
+	}
+	params = {
+		'mode': mode,
+		'page': page,
+		'per_page': per_page,
+		'include_stats': include_stats,
+		'include_sanity_level': include_sanity_level,
+		'image_sizes': ','.join(image_sizes),
+		'profile_image_sizes': ','.join(profile_image_sizes),
+	}
+	if date:	# 过去排行榜
+		params['date'] = date
+
+	r = self.api._requests_call('GET', url, headers=headers, params=params)
+	return self.parse_result(r)
+</code></pre>
+
+<p>新版接口多了一些可选字段，比如指定返回图片的大小，以及是否需要stats的计数信息。实际发送的请求如下：</p>
+
+<pre><code>GET https://public-api.secure.pixiv.net/v1/ranking/all?image_sizes=px_128x128%2Cpx_480mw%2Clarge&amp;include_stats=true&amp;page=1&amp;profile_image_sizes=px_170x170%2Cpx_50x50&amp;mode=daily&amp;include_sanity_level=true&amp;per_page=50 HTTP/1.1
+Host: public-api.secure.pixiv.net
+Referer: http://spapi.pixiv.net/
+Authorization: Bearer WHDWCGnwWA2C8PRfQSdXJxjXp0G6ULRaRkkd6t5B6h8
+Accept-Encoding: gzip, deflate
+Accept: */*
+Accept-Language: zh-cn
+Connection: keep-alive
+Proxy-Connection: keep-alive
+User-Agent: PixivIOSApp/5.6.0
+</code></pre>
+
+<p>返回结果：</p>
+
+<pre><code class="language-json">{
+    "status": "success",
+    "response": [
+        {
+            "content": "all",
+            "mode": "daily",
+            "date": "2015-05-13",
+            "works": [
+                {
+                    "rank": 51,
+                    "previous_rank": 134,
+                    "work": {
+                        "id": 50332933,
+                        "title": "何か用かしら",
+                        "caption": null,
+                        "tags": [
+                            "やはり俺の青春ラブコメはまちがっている。",
+                            "俺ガイル",
+                            "雪ノ下雪乃",
+                            "見せない構図",
+                            "俺ガイル1000users入り"
+                        ],
+                        "tools": null,
+                        "image_urls": {
+                            "px_128x128": "http://i2.pixiv.net/c/128x128/img-master/img/2015/05/12/00/01/19/50332933_p0_square1200.jpg",
+                            "px_480mw": "http://i2.pixiv.net/c/480x960/img-master/img/2015/05/12/00/01/19/50332933_p0_master1200.jpg",
+                            "large": "http://i2.pixiv.net/img-original/img/2015/05/12/00/01/19/50332933_p0.png"
+                        },
+                        "width": 875,
+                        "height": 775,
+                        "stats": {
+                            "scored_count": 230,
+                            "score": 2283,
+                            "views_count": 16325,
+                            "favorited_count": {
+                                "public": null,
+                                "private": null
+                            },
+                            "commented_count": null
+                        },
+                        "publicity": 0,
+                        "age_limit": "all-age",
+                        "created_time": "2015-05-12 00:01:00",
+                        "reuploaded_time": "2015-05-12 00:01:19",
+                        "user": {
+                            "id": 3145937,
+                            "account": "37193719",
+                            "name": "コ゛りぼて",
+                            "is_following": null,
+                            "is_follower": null,
+                            "is_friend": null,
+                            "is_premium": null,
+                            "profile_image_urls": {
+                                "px_170x170": "http://i3.pixiv.net/img77/profile/37193719/8134423.jpg",
+                                "px_50x50": "http://i3.pixiv.net/img77/profile/37193719/8134423_s.jpg"
+                            },
+                            "stats": null,
+                            "profile": null
+                        },
+                        "is_manga": null,
+                        "is_liked": null,
+                        "favorite_id": null,
+                        "page_count": 1,
+                        "book_style": "right_to_left",
+                        "type": "illustration",
+                        "metadata": null,
+                        "content_type": null,
+                        "sanity_level": "white"
+                    }
+                }
+            ]
+        }
+    ],
+    "count": 1,
+    "pagination": {
+        "previous": 1,
+        "next": 3,
+        "current": 2,
+        "per_page": 50,
+        "total": 500,
+        "pages": 10
+    }
+}
+</code></pre>
+
+<p>可以看到，json结构的最外层多了个分页相关的pagination，再也不用像以前一样调SAPI翻到没数据才切日期了。response里是个数组，但大部分接口的count都是1，里面才是需要的ranking数据。</p>
+
+<p>ranking数据中除了告诉这个返回的查询模式和参数，works是最终的榜单内容。其中每个illust都有rank和<code>previous_rank</code>来标记它的上升/下降情况，以及一个<code>image_urls</code>数组返回<code>image_sizes</code>指定的图片URL。当<code>include_stats=true</code>时，stats里会带回作品的评分、收藏计数等信息。最后还有个user，包含了该作品作者的基本信息，以及是否follow过<code>is_following</code>等标志。作品也带有<code>favorite_id</code>标记来判断是否已经收藏，这回再也不用一个个查询了..</p>
+
+<p>相信后面几个版本Pixiv iOS会逐步抛弃SAPI（目前还有个拉取评论接口在用），如果你的App还有在用这些接口的，早日切换到更好用的Public-API吧。</p>
+
+<p>ps: 看看日期果然好长时间没更新了，罪过… 不能因为工作忙就放弃Blog，熬夜把这篇给发了！</p>
+
+		</section>
+
+		<footer class="post-footer">
+		<!-- If we want to display author's name and bio -->
+		
+			<section class="author">
+				<header> <a href="/about/"> <img class="profile" src="/assets/images/profile.png" alt="Author's profile picture"></a></header>
+				<article>
+					<!-- Author Name -->
+					<h4> 木桩 </h4>
+					<!-- Author Bio -->
+					<p> 
+					这是一个追寻抹大拉之地的geeker<BR />
+					生命不息，折腾不止。
+					</p>
+				</article>
+			</section>				
+		
+
+		
+		<section class="share">
+			<h4>Share this post</h4>
+			<a class="icon-twitter" href="http://twitter.com/share?text=Pixiv老接口停用提醒，请迁移PixivPy的SAPI到新的PAPI&amp;url=http://blog.imaou.com/opensource/2015/05/17/migrate_pixivpy_sapi_to_papi.html"
+				onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+				<span class="hidden">Twitter</span>
+			</a>
+			<a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.imaou.com/opensource/2015/05/17/migrate_pixivpy_sapi_to_papi.html"
+				onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+				<span class="hidden">Facebook</span>
+			</a>
+			<a class="icon-google-plus" href="https://plus.google.com/share?url=http://blog.imaou.com/opensource/2015/05/17/migrate_pixivpy_sapi_to_papi.html"
+			   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+				<span class="hidden">Google+</span>
+			</a>
+		</section>
+		
+		
+		
+		<section class="disqus">
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+				var disqus_shortname = 'magdalene'; // required: replace example with your forum shortname
+
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+					})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+			<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		</section>
+		
+			
+		</footer>
+
+	</article>
+
+</main>
+
+	<footer class="site-footer">
+		<a class="subscribe icon-feed" href="/archive/2019/"><span class="tooltip">Archive 2019</span></a>
+		<div class="inner">
+			 <section class="copyright">All content copyright <a href="/">夢沉抹大拉</a> &copy;  &bull; All rights reserved.</section>
+			 <section class="poweredby">Made with Jekyll using <a href="http://github.com/rosario/kasper">Kasper theme</a></section>
+		</div>
+	</footer>
+
+	<script asynsc type="text/javascript" src="/assets/js/jquery-1.11.1.min.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/index.js"></script>
+
+	<script type="text/javascript">
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-53731588-1', 'auto');
+		ga('send', 'pageview');
+
+	</script>
+
+</body>
+</html>

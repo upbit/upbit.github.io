@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>   
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+<title>解决Cassandra Schema不一致导致的 Column family ID mismatch - 夢沉抹大拉</title>
+<meta name="description" content="生命不息，折腾不止" />
+
+<meta name="HandheldFriendly" content="True" />
+<meta name="MobileOptimized" content="320" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<link rel="apple-touch-icon" href="/assets/images/profile.png"/>
+
+<link rel="stylesheet" type="text/css" href="/assets/css/normalize.min.css" />
+<link rel="stylesheet" type="text/css" href="/assets/css/screen.min.css" />
+<!-- This is for syntax highlight -->
+<link rel="stylesheet" type="text/css" href="/assets/css/syntax.min.css">
+<!-- Customisation  -->
+<link rel="stylesheet" type="text/css" href="/assets/css/main.min.css">
+</head>
+<body class="home-template">
+<main class="content" role="main">
+
+	<article class="post">
+		<header class="post-header">
+			
+				<span class="blog-title"><a id="blog-logo" href="/">夢沉抹大拉</a></span>
+			 
+			&nbsp;&nbsp;
+			<span class="post-meta">
+			
+				<span style="color:#646A58">opensource on</span>
+			
+				<time datetime="2015-08-01">
+					<a href="/archive/2015/">01 Aug 2015</a>
+				</time>
+			</span>
+		</header>
+
+		<h2 class="post-title">解决Cassandra Schema不一致导致的 Column family ID mismatch</h2>
+
+		<section class="post-content">
+			<p>说到Cassandra，一般会想到为了支持分页不得不将数据存成多份，每当这个时候都会无比怀念MySQL里想怎么撸就怎么撸的便利性。而实际使用中，最讨厌的还要属”Column family ID mismatch”。从Cassandra的issues列表就能看到，无论在哪个版本都存在CF ID不一致导致的问题：<a href="https://issues.apache.org/jira/browse/CASSANDRA-8387">CASSANDRA-8387</a> / <a href="https://issues.apache.org/jira/browse/CASSANDRA-6038">CASSANDRA-6038</a> / <a href="https://issues.apache.org/jira/browse/CASSANDRA-5202">CASSANDRA-5202</a>，而实际上就算线上更新到Cassandra 2.1.5，不小心还是会遇到多节点同时建表导致的同步异常。各种血的教训下终于明白，不要重复修改Schema！不要重复修改Schema！不要重复修改Schema！（因为很重要所以说三遍</p>
+
+<h2 id="column-family-id-mismatch-的原因">Column family ID mismatch 的原因</h2>
+
+<p>众所周知，Cassandra是一个无中心的分布式数据库，其CREATE/DROP/ALTER等对Schema的修改操作，都是在一个节点上完成后，再同步给集群其它节点的。当一个以上节点同时执行修改Schema操作（例如创建新的Column family，哪怕加了IF NOT EXISTS），此时多个节点彼此都认为没有这张表，于是为这张表各自生成了一个Column family ID。于是等他们各自完成本地的操作开始同步时，灾难就降临了：</p>
+
+<pre><code>ERROR [Thrift:15] 2015-07-31 11:24:54,781 CustomTThreadPoolServer.java:224 - Error occurred during processing of message.
+java.lang.RuntimeException: java.util.concurrent.ExecutionException: java.lang.RuntimeException: org.apache.cassandra.exceptions.ConfigurationException: Column family ID mismatch (found 1660db50-3717-11e5-bb49-4d1f4d3a1785; expected 16490d90-3717-11e5-baae-43ee31cfdaef)
+</code></pre>
+
+<p>可以看到该节点接收到一个<code>1660db50-3717-11e5-bb49-4d1f4d3a1785</code>的CFID，但本机的内容为<code>16490d90-3717-11e5-baae-43ee31cfdaef</code>。遇上这种情况如果这个表有多个replicas(copys)，可能会因为无法同步导致写入阻塞或超时。</p>
+
+<p>也许你也曾经和我一样，天真的以为作者会在新版里修复。按Aleksey Yeschenko在CASSANDRA-8387里的回复，CASSANDRA-6038(大概3.x)里将应用一个并没有实际改变的新协议，尝试修复这个问题…</p>
+
+<pre><code>Your issue is a consequence of CASSANDRA-5202, that made table uuids non-deterministic.
+I don't see a good way to fix this in 2.1. I will try to handle this scenario in CASSANDRA-6038, with the new schema change protocol, but even then, I don't see an immediate solution - yet.
+</code></pre>
+
+<p>曾经因为两次ALTER TABLE了同一张表，而把整个keyspace弄得卡死无法写入，最后无意中rolling重启所有节点后问题解决。今天则无意中看到<a href="http://stackoverflow.com/a/27629161">Cassandra keyspace does not propagate to newly added node</a>的回答，也是提及如何解决Column family ID mismatch：</p>
+
+<pre><code>1. stop the Cassandra service/process, typically by running: nodetool drain
+2. Remove the Schema* and Migration* sstables inside of your system keyspace
+3. After starting Cassandra again, this node will notice the missing information and pull in the correct schema from one of the other nodes.
+</code></pre>
+
+<p>其实2做不做无所谓，2.x的Cassandra重启后会找其他节点拉取正确的schema，让整个集群重新趋于一致。首先摘掉当前节点：</p>
+
+<pre><code>nodetool disablegossip
+nodetool disablethrift
+nodetool drain
+nodetool stopdaemon
+</code></pre>
+
+<p>具体解释可以参看<a href="http://devblog.michalski.im/2012/11/25/safe-cassandra-shutdown-and-restart/">Safe Cassandra shutdown and restart</a>，先禁止gossip和thrift协议，然后用drain禁写并flush所有MemTables到SSTables，这样就可以安全的stopdaemon了。</p>
+
+<p>停止Cassandra后，往往不用去data下删除对应keyspace的数据和commitlog，直接启动Cassandra后它会自己load SSTable并且replaying commitlog：</p>
+
+<pre><code>daemon --user cassandra "cassandra" -p $pidfile
+</code></pre>
+
+<p>重启节点后可能出现<code>UnknownColumnFamilyException: Couldn't find cfId=16490d90-3717-11e5-baae-43ee31cfdaef</code>错误，这是因为其他机器上有错误的schema，Handshake后发给重启后节点找不到对应的meta信息：</p>
+
+<pre><code>WARN  [Thread-21] 2015-07-31 12:08:15,879 IncomingTcpConnection.java:94 - UnknownColumnFamilyException reading from socket; closing
+org.apache.cassandra.db.UnknownColumnFamilyException: Couldn't find cfId=16490d90-3717-11e5-baae-43ee31cfdaef
+</code></pre>
+
+<p>这个错误只要轮流将其他节点依次重启后，schema就会达到一致而停止报错。</p>
+
+<p>不过还是没弄明白，为什么cqlsh里在写频繁的keyspace里建表，也会遇到<code>Column family ID mismatch</code>问题。常常是执行命令后提示<code>TSocket read 0 bytes</code>然后log里出现mismatch错误，目前只能推测cqlsh在遇到错误时有重试操作。</p>
+
+<p>总之在Cassandra动态CREATE/DROP/ALTER Schema时，要注意一致性问题，不要在分布式的代码、cqlsh里对这样的操作进行重试。因为如果刚好这个操作落在两个不同节点上，就只能这样rolling重启Cassandra来解决mismatch问题了…</p>
+
+		</section>
+
+		<footer class="post-footer">
+		<!-- If we want to display author's name and bio -->
+		
+			<section class="author">
+				<header> <a href="/about/"> <img class="profile" src="/assets/images/profile.png" alt="Author's profile picture"></a></header>
+				<article>
+					<!-- Author Name -->
+					<h4> 木桩 </h4>
+					<!-- Author Bio -->
+					<p> 
+					这是一个追寻抹大拉之地的geeker<BR />
+					生命不息，折腾不止。
+					</p>
+				</article>
+			</section>				
+		
+
+		
+		<section class="share">
+			<h4>Share this post</h4>
+			<a class="icon-twitter" href="http://twitter.com/share?text=解决Cassandra Schema不一致导致的 Column family ID mismatch&amp;url=http://blog.imaou.com/opensource/2015/08/01/cassandra_column_family_id_mismatch.html"
+				onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+				<span class="hidden">Twitter</span>
+			</a>
+			<a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.imaou.com/opensource/2015/08/01/cassandra_column_family_id_mismatch.html"
+				onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+				<span class="hidden">Facebook</span>
+			</a>
+			<a class="icon-google-plus" href="https://plus.google.com/share?url=http://blog.imaou.com/opensource/2015/08/01/cassandra_column_family_id_mismatch.html"
+			   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+				<span class="hidden">Google+</span>
+			</a>
+		</section>
+		
+		
+		
+		<section class="disqus">
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+				var disqus_shortname = 'magdalene'; // required: replace example with your forum shortname
+
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+					})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+			<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		</section>
+		
+			
+		</footer>
+
+	</article>
+
+</main>
+
+	<footer class="site-footer">
+		<a class="subscribe icon-feed" href="/archive/2019/"><span class="tooltip">Archive 2019</span></a>
+		<div class="inner">
+			 <section class="copyright">All content copyright <a href="/">夢沉抹大拉</a> &copy;  &bull; All rights reserved.</section>
+			 <section class="poweredby">Made with Jekyll using <a href="http://github.com/rosario/kasper">Kasper theme</a></section>
+		</div>
+	</footer>
+
+	<script asynsc type="text/javascript" src="/assets/js/jquery-1.11.1.min.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/index.js"></script>
+
+	<script type="text/javascript">
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-53731588-1', 'auto');
+		ga('send', 'pageview');
+
+	</script>
+
+</body>
+</html>

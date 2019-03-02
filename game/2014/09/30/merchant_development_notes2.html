@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>   
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+<title>TravelingMerchant开发手记02 - 供给与需求模型 - 夢沉抹大拉</title>
+<meta name="description" content="生命不息，折腾不止" />
+
+<meta name="HandheldFriendly" content="True" />
+<meta name="MobileOptimized" content="320" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<link rel="apple-touch-icon" href="/assets/images/profile.png"/>
+
+<link rel="stylesheet" type="text/css" href="/assets/css/normalize.min.css" />
+<link rel="stylesheet" type="text/css" href="/assets/css/screen.min.css" />
+<!-- This is for syntax highlight -->
+<link rel="stylesheet" type="text/css" href="/assets/css/syntax.min.css">
+<!-- Customisation  -->
+<link rel="stylesheet" type="text/css" href="/assets/css/main.min.css">
+</head>
+<body class="home-template">
+<main class="content" role="main">
+
+	<article class="post">
+		<header class="post-header">
+			
+				<span class="blog-title"><a id="blog-logo" href="/">夢沉抹大拉</a></span>
+			 
+			&nbsp;&nbsp;
+			<span class="post-meta">
+			
+				<span style="color:#646A58">game on</span>
+			
+				<time datetime="2014-09-30">
+					<a href="/archive/2014/">30 Sep 2014</a>
+				</time>
+			</span>
+		</header>
+
+		<h2 class="post-title">TravelingMerchant开发手记02 - 供给与需求模型</h2>
+
+		<section class="post-content">
+			<p>说到商业模拟，我们往往想到的是大航海时代里，在两个港口来回倒卖特产的情景，然而现实中的经济远非这么简单。例如小麦，它的价格由当地的供给与需求决定，如果供不应求势必会导致价格的上涨，而供过于求则会致使小麦价格的下跌。小麦同时又是面粉的原料(投入品)，其价格直接影响面粉的价格；并且小麦还有大麦、黑麦、燕麦等代替品，当小麦价格过高时，人们又会选择相对低廉的代替品，从而导致需求的二次变化…</p>
+
+<p>对于一个经济概念还仅仅停留在大学时背诵的“生产力决定生产关系”的门外汉，直接上来就思考供需理论实在是难度太大了点。好在现在是个网络的时代，搜了本曼昆的<a href="http://book.douban.com/subject/3719533/">《经济学原理》</a>猛啃，算是摸到了点门道。</p>
+
+<p>首先要明确的是，<strong>价格影响供给与需求</strong>。以白菜为例，如果价格涨到50块钱一斤，想必商家会想方设法从附近省市调货，甚至把自家地下室里储藏过冬的白菜都拿出来卖了；如果白菜跌到5毛钱3斤，老百姓是高兴了但想必种白菜的没人愿意拿出来卖，还不如留着自家煮火锅来的合算。</p>
+
+<p>所以物品的价格，会趋于一个稳定点，即<a href="http://zh.wikipedia.org/wiki/%E4%BE%9B%E7%BB%99%E5%92%8C%E9%9C%80%E6%B1%82">供给与需求曲线</a>的交点，并且在这一点对应的价格P，使得供给与需求刚好都等于Q：</p>
+
+<center>![供需平衡价格](http://blog.imaou.com/images/Supply-demand-equilibrium.svg.png)</center>
+
+<p>图中需求曲线(红色)和供给曲线(蓝色)，存在不同的曲率以及与坐标轴的交点。交点可以理解为最大需求量(价格为0时)以及最小供给价格(供给为0时)，而曲率则比较复杂，还需要从影响供需的因素说起。</p>
+
+<p>首先来考虑<strong>影响需求的因素</strong>，在游戏中存在以下几个方面：</p>
+
+<ol>
+  <li><strong>收入：</strong>购买者的收入决定了购买力，并且当收入过低时，低档商品的需求相反会得到提升；
+    <ul>
+      <li><span style="color:#888;">因为低档商品与正常商品的模型完全不同，这里只考虑随着收入变化而同步变化的正常商品。同时区域的收入也可以抽象为该区域的繁荣度。</span></li>
+    </ul>
+  </li>
+  <li><strong>相关物品价格：</strong>就像开头提到的小麦，它存在其他谷物的代替品，在小麦价格上涨时其自身需求下降，并且其他代替品的需求上升；同样的还有互补品，比如面包卖的好时，店里的咖啡或饮料销量同时会得到提升；</li>
+  <li><strong>嗜好：</strong>比如中国北方喜食面食，而南方则以大米为主，这是由于地域差异决定的；</li>
+  <li><strong>预期：</strong>如果某个商品的价格即将上涨，那么购买的人会在段时间内暴增，相反下跌前需求会急剧减少；
+    <ul>
+      <li><span style="color:#888;">不过预期刻画的是短期内的变化，不会长时间影响需求量，所以暂时可以不考虑这个因素。</span></li>
+    </ul>
+  </li>
+</ol>
+
+<p>这些因素共同决定了物品的需求变化(需求弹性)。相对应的，<strong>供给</strong>也同样存在以下几种<strong>影响因素</strong>：</p>
+
+<ol>
+  <li><strong>投入品价格：</strong>原料等价格上涨，在市场价不变时会导致供给量下降(利润变低了)；</li>
+  <li><strong>技术：</strong>例如小麦的种植技术改进，使单位面积的小麦产量翻倍。在那么同样售价下，市场的供给也得到了近乎翻倍的提升；</li>
+  <li><strong>预期：</strong>不仅仅消费者，供应商也会有预期。</li>
+</ol>
+
+<p>因为模拟的是欧洲中世纪的贸易，大多都是手工或作坊生产，这里忽略生产成本对供给的影响。</p>
+
+<p>说了这么多理论，再回头看下 规则3 [<strong>供需与价格</strong>：区域中的物品进货价格，由区域的供需关系决定] 这条，物品的均衡价格正好用供需曲线来刻画：</p>
+
+<center>![供给和需求](http://blog.imaou.com/images/Supply-demand-right-shift-demand_zh-tw.svg.png)</center>
+
+<p>当区域中代替品价格上涨时，小麦的需求曲线从D1变化到D2，及相同价格P1下需求量上升。而由于供给曲线S未变，均衡价格从P1慢慢变化到P2(因为持续供不应求)，直到达到新的均衡点(Q2,P2)为止。这个过程就是当某种谷物(比如大麦)价格上涨时，小麦价格与供需的变化过程。</p>
+
+<p>不过，光有这些理论还远远达不到构筑模型的程度，<a href="#">TravelingMerchant开发手记03</a>将继续阐述商人、供应商的模拟，来构筑供需平衡的市场规律。</p>
+
+		</section>
+
+		<footer class="post-footer">
+		<!-- If we want to display author's name and bio -->
+		
+			<section class="author">
+				<header> <a href="/about/"> <img class="profile" src="/assets/images/profile.png" alt="Author's profile picture"></a></header>
+				<article>
+					<!-- Author Name -->
+					<h4> 木桩 </h4>
+					<!-- Author Bio -->
+					<p> 
+					这是一个追寻抹大拉之地的geeker<BR />
+					生命不息，折腾不止。
+					</p>
+				</article>
+			</section>				
+		
+
+		
+		<section class="share">
+			<h4>Share this post</h4>
+			<a class="icon-twitter" href="http://twitter.com/share?text=TravelingMerchant开发手记02 - 供给与需求模型&amp;url=http://blog.imaou.com/game/2014/09/30/merchant_development_notes2.html"
+				onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+				<span class="hidden">Twitter</span>
+			</a>
+			<a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.imaou.com/game/2014/09/30/merchant_development_notes2.html"
+				onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+				<span class="hidden">Facebook</span>
+			</a>
+			<a class="icon-google-plus" href="https://plus.google.com/share?url=http://blog.imaou.com/game/2014/09/30/merchant_development_notes2.html"
+			   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+				<span class="hidden">Google+</span>
+			</a>
+		</section>
+		
+		
+		
+		<section class="disqus">
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+				var disqus_shortname = 'magdalene'; // required: replace example with your forum shortname
+
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+					})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+			<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		</section>
+		
+			
+		</footer>
+
+	</article>
+
+</main>
+
+	<footer class="site-footer">
+		<a class="subscribe icon-feed" href="/archive/2019/"><span class="tooltip">Archive 2019</span></a>
+		<div class="inner">
+			 <section class="copyright">All content copyright <a href="/">夢沉抹大拉</a> &copy;  &bull; All rights reserved.</section>
+			 <section class="poweredby">Made with Jekyll using <a href="http://github.com/rosario/kasper">Kasper theme</a></section>
+		</div>
+	</footer>
+
+	<script asynsc type="text/javascript" src="/assets/js/jquery-1.11.1.min.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+	<script asynsc type="text/javascript" src="/assets/js/index.js"></script>
+
+	<script type="text/javascript">
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-53731588-1', 'auto');
+		ga('send', 'pageview');
+
+	</script>
+
+</body>
+</html>
