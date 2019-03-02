@@ -12,9 +12,6 @@ meta_description: "生命不息，折腾不止"
 # URL of your avatar or profile pic (you could use your GitHub profile pic)
 avatar: https://raw.githubusercontent.com/upbit/upbit.github.io/master/assets/images/profile.png
 
-# markdown: redcarpet
-highlighter: pygments
-
 paginate: 10
 
 #

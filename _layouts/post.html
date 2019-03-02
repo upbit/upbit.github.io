@@ -34,11 +34,8 @@
 			&nbsp;&nbsp;
 			<span class="post-meta">
 			{% if page.category %}
-				<span style="color:#646A58">{{ page.category }} on</span>
+				<span style="color:#646A58">{{ page.category }}</span>
 			{% endif %}
-				<time datetime="{{ page.date | date:"%Y-%m-%d" }}">
-					<a href="{{ site.baseurl }}archive/{{ page.date | date: "%Y" }}/">{{ page.date | date_to_string }}</a>
-				</time>
 			</span>
 		</header>
 
@@ -109,11 +106,9 @@
 </main>
 
 	<footer class="site-footer">
-		<a class="subscribe icon-feed" href="{{ site.baseurl }}archive/{{ site.time | date: "%Y" }}/"><span class="tooltip">Archive {{ site.time | date: "%Y" }}</span></a>
-		<div class="inner">
-			 <section class="copyright">All content copyright <a href="{{ site.baseurl }}">{{ site.name }}</a> &copy; {{date}} &bull; All rights reserved.</section>
-			 <section class="poweredby">Made with Jekyll using <a href="http://github.com/rosario/kasper">Kasper theme</a></section>
-		</div>
+		<footer class="footer">
+			{% include svg-icons.html %}
+		</footer>
 	</footer>
 
 	<script asynsc type="text/javascript" src="/assets/js/jquery-1.11.1.min.js"></script>
