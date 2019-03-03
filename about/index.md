@@ -11,7 +11,7 @@ title: About me
 
 # 个人信息
 
-- 工作年限：3.5年
+- 工作时间：2011-至今
 - GitHub: [https://github.com/upbit](https://github.com/upbit)
 - 技术博客：[http://blog.imaou.com](http://blog.imaou.com)
 
