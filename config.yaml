@@ -1,0 +1,32 @@
+title: 夢沉抹大拉
+baseurl: "https://blog.imaou.com"
+
+languageCode: zh-CN
+theme: m10c
+
+permalinks:
+  post: "/:year:month/:filename/"
+
+googleAnalytics: 53731588
+
+params:
+  author: Zhou Hao
+  description: 一个追寻抹大拉之地的geeker
+  menu_item_separator: " / "
+  # use feather icons https://feathericons.com/
+  social:
+    - name: GitHub
+      icon: github
+      url: https://github.com/upbit
+    - name: ArtStation
+      icon: aperture
+      url: https://upbit.artstation.com/
+
+menu:
+  main:
+    - name: Blog
+      url: /
+      weight: 1
+    - name: About
+      url: /page/about/
+      weight: 4
