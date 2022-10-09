@@ -12,7 +12,7 @@ googleAnalytics: 53731588
 params:
   author: Zhou Hao
   description: 一个追寻抹大拉之地的geeker
-  menu_item_separator: " / "
+  menu_item_separator: " - "
   # use feather icons https://feathericons.com/
   social:
     - name: GitHub
