@@ -1,0 +1,13 @@
+remote_theme: pages-themes/hacker@v0.2.0
+plugins:
+- jekyll-remote-theme # add this line to the plugins list if you already have one
+
+title: 夢沉抹大拉
+description: 一个追寻抹大拉之地的geeker
+meta_description: 生命不息，折腾不止
+
+# URL of your avatar or profile pic (you could use your GitHub profile pic)
+avatar: https://raw.githubusercontent.com/upbit/upbit.github.io/master/assets/images/profile.png
+
+show_downloads: false
+google_analytics: 53731588
