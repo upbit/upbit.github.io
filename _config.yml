@@ -6,6 +6,15 @@ title: 夢沉抹大拉
 description: 一个追寻抹大拉之地的geeker
 meta_description: 生命不息，折腾不止
 
+asciidoc: {}
+asciidoctor:
+  base_dir: :docdir
+  safe: unsafe
+  attributes:
+    - idseparator=_
+    - source-highlighter=coderay
+    - icons=font
+
 # URL of your avatar or profile pic (you could use your GitHub profile pic)
 avatar: https://raw.githubusercontent.com/upbit/upbit.github.io/master/assets/images/profile.png
 
