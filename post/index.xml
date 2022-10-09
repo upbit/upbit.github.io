@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on 夢沉抹大拉</title><link>https://blog.imaou.com/post/</link><description>Recent content in Posts on 夢沉抹大拉</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Fri, 14 Jun 2019 20:00:00 +0800</lastBuildDate><atom:link href="https://blog.imaou.com/post/index.xml" rel="self" type="application/rss+xml"/><item><title>训练 Darknet YOLOv4/YOLOv3-tiny 进行自定义物体识别</title><link>https://blog.imaou.com/201906/darknet_yolov4_finetune/</link><pubDate>Fri, 14 Jun 2019 20:00:00 +0800</pubDate><guid>https://blog.imaou.com/201906/darknet_yolov4_finetune/</guid><description>最近机缘巧合下接触到智慧零售，于是了解到一些基于摄像头的流量（人/车）监控方案。其基本思路，基本都是通过SSD或者YOLO识别具体人物，然后计算帧与帧中物体经过gate的个数&amp;hellip; 所以第一步先来搞定物体识别。
+先附上colab notebook，不想看介绍的可以直接看演示：
+YOLOv3-tiny: https://colab.research.google.com/drive/1XSArXZImsYsorzcv4vX3aN5TQaLkKmPx?usp=sharing YOLOv4训练较慢，GPU大概要半小时才100次迭代: https://colab.research.google.com/drive/1XIpuhhTlVvYIDzenZxdWKl-tk7lwbL-2?usp=sharing 1. AlexeyAB/darknet 看了下，darknet应该是目前最好上手的项目，编译就是个bin文件，加载模型和training(fine-tune)都是用这个工具完成。因为要用到最新的 YOLOv4，所以选alexeyab的版本。
+1.1 编译 (make darknet) # clone 并编译darknet !test -d darknet || git clone https://github.com/AlexeyAB/darknet %cd darknet !make -j8 1.2 预测 (detect) 先下载预训练的权重：yolov3-tiny-prn.weights，放在当前目录下
+# 准备预测用图片，这里我们用一张高速的照片 !wget https://github.com/nathanrooy/rpi-urban-mobility-tracker/raw/master/notebooks/highway02_frame000010.jpg # 预测 !./darknet detect cfg/yolov3-tiny-prn.cfg yolov3-tiny-prn.weights highway02_frame000010.jpg -dont_show 结束后会在当前目录，生成一个predictions.jpg，即是标注结果。我们用PIL输出，即可看到标注情况：
+from PIL import Image Image.open(&amp;#39;predictions.jpg&amp;#39;) YOLOv4标注的更多，连远处的车和广告牌都标出来了（虽然识别成了火车，不过看起来确实有点像）
+2. 自定义物体识别 (whill dataset) 为了识别自定义的物体，我们自然要找个没见过的东西和并标注。这里为了简便，我们用KazumichiShirai提供的数据集，100来张自动轮椅的图片进行目标识别。
+效果如下：
+原版是用 darknet53训练 的，这里我们改成用YOLO的预训练权重。
+为简便起见，我已经打包好了这些图片和YOLOv4的训练参数配置。注意不是下载到本地，直接转储到Google Drive的 datastes/whill/ 下备用：
+https://drive.google.com/drive/folders/1A6ogns-_aJee3mItRykMy_ZtqzsyOeZu?usp=sharing
+2.1 darknet training 环境准备 首先参考方法1编译darknet，但训练必须使用GPU，因此我们需要先改下Makefile（最开始就是卡这里，默认非GPU的darknet，到train步骤就报错）。主要变动是头部的几个参数(如果GPU够好，CUDNN_HALF可按实际情况打开)：</description></item><item><title>Google Colab中一些你可能不知道的tricks</title><link>https://blog.imaou.com/201903/colab_tricks/</link><pubDate>Sun, 03 Mar 2019 20:00:00 +0800</pubDate><guid>https://blog.imaou.com/201903/colab_tricks/</guid><description>几年后重新开始写技术blog。一直把colab当备忘录，直到最近有人问起来BERT的各种问题，而我自己又有点记不清了(看完的代码过个年就忘干净&amp;hellip;捂脸) 既然用了colab这么久，第一篇就帮colab打打广告吧 :stuck_out_tongue_closed_eyes:
+Google Colab Colab是一个Google提供的免费Jupyter笔记本环境，完全保存于云端，并且有免费的GPU/TPU可以使用：
+https://colab.research.google.com/notebooks/welcome.ipynb
+1. 用代码清空单元格输出 clear_output() 在BERT教程里看到的方法。有时想看迭代进度，但最后又不想滑动很久看eval的效果输出，就可以在train完成后加上clear_output()
+from IPython.display import clear_output # 这里输出很多内容，比如训练modle clear_output() # 执行后之前的输出将被清空 2. 访问 Google Drive 上的数据 colab的数据不是永久存储的，一些训练好的model或者私有数据，往往需要存储到gdrive上：
+from google.colab import drive drive.mount(&amp;#39;/content/gdrive&amp;#39;) GDRIVE_ROOT = &amp;#34;/content/gdrive/My Drive&amp;#34; !ls &amp;#34;$GDRIVE_ROOT/datasets&amp;#34; 执行后会输出个认证url和输入框，点击url后复制里面的key，粘贴在输入框里回车即可。
+之后的!ls语法，感叹号和jupyter里一样，代表执行shell，python的变量可以类似上面的$GDRIVE_ROOT来访问
+3. Eager Execution 这个估计大部分同学都知道。colab类似anaconda默认安装了很多基础库。当然如果缺少，还是可以通过!pip来安装和升级的
+import tensorflow as tf tf.enable_eager_execution() 4. Cell的标题和参数控制 注释后加@title且放在顶行，右侧会出现对应的标题内容。而某个变量赋值后，加上@param则可以提供输入选项：
+#@title 演示如何提供参数控制 LOG_DIR = &amp;#39;/tmp/model&amp;#39; #@param {type:&amp;#34;string&amp;#34;} text_and_dropdown = &amp;#39;faces&amp;#39; #@param [&amp;#34;faces&amp;#34;, &amp;#34;celebs&amp;#34;, &amp;#34;cats&amp;#34;, &amp;#34;cars&amp;#34;, &amp;#34;bedrooms&amp;#34;, &amp;#34;anime&amp;#34;] seed = 123456 #@param {type:&amp;#34;slider&amp;#34;, min: 0, max: 10000000, step: 1} 5.</description></item></channel></rss>
